@@ -1,12 +1,27 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}Registration{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+{% endblock %}
 {% block navbar %}
-<div class="navbar navbar-fixed-top">
-  
-</div>
+
 {% endblock %}
 {% block content %}
-    <form action="" method="POST">
-        {% form.hidden_tag() %}
+    <form action="" method="POST" class="registration-form">
+        {{ form.hidden_tag() }}
+        {% for field in form %}
+            {% if field.label.text == "Register" %}
+                <div>{{ field() }}</div>
+            {% elif field.label.text == "CSRF Token" %}
+                {{ pass }}
+            {% else %}
+                <div>
+                    {{ field.label }}
+                    <br>
+                    {{ field() }}
+                </div>
+            {% endif %}
+        {% endfor %}
     </form>
 {% endblock %}

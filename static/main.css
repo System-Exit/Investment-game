@@ -1,0 +1,26 @@
+/* All pages */
+body
+{
+    text-align: center;
+    background-color: aquamarine;
+}
+
+/* Registration page */
+.registration-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.registration-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.registration-form input
+{
+    border-radius: 20px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}

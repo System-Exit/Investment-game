@@ -1,14 +1,20 @@
 from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, DateField, SubmitField  
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.fields.html5 import EmailField, DateField
+from wtforms.validators import DataRequired
 
-class Registration:
-    pass
 
 class UserRegistrationForm(FlaskForm):
-    username = StringField('Username')
-    password = PasswordField('Password')
-    submit = SubmitField('Next')
-    fname = StringField('First Name')
-    lname = StringField('Last Name')
-    dob = DateField('Date of Birth')
+    """
+    Form for user registration
+
+    """
+    username = StringField('Username', validators=[DataRequired('Username is required')])
+    password = PasswordField('Password', validators=[DataRequired('Password is required')])
+    fname = StringField('First Name', validators=[DataRequired('First name is required')])
+    lname = StringField('Last Name', validators=[DataRequired('Last name is required')])
+    dob = DateField('Date of Birth', validators=[DataRequired('Date of birth is requred')], format='%d/%m/%Y')
+    email = EmailField('Email', validators=[DataRequired('Valid email address is required')])
+    gender = SelectField('Gender', choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
+    submit = SubmitField('Register')

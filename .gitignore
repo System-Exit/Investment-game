@@ -1,2 +1,4 @@
 # Ignore any settings for VS Code
 .vscode
+# Ignore cache
+__pycache__
