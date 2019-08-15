@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 from config import Config
 from registration import UserRegistrationForm
+from login import UserLoginForm
 
 
 # Load app with bootstrap
