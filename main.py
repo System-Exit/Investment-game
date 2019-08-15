@@ -4,6 +4,7 @@ from config import Config
 from flask_login import current_user, login_user
 from models import User
 from forms import UserLoginForm, UserRegistrationForm
+from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
 
@@ -52,7 +53,9 @@ def registration():
         dob = form.dob.data
         email = form.email.data
         gender = form.gender.data
-        # TODO: Call database API to create user
+        # Call database API to create user
+        gdb = GoogleDatabaseAPI()
+        gdb.adduser(username, password, fname, lname, email, gender)
         # Redirect to index
         return redirect(url_for('index'))
     # Render template

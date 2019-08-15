@@ -5,4 +5,4 @@ class Config(object):
     GDB_USERNAME = 'root' 
     GDB_PASSWORD = 'RMIT1234!!!'
     GDB_HOST = '35.189.52.142'
-    GDB_DATABASE = 'database'
+    GDB_DATABASE = 'Database'
