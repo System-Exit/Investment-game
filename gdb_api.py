@@ -1,5 +1,5 @@
 from config import Config
-from models import *
+from models import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -20,13 +20,27 @@ class GoogleDatabaseAPI:
         password = Config.GDB_PASSWORD
         host = Config.GDB_HOST
         database = Config.GDB_DATABASE
+        query = Config.GDB_QUERY
         # Create engine
-        engine = create_engine("%s://%s:%s@%s/%s" % (drivername, username, password, host, database))
+        engine = create_engine("%s://%s:%s@%s/%s%s" % (
+            drivername, username, password, host, database, query))
         # Start session
         Session = sessionmaker(bind=engine)
         self.session = Session()
 
     def adduser(self, username, password, firstname, lastname, email, gender):
+        """
+        Add new user to user database table with given details
+
+        Args:
+            username (str): Username for new user
+            password (str): Password for new user
+            firstname (str): First name of new user
+            lastname (str): Last name of new user
+            email (str): Email of new user
+            gender (str): Gender identity of new user
+
+        """
         # Create user
         user = User(
             firstname=firstname, 
@@ -34,10 +48,18 @@ class GoogleDatabaseAPI:
             email=email,
             gender=gender, 
             username=username, 
-            userpassword=password, 
-            verfied= "Y"
+            userpass=password, 
+            verified= True
             )
         # Add user to database
         self.session.add(user)
         self.session.commit()
+
+    def verifyuser(self, username, userpass):
+        """
+        TODO
+
+        """
+        pass
+
         
