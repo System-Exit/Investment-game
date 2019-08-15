@@ -2,26 +2,48 @@
 {% block title %}Registration{% endblock %}
 {% block styles %}
     {{ super() }}
-    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
-{% endblock %}
-{% block navbar %}
-
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
 {% endblock %}
 {% block content %}
     <form action="" method="POST" class="registration-form">
         {{ form.hidden_tag() }}
-        {% for field in form %}
-            {% if field.label.text == "Register" %}
-                <div>{{ field() }}</div>
-            {% elif field.label.text == "CSRF Token" %}
-                {{ pass }}
-            {% else %}
-                <div>
-                    {{ field.label }}
-                    <br>
-                    {{ field() }}
-                </div>
-            {% endif %}
-        {% endfor %}
+        <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+        alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+        <div>
+            {{ form.username.label }}
+            <br>
+            {{ form.username() }}
+        </div>
+        <div>
+            {{ form.password.label }}
+            <br>
+            {{ form.password() }}
+        </div>
+        <div>
+            {{ form.fname.label }}
+            <br>
+            {{ form.fname() }}
+        </div>
+        <div>
+            {{ form.lname.label }}
+            <br>
+            {{ form.lname() }}
+        </div>
+        <div>
+            {{ form.dob.label }}
+            <br>
+            {{ form.dob() }}
+        </div>
+        <div>
+            {{ form.email.label }}
+            <br>
+            {{ form.email() }}
+        </div>
+        <div>
+            {{ form.gender.label }}
+            <br>
+            {{ form.gender() }}
+        </div>
+        <div>{{ form.submit() }}</div>
     </form>
 {% endblock %}

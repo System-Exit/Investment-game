@@ -5,6 +5,12 @@ body
     background-color: #add8e6;
 }
 
+/* Index page */
+#index-body a
+{
+    font-size: 24px;
+}
+
 /* Registration page */
 .registration-form
 {
