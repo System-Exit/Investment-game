@@ -4,6 +4,7 @@ from config import Config
 from registration import UserRegistrationForm
 from flask_login import current_user, login_user
 from models import User
+from login import UserLoginForm
 
 MyCloud = True
 
