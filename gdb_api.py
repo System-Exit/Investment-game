@@ -1,6 +1,5 @@
 from config import Config
-#import sqlalchemy as db
-import pymysql as db
+import sqlalchemy as db
 
 
 class GoogleDatabaseAPI:
@@ -13,17 +12,14 @@ class GoogleDatabaseAPI:
         Initialise connection to database and setup API
 
         """
-        # drivername = 'mysql+pymysql'
+        drivername = 'mysql+pymysql'
         username = Config.GDB_USERNAME
         password = Config.GDB_PASSWORD
         host = Config.GDB_HOST
         database = Config.GDB_DATABASE
-        # SQLAlchemy code
-        # db.create_engine('%s://%s:%s@%s/%s' % (drivername, username, password, host, database))
-        # conn = engine.connect()
-        # meta = db.MetaData()
-        # SQL code
-        conn = db.Connect(host=host, user=username, password=password, db=database)
+        engine = db.create_engine('%s://%s:%s@%s/%s' % (drivername, username, password, host, database))
+        conn = engine.connect()
+        meta = db.MetaData()
         
 
 if __name__ == "__main__":

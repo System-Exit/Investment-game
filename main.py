@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 from config import Config
-from registration import UserRegistrationForm
 from flask_login import current_user, login_user
 from models import User
-from login import UserLoginForm
+from forms import UserLoginForm, UserRegistrationForm
 
 MyCloud = True
 
@@ -65,7 +64,7 @@ def login():
         # Redirect to index
         return redirect(url_for('index'))
     # Initialise login form
-    form = LoginForm()
+    form = UserLoginForm()
     # Validate and process form data
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
