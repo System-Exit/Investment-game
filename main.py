@@ -48,7 +48,7 @@ def registration():
         # Check if user was added to database
         if(userAdded):
             # Redirect to index with success message
-            flash("Registration successful!", category="message")
+            flash("Registration successful!", category="success")
             return redirect(url_for('index'))
         else:
             # Redirect to registration with warning message
@@ -89,7 +89,7 @@ def logout():
     # Log user out
     logout_user()
     # Redirect to index page
-    flash("Successfully logged out.", category="message")
+    flash("Successfully logged out.", category="success")
     return redirect(url_for('index'))
 
 @app.route('/dashboard')
