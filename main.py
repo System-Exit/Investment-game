@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from config import Config
-from flask_login import current_user, login_user
+from flask_login import LoginManager, current_user, login_user, logout_user
 from models import User
 from forms import UserLoginForm, UserRegistrationForm
 from gdb_api import GoogleDatabaseAPI
@@ -10,27 +10,18 @@ MyCloud = True
 
 # Load app with bootstrap
 app = Flask(__name__)
-app.config.from_object(Config)
 Bootstrap(app)
-
-if MyCloud:
-    HOST = "35.201.8.54"
-    USER = "root"
-    PASSWORD = "RMIT1234!!!"
-    DATABASE = "USER"
-else:
-    HOST = ""
-    USER = "root"
-    PASSWORD = "Bondi2Beach"
-    DATABASE = "Library"
-
-SQLALCHEMY_DATABASE_URI = "mysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, DATABASE)
-
+login_manager = LoginManager(app)
+app.config.from_object(Config)
+gdb = GoogleDatabaseAPI()
 
 # Routing for each page
 # TODO: Change where routing is handled
 @app.route('/')
 def index():
+    if current_user.is_authenticated:
+        # Redirect to dashboard
+        return redirect(url_for('dashboard'))
     return render_template('index.html')
 
 @app.route('/registration', methods=['GET', 'POST'])
@@ -38,7 +29,6 @@ def registration():
     """
     Route for registartion page.
     Processes registration for registration page.
-    TODO: Consider moving the logic for this elsewhere later
 
     """
     # Initialise registration form
@@ -54,29 +44,57 @@ def registration():
         email = form.email.data
         gender = form.gender.data
         # Call database API to create user
-        gdb = GoogleDatabaseAPI()
-        gdb.adduser(username, password, fname, lname, email, gender)
-        # Redirect to index
-        return redirect(url_for('index'))
+        userAdded = gdb.adduser(username, password, fname, lname, email, gender)
+        # Check if user was added to database
+        if(userAdded):
+            # Redirect to index with success message
+            flash("Registration successful!", category="message")
+            return redirect(url_for('index'))
+        else:
+            # Redirect to registration with warning message
+            flash("Username is already taken!", category="error")
+            return redirect(url_for('registration'))
     # Render template
     return render_template('registration.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        # Redirect to index
-        return redirect(url_for('index'))
+        # Redirect to dashboard
+        return redirect(url_for('dashboard'))
     # Initialise login form
     form = UserLoginForm()
     # Validate and process form data
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        # Get form data
+        username = form.username.data
+        password = form.password.data
+        # Check if username and password is valid
+        valid, user = gdb.verifyuser(username, password)
+        if(valid):
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Invalid username or password.", category="error")
             return redirect(url_for('login'))
-        return redirect(url_for('index'))
     # Render template
     return render_template('login.html', form=form)
+
+@login_manager.user_loader
+def load_user(userID):
+    return gdb.getuser(userID)
+
+@app.route('/logout')
+def logout():
+    # Log user out
+    logout_user()
+    # Redirect to index page
+    flash("Successfully logged out.", category="message")
+    return redirect(url_for('index'))
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 # Run the app
 if __name__ == '__main__':

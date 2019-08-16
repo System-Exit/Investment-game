@@ -20,6 +20,9 @@ class User(Base, UserMixin):
     userpass = Column(String(200), unique=False, nullable=False)
     verified = Column(Boolean, unique=False)
 
+    def get_id(self):
+        return self.userID
+
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
     # Define SQL connection parameters

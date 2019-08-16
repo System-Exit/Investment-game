@@ -2,7 +2,20 @@
 body
 {
     text-align: center;
-    background-color: #add8e6;
+    /* background-color: #add8e6; */
+    background-color: lightgray;
+}
+.flash-success
+{
+    color: green;
+    font-weight: bold;
+    padding: 5px;
+}
+.flash-error
+{
+    color: red;
+    font-weight: bold;
+    padding: 5px;
 }
 
 /* Index page */
