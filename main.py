@@ -118,6 +118,7 @@ def dashboard():
     Handles dashboard for user.
 
     """
+    # Redirect user to index if they are not logged in
     if not current_user.is_authenticated:
         # Redirect to index
         return redirect(url_for('index'))
