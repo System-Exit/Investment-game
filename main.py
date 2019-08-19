@@ -84,9 +84,11 @@ def login():
         username = form.username.data
         password = form.password.data
         # Check if username and password is valid
-        valid, user = gdb.verifyuser(username, password)
+        valid, userID = gdb.verifyuser(username, password)
         if(valid):
-            login_user(user)
+            with gdb.sessionmanager() as session:
+                user = gdb.getuser(session, userID)
+                login_user(user)
             return redirect(url_for('dashboard'))
         else:
             flash("Invalid username or password.", category="error")
@@ -96,7 +98,8 @@ def login():
 
 @login_manager.user_loader
 def load_user(userID):
-    return gdb.getuser(userID)
+    with gdb.sessionmanager() as session:
+        return gdb.getuser(session, userID)
 
 @app.route('/logout')
 def logout():

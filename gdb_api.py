@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from contextlib import contextmanager
 import json
 import requests
 from datetime import datetime
@@ -29,9 +30,25 @@ class GoogleDatabaseAPI:
         # Create engine
         engine = create_engine("%s://%s:%s@%s/%s%s" % (
             drivername, username, password, host, database, query))
-        # Start session
-        Session = sessionmaker(bind=engine)
-        self.session = Session()
+        # Define session maker
+        self.Session = sessionmaker(bind=engine)
+
+    @contextmanager
+    def sessionmanager(self):
+        """
+        Context manager for handling sessions.
+        Can often used
+
+        """
+        session = self.Session()
+        try:
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
     def adduser(self, username, userpass, firstname, lastname, email, gender):
         """
@@ -50,26 +67,26 @@ class GoogleDatabaseAPI:
             bool: Whether or not the user was added.
 
         """
-        # Check that username is available. If not, return false.
-        user = self.session.query(User).filter(User.username == username).first()
-        if(user is not None):
-            return False
-        
-        # Hash password
-        passhash = PasswordHasher().hash(userpass)
-        # Create user
-        user = User(
-            firstname=firstname, 
-            lastname=lastname, 
-            email=email,
-            gender=gender, 
-            username=username, 
-            userpass=passhash, 
-            verified= True
-            )
-        # Add user to database
-        self.session.add(user)
-        self.session.commit()
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that username is available. If not, return false.
+            user = session.query(User).filter(User.username == username).first()
+            if(user is not None):
+                return False
+            # Hash password
+            passhash = PasswordHasher().hash(userpass)
+            # Create user
+            user = User(
+                firstname=firstname, 
+                lastname=lastname, 
+                email=email,
+                gender=gender, 
+                username=username, 
+                userpass=passhash, 
+                verified= True
+                )
+            # Add user to database
+            session.add(user)
         # Return success
         return True
 
@@ -83,43 +100,51 @@ class GoogleDatabaseAPI:
 
         Retruns:
             True if the user exists and the password is valid, otherwise false.
-            User model object for user if valid, otherwise None.
+            User ID if the user exists and password is valid, None otherwise.
 
         """
-        # Initialise passwor hasher
-        ph = PasswordHasher()
-        # Query if user exists
-        user = self.session.query(User).filter(User.username == username).first()
-        # Check if query returns a user
-        if(user is not None):
-            # Verify whether the password is valid or not
-            try:
-                ph.verify(user.userpass, userpass)
-            except VerifyMismatchError:
-                # Password does not match, return false
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Initialise password hasher
+            ph = PasswordHasher()
+            # Query if user exists
+            user = session.query(User).filter(User.username == username).first()
+            # Check if query returns a user
+            if(user is not None):
+                # Verify whether the password is valid or not
+                try:
+                    ph.verify(user.userpass, userpass)
+                except VerifyMismatchError:
+                    # Password does not match, return false
+                    return False, None
+                # Check if password needs to be rehashed
+                if(ph.check_needs_rehash(user.userpass)):
+                    # Generate new hash
+                    rehash = ph.hash(userpass)
+                    # Update user record to include new hash
+                    user.userpass = rehash
+                # Since user exists and password is valid, return true
+                return True, user.userID
+            else:
+                # User doesn't exist, return false
                 return False, None
-            # Check if password needs to be rehashed
-            if(ph.check_needs_rehash(user.userpass)):
-                # Generate new hash
-                rehash = ph.hash(userpass)
-                # Update user record to include new hash
-                user.userpass = rehash
-                self.session.commit()
-            # Since user exists and password is valid, return true
-            return True, user
-        else:
-            # User doesn't exist, return false
-            return False, None
 
-    def getuser(self, userID):
+    def getuser(self, session, userID):
         """
         Gets and returns user object based on given ID.
+        This needs to be given a session, as the returned model is
+        connected to the session it is aquired from.
+
         Args:
+            session: Session from context manager defined in this class.
             userID (str): The ID of the user to get.
         Returns:
             The user model object for that user.
         """
-        return self.session.query(User).get(userID)
+        # Get user
+        user = session.query(User).get(userID)
+        # Return user
+        return user
 
     def addshare(self, issuercode):
         """
@@ -131,33 +156,34 @@ class GoogleDatabaseAPI:
             bool: True if sucessful, false if share doesn't exist or is already present.
 
         """
-        # Check that share isn't already added to database
-        share = self.session.query(Share).filter(Share.issuercode == issuercode).first()
-        if(share is not None):
-            return False
-        # Get share data from ASX
-        # TODO: Move ASX API call elsewhere
-        address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
-        asxdata = requests.get(address).json()
-        # Check if share data was not retrieved successfully
-        if('code' not in asxdata and asxdata['code'] != issuercode):
-            return False
-        # Create new share record
-        share = Share(
-            issuercode = asxdata['code'],
-            companyname = asxdata['name_short'],
-            industrygroupname = asxdata['industry_group_name'],
-            currentprice = float(asxdata['primary_share']['open_price']),
-            marketcapitalisation = int(asxdata['primary_share']['market_cap']),
-            sharecount = int(asxdata['primary_share']['number_of_shares']),
-            daychangepercent = float(asxdata['primary_share']['change_in_percent'].strip('%'))/100,
-            daychangeprice = float(asxdata['primary_share']['change_price'])
-        )
-        # Add share to share table and commit changes
-        self.session.add(share)
-        self.session.commit()
-        # Return success
-        return True
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that share isn't already added to database
+            share = session.query(Share).filter(Share.issuercode == issuercode).first()
+            if(share is not None):
+                return False
+            # Get share data from ASX
+            # TODO: Move ASX API call elsewhere
+            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
+            asxdata = requests.get(address).json()
+            # Check if share data was not retrieved successfully
+            if('code' not in asxdata and asxdata['code'] != issuercode):
+                return False
+            # Create new share record
+            share = Share(
+                issuercode = asxdata['code'],
+                companyname = asxdata['name_short'],
+                industrygroupname = asxdata['industry_group_name'],
+                currentprice = float(asxdata['primary_share']['open_price']),
+                marketcapitalisation = int(asxdata['primary_share']['market_cap']),
+                sharecount = int(asxdata['primary_share']['number_of_shares']),
+                daychangepercent = float(asxdata['primary_share']['change_in_percent'].strip('%'))/100,
+                daychangeprice = float(asxdata['primary_share']['change_price'])
+            )
+            # Add share to share table
+            session.add(share)
+            # Return success
+            return True
     
     def getshares(self):
         """
@@ -167,7 +193,12 @@ class GoogleDatabaseAPI:
             A list of every share in the database with stored data.
 
         """
-        return self.session.query(Share).all()
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get shares
+            shares = session.query(Share).all()
+            # Return shares
+            return shares
     
     def updateshares(self):
         """
@@ -187,8 +218,12 @@ class GoogleDatabaseAPI:
                 dc_price: <Current daily price change>
             } 
         """
-        # Get issuer codes for all currently stored shares
-        share_codes = self.session.query(Share.issuercode).all()
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get issuer codes for all currently stored shares
+            share_codes = session.query(Share.issuercode).all()
+        
+        # Initialise share data
         share_data = dict()
         # Iterate over each share issuer code
         for code in share_codes:
@@ -212,29 +247,30 @@ class GoogleDatabaseAPI:
                 "dc_percent": asxdata['primary_share']['change_in_percent'],
                 "dc_price": asxdata['primary_share']['change_price']
             }
-        # Iterate over each share and update its values
-        for issuercode in share_data:
-            # Get share data
-            curr_price = float(share_data[issuercode]["curr_price"])
-            curr_mc = int(share_data[issuercode]["curr_mc"])
-            curr_sc = int(share_data[issuercode]["curr_sc"])
-            dc_percent = float(share_data[issuercode]["dc_percent"].strip('%'))/100
-            dc_price = float(share_data[issuercode]["dc_price"])
-            # Update share field
-            share = self.session.query(Share).get(issuercode)
-            share.price = curr_price
-            share.marketcapitalisation = curr_mc
-            share.sharecount = curr_sc
-            share.daychangepercent = dc_percent
-            share.daychangeprice = dc_price
-            # Create and add new share price record
-            shareprice = SharePrice(
-                issuercode = issuercode,
-                recordtime = datetime.utcnow(),
-                price = curr_price
-            )
-            self.session.add(shareprice)
-            # Commit the changes
-            self.session.commit()
+        
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Iterate over each share and update its values
+            for issuercode in share_data:
+                # Get share data
+                curr_price = float(share_data[issuercode]["curr_price"])
+                curr_mc = int(share_data[issuercode]["curr_mc"])
+                curr_sc = int(share_data[issuercode]["curr_sc"])
+                dc_percent = float(share_data[issuercode]["dc_percent"].strip('%'))/100
+                dc_price = float(share_data[issuercode]["dc_price"])
+                # Update share field
+                share = session.query(Share).get(issuercode)
+                share.price = curr_price
+                share.marketcapitalisation = curr_mc
+                share.sharecount = curr_sc
+                share.daychangepercent = dc_percent
+                share.daychangeprice = dc_price
+                # Create and add new share price record
+                shareprice = SharePrice(
+                    issuercode = issuercode,
+                    recordtime = datetime.utcnow(),
+                    price = curr_price
+                )
+                session.add(shareprice)
         # Return true as update was successful
         return True
