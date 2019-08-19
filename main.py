@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_bootstrap import Bootstrap
 from config import Config
 from flask_login import LoginManager, current_user, login_user, logout_user
@@ -140,6 +140,8 @@ def sharesupdate():
     """
     # Call database to get new share data
     gdb.updateshares()
+    # Return a success response
+    return jsonify(success=True)
 
 # Run the app
 if __name__ == '__main__':

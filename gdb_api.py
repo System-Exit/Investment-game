@@ -139,7 +139,7 @@ class GoogleDatabaseAPI:
         # TODO: Move ASX API call elsewhere
         address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
         asxdata = requests.get(address).json()
-        # Check that share data was not retrieved successfully
+        # Check if share data was not retrieved successfully
         if('code' not in asxdata and asxdata['code'] != issuercode):
             return False
         # Create new share record
@@ -173,6 +173,9 @@ class GoogleDatabaseAPI:
         """
         Updates share and share price tables with new values from ASX.
         Calls ASX API in this method directly.
+
+        Returns:
+            bool: True if update was successful, false if any errors occurs.
         
         Note: May be updated to be passed share data rather than do API calls here.
             Proposed data structure to be passed:
@@ -189,18 +192,23 @@ class GoogleDatabaseAPI:
         share_data = dict()
         # Iterate over each share issuer code
         for code in share_codes:
+            # Get issuer code
+            issuercode = code[0]
             # Call ASX API
-            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % code[0]
+            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
             asxdata = requests.get(address).json()
+            # Check that the data was successfully retreived
+            if('code' not in asxdata and asxdata['code'] == issuercode):
+                return False
             # Add data to dictionary
-            share_data[code[0]] = {
+            share_data[issuercode] = {
                 "curr_price": asxdata['primary_share']['open_price'],
                 "curr_mc": asxdata['primary_share']['market_cap'],
                 "curr_sc": asxdata['primary_share']['number_of_shares'],
                 "dc_percent": asxdata['primary_share']['change_in_percent'],
                 "dc_price": asxdata['primary_share']['change_price']
             }
-        # Iterate over each share
+        # Iterate over each share and update its values
         for issuercode in share_data:
             # Get share data
             curr_price = float(share_data[issuercode]["curr_price"])
@@ -224,3 +232,5 @@ class GoogleDatabaseAPI:
             self.session.add(shareprice)
             # Commit the changes
             self.session.commit()
+        # Return true as update was successful
+        return True
