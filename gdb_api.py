@@ -92,7 +92,7 @@ class GoogleDatabaseAPI:
             # Verify whether the password is valid or not
             try:
                 ph.verify(user.userpass, userpass)
-            except VerifyMismatchError as e:
+            except VerifyMismatchError:
                 # Password does not match, return false
                 return False, None
             # Check if password needs to be rehashed
