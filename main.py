@@ -138,7 +138,8 @@ def sharesupdate():
     Update shares database.
 
     """
-    gdb
+    # Call database to get new share data
+    gdb.updateshares()
 
 # Run the app
 if __name__ == '__main__':

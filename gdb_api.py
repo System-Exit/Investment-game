@@ -6,6 +6,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import json
 import requests
+from datetime import datetime
 
 
 class GoogleDatabaseAPI:
@@ -120,6 +121,44 @@ class GoogleDatabaseAPI:
         """
         return self.session.query(User).get(userID)
 
+    def addshare(self, issuercode):
+        """
+        Adds share details of specified share to database to database.
+
+        Args:
+            issuercode (str): ASX issued code of share to add.
+        Returns:
+            bool: True if sucessful, false if share doesn't exist or is already present.
+
+        """
+        # Check that share isn't already added to database
+        share = self.session.query(Share).filter(Share.issuercode == issuercode).first()
+        if(share is not None):
+            return False
+        # Get share data from ASX
+        # TODO: Move ASX API call elsewhere
+        address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
+        asxdata = requests.get(address).json()
+        # Check that share data was not retrieved successfully
+        if('code' not in asxdata and asxdata['code'] != issuercode):
+            return False
+        # Create new share record
+        share = Share(
+            issuercode = asxdata['code'],
+            companyname = asxdata['name_short'],
+            industrygroupname = asxdata['industry_group_name'],
+            currentprice = float(asxdata['primary_share']['open_price']),
+            marketcapitalisation = int(asxdata['primary_share']['market_cap']),
+            sharecount = int(asxdata['primary_share']['number_of_shares']),
+            daychangepercent = float(asxdata['primary_share']['change_in_percent'].strip('%'))/100,
+            daychangeprice = float(asxdata['primary_share']['change_price'])
+        )
+        # Add share to share table and commit changes
+        self.session.add(share)
+        self.session.commit()
+        # Return success
+        return True
+    
     def getshares(self):
         """
         Returns a list of all shares contained in the database.
@@ -154,7 +193,7 @@ class GoogleDatabaseAPI:
             address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % code[0]
             asxdata = requests.get(address).json()
             # Add data to dictionary
-            share_data[code] = {
+            share_data[code[0]] = {
                 "curr_price": asxdata['primary_share']['open_price'],
                 "curr_mc": asxdata['primary_share']['market_cap'],
                 "curr_sc": asxdata['primary_share']['number_of_shares'],
@@ -162,15 +201,15 @@ class GoogleDatabaseAPI:
                 "dc_price": asxdata['primary_share']['change_price']
             }
         # Iterate over each share
-        for issuer_id in share_data:
+        for issuercode in share_data:
             # Get share data
-            curr_price = share_data[issuer_id]["curr_price"]
-            curr_mc = share_data[issuer_id]["curr_mc"]
-            curr_sc = share_data[issuer_id]["curr_sc"]
-            dc_percent = share_data[issuer_id]["curr_percent"]
-            dc_price = share_data[issuer_id]["curr_price"]
+            curr_price = float(share_data[issuercode]["curr_price"])
+            curr_mc = int(share_data[issuercode]["curr_mc"])
+            curr_sc = int(share_data[issuercode]["curr_sc"])
+            dc_percent = float(share_data[issuercode]["dc_percent"].strip('%'))/100
+            dc_price = float(share_data[issuercode]["dc_price"])
             # Update share field
-            share = self.session.query(Share).get(issuer_id)
+            share = self.session.query(Share).get(issuercode)
             share.price = curr_price
             share.marketcapitalisation = curr_mc
             share.sharecount = curr_sc
@@ -178,7 +217,8 @@ class GoogleDatabaseAPI:
             share.daychangeprice = dc_price
             # Create and add new share price record
             shareprice = SharePrice(
-                issuercode = issuer_id,
+                issuercode = issuercode,
+                recordtime = datetime.utcnow(),
                 price = curr_price
             )
             self.session.add(shareprice)

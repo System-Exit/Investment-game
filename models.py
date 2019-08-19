@@ -25,27 +25,27 @@ class User(Base, UserMixin):
         return self.userID
 
 class Share(Base):
-    """Model for shares"""
+    """Model for shares."""
     # Table name
     __tablename__ = 'SHARE'
     # Table Columns
     issuercode = Column(String(3), primary_key=True)
     companyname = Column(String(50), nullable=False, unique=True)
     industrygroupname = Column(String(50), nullable=True, unique=False)
-    currentprice = Column(Float(2), nullable=False, unique=False)
+    currentprice = Column(Float, nullable=False, unique=False)
     marketcapitalisation = Column(BigInteger, nullable=False, unique=False)
     sharecount = Column(BigInteger, nullable=False, unique=False)
-    daychangepercent = Column(Float(2), nullable=False, unique=False)
-    daychangeprice = Column(Float(2), nullable=False, unique=False)
+    daychangepercent = Column(Float, nullable=False, unique=False)
+    daychangeprice = Column(Float, nullable=False, unique=False)
 
 class SharePrice(Base):
-    """Model for share price record"""
+    """Model for share price record."""
     # Table name
     __tablename__ = 'SHAREPRICE'
     # Table Columns
     issuercode = Column(String(3), ForeignKey('SHARE.issuercode'), primary_key=True)
-    datetime = Column(DateTime, primary_key=True, server_default=func.now())
-    price = Column(Float(2), nullable=False, unique=False)
+    recordtime = Column(DateTime, primary_key=True)
+    price = Column(Float, nullable=False, unique=False)
 
 
 # Allow creation of tables by running API directly
