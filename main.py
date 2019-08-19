@@ -115,7 +115,7 @@ def logout():
 @app.route('/dashboard')
 def dashboard():
     """
-    Handles dashboard for user.
+    Handles and displays dashboard for user.
 
     """
     # Redirect user to index if they are not logged in
@@ -123,6 +123,22 @@ def dashboard():
         # Redirect to index
         return redirect(url_for('index'))
     return render_template('dashboard.html')
+
+@app.route('/shares')
+def sharelist():
+    """
+    Displays current values for all shares.
+
+    """
+    pass
+
+@app.route('/tasks/updateshares')
+def sharesupdate():
+    """
+    Update shares database.
+
+    """
+    gdb
 
 # Run the app
 if __name__ == '__main__':

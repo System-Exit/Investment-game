@@ -1,9 +1,11 @@
 from config import Config
-from models import User
+from models import User, Share, SharePrice
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+import json
+import requests
 
 
 class GoogleDatabaseAPI:
@@ -118,4 +120,67 @@ class GoogleDatabaseAPI:
         """
         return self.session.query(User).get(userID)
 
+    def getshares(self):
+        """
+        Returns a list of all shares contained in the database.
+
+        Returns:
+            A list of every share in the database with stored data.
+
+        """
+        return self.session.query(Share).all()
+    
+    def updateshares(self):
+        """
+        Updates share and share price tables with new values from ASX.
+        Calls ASX API in this method directly.
         
+        Note: May be updated to be passed share data rather than do API calls here.
+            Proposed data structure to be passed:
+            <issuer code>:{
+                curr_price: <Current price of share>
+                curr_mc: <Current market cap of share>
+                curr_sc: <Current total number of shares>
+                dc_percent: <Current daily price change percent>
+                dc_price: <Current daily price change>
+            } 
+        """
+        # Get issuer codes for all currently stored shares
+        share_codes = self.session.query(Share.issuercode).all()
+        share_data = dict()
+        # Iterate over each share issuer code
+        for code in share_codes:
+            # Call ASX API
+            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % code[0]
+            asxdata = requests.get(address).json()
+            # Add data to dictionary
+            share_data[code] = {
+                "curr_price": asxdata['primary_share']['open_price'],
+                "curr_mc": asxdata['primary_share']['market_cap'],
+                "curr_sc": asxdata['primary_share']['number_of_shares'],
+                "dc_percent": asxdata['primary_share']['change_in_percent'],
+                "dc_price": asxdata['primary_share']['change_price']
+            }
+        # Iterate over each share
+        for issuer_id in share_data:
+            # Get share data
+            curr_price = share_data[issuer_id]["curr_price"]
+            curr_mc = share_data[issuer_id]["curr_mc"]
+            curr_sc = share_data[issuer_id]["curr_sc"]
+            dc_percent = share_data[issuer_id]["curr_percent"]
+            dc_price = share_data[issuer_id]["curr_price"]
+            # Update share field
+            share = self.session.query(Share).get(issuer_id)
+            share.price = curr_price
+            share.marketcapitalisation = curr_mc
+            share.sharecount = curr_sc
+            share.daychangepercent = dc_percent
+            share.daychangeprice = dc_price
+            # Create and add new share price record
+            shareprice = SharePrice(
+                issuercode = issuer_id,
+                price = curr_price
+            )
+            self.session.add(shareprice)
+            # Commit the changes
+            self.session.commit()

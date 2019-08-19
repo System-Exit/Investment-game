@@ -1,7 +1,8 @@
 from config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Float
+from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Float, DateTime, ForeignKey
 from flask_login import UserMixin
 
 Base = declarative_base()
@@ -30,10 +31,22 @@ class Share(Base):
     # Table Columns
     issuercode = Column(String(3), primary_key=True)
     companyname = Column(String(50), nullable=False, unique=True)
-    # TODO: Column for daychangepercent
-    # TODO: Column for daychangeprice
     industrygroupname = Column(String(50), nullable=True, unique=False)
-    marketcapitalisation = Column(BigInteger, nullable=False, unque=False)
+    currentprice = Column(Float(2), nullable=False, unique=False)
+    marketcapitalisation = Column(BigInteger, nullable=False, unique=False)
+    sharecount = Column(BigInteger, nullable=False, unique=False)
+    daychangepercent = Column(Float(2), nullable=False, unique=False)
+    daychangeprice = Column(Float(2), nullable=False, unique=False)
+
+class SharePrice(Base):
+    """Model for share price record"""
+    # Table name
+    __tablename__ = 'SHAREPRICE'
+    # Table Columns
+    issuercode = Column(String(3), ForeignKey('SHARE.issuercode'), primary_key=True)
+    datetime = Column(DateTime, primary_key=True, server_default=func.now())
+    price = Column(Float(2), nullable=False, unique=False)
+
 
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
