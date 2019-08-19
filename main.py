@@ -18,7 +18,12 @@ gdb = GoogleDatabaseAPI()
 # Routing for each page
 # TODO: Change where routing is handled
 @app.route('/')
+@app.route('/index')
 def index():
+    """
+    Handles landing page, which provides users links to register of login.
+
+    """
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
@@ -27,10 +32,14 @@ def index():
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
     """
-    Route for registartion page.
-    Processes registration for registration page.
+    Handles registration for registration page.
+    Provides user a form to input registration information.
 
     """
+    # Checks if user is already logged in
+    if current_user.is_authenticated:
+        # Redirect to dashboard
+        return redirect(url_for('dashboard'))
     # Initialise registration form
     form = UserRegistrationForm()
     # Validate and process form data
@@ -59,6 +68,11 @@ def registration():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Handles user login for login page.
+    Procides user with a login form and checks that input matches a valid user.
+
+    """
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
@@ -86,14 +100,27 @@ def load_user(userID):
 
 @app.route('/logout')
 def logout():
-    # Log user out
-    logout_user()
-    # Redirect to index page
-    flash("Successfully logged out.", category="success")
+    """
+    Handles logging out for user.
+
+    """
+    # Log user out if they are authenticated
+    if current_user.is_authenticated:
+        logout_user()
+        # Redirect to index page
+        flash("Successfully logged out.", category="success")
+    # Redirect back to index
     return redirect(url_for('index'))
 
 @app.route('/dashboard')
 def dashboard():
+    """
+    Handles dashboard for user.
+
+    """
+    if not current_user.is_authenticated:
+        # Redirect to index
+        return redirect(url_for('index'))
     return render_template('dashboard.html')
 
 # Run the app
