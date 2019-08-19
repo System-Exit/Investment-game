@@ -175,7 +175,7 @@ class GoogleDatabaseAPI:
         Calls ASX API in this method directly.
 
         Returns:
-            bool: True if update was successful, false if any errors occurs.
+            bool: True if update was successful, false if any major error occurs.
         
         Note: May be updated to be passed share data rather than do API calls here.
             Proposed data structure to be passed:
@@ -199,7 +199,11 @@ class GoogleDatabaseAPI:
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
             if('code' not in asxdata and asxdata['code'] == issuercode):
-                return False
+                # If unsuccessful, skip this share and try the next one
+                # TODO: Rather than skip, maybe throw an exception or make it return
+                #       false after doing everything else, as some shares may be
+                #       removed from ASX later and may not work correctly.
+                continue
             # Add data to dictionary
             share_data[issuercode] = {
                 "curr_price": asxdata['primary_share']['open_price'],
