@@ -174,7 +174,7 @@ class GoogleDatabaseAPI:
                 issuercode = asxdata['code'],
                 companyname = asxdata['name_short'],
                 industrygroupname = asxdata['industry_group_name'],
-                currentprice = float(asxdata['primary_share']['open_price']),
+                currentprice = float(asxdata['primary_share']['last_price']),
                 marketcapitalisation = int(asxdata['primary_share']['market_cap']),
                 sharecount = int(asxdata['primary_share']['number_of_shares']),
                 daychangepercent = float(asxdata['primary_share']['change_in_percent'].strip('%'))/100,
@@ -241,7 +241,7 @@ class GoogleDatabaseAPI:
                 continue
             # Add data to dictionary
             share_data[issuercode] = {
-                "curr_price": asxdata['primary_share']['open_price'],
+                "curr_price": asxdata['primary_share']['last_price'],
                 "curr_mc": asxdata['primary_share']['market_cap'],
                 "curr_sc": asxdata['primary_share']['number_of_shares'],
                 "dc_percent": asxdata['primary_share']['change_in_percent'],
