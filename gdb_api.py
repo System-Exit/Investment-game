@@ -62,7 +62,7 @@ class GoogleDatabaseAPI:
             lastname (str): Last name of new user.
             email (str): Email of new user.
             gender (str): Gender identity of new user.
-        
+
         Returns:
             bool: Whether or not the user was added.
 
@@ -70,20 +70,21 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Check that username is available. If not, return false.
-            user = session.query(User).filter(User.username == username).first()
+            user = session.query(User).filter(
+                   User.username == username).first()
             if(user is not None):
                 return False
             # Hash password
             passhash = PasswordHasher().hash(userpass)
             # Create user
             user = User(
-                firstname=firstname, 
-                lastname=lastname, 
+                firstname=firstname,
+                lastname=lastname,
                 email=email,
-                gender=gender, 
-                username=username, 
-                userpass=passhash, 
-                verified= True
+                gender=gender,
+                username=username,
+                userpass=passhash,
+                verified=True
                 )
             # Add user to database
             session.add(user)
@@ -108,7 +109,8 @@ class GoogleDatabaseAPI:
             # Initialise password hasher
             ph = PasswordHasher()
             # Query if user exists
-            user = session.query(User).filter(User.username == username).first()
+            user = session.query(User).filter(
+                   User.username == username).first()
             # Check if query returns a user
             if(user is not None):
                 # Verify whether the password is valid or not
@@ -153,38 +155,47 @@ class GoogleDatabaseAPI:
         Args:
             issuercode (str): ASX issued code of share to add.
         Returns:
-            bool: True if sucessful, false if share doesn't exist or is already present.
+            bool: True if sucessful, false if share doesn't exist or is
+                  already present.
 
         """
         # Initialse session
         with self.sessionmanager() as session:
             # Check that share isn't already added to database
-            share = session.query(Share).filter(Share.issuercode == issuercode).first()
+            share = session.query(Share).filter(
+                Share.issuercode == issuercode).first()
             if(share is not None):
                 return False
             # Get share data from ASX
             # TODO: Move ASX API call elsewhere
-            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
+            address = ("https://www.asx.com.au/asx/1/company/"
+                       "%s?fields=primary_share") % issuercode
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
             if('code' not in asxdata and asxdata['code'] != issuercode):
                 return False
             # Create new share record
             share = Share(
-                issuercode = asxdata['code'],
-                companyname = asxdata['name_short'],
-                industrygroupname = asxdata['industry_group_name'],
-                currentprice = float(asxdata['primary_share']['last_price']),
-                marketcapitalisation = int(asxdata['primary_share']['market_cap']),
-                sharecount = int(asxdata['primary_share']['number_of_shares']),
-                daychangepercent = float(asxdata['primary_share']['change_in_percent'].strip('%'))/100,
-                daychangeprice = float(asxdata['primary_share']['change_price'])
+                issuercode=asxdata['code'],
+                companyname=asxdata['name_short'],
+                industrygroupname=asxdata['industry_group_name'],
+                currentprice=float(
+                    asxdata['primary_share']['last_price']),
+                marketcapitalisation=int(
+                    asxdata['primary_share']['market_cap']),
+                sharecount=int(
+                    asxdata['primary_share']['number_of_shares']),
+                daychangepercent=float(
+                    asxdata['primary_share']['change_in_percent'].
+                    strip('%'))/100,
+                daychangeprice=float(
+                    asxdata['primary_share']['change_price'])
             )
             # Add share to share table
             session.add(share)
             # Return success
             return True
-    
+
     def getshares(self):
         """
         Returns a list of all shares contained in the database.
@@ -199,16 +210,18 @@ class GoogleDatabaseAPI:
             shares = session.query(Share).all()
             # Return shares
             return shares
-    
+
     def updateshares(self):
         """
         Updates share and share price tables with new values from ASX.
         Calls ASX API in this method directly.
 
         Returns:
-            bool: True if update was successful, false if any major error occurs.
-        
-        Note: May be updated to be passed share data rather than do API calls here.
+            bool: True if update was successful, false if any
+                  major error occurs.
+
+        Note: May be updated to be passed share data rather
+              than do API calls here.
             Proposed data structure to be passed:
             <issuer code>:{
                 curr_price: <Current price of share>
@@ -216,13 +229,13 @@ class GoogleDatabaseAPI:
                 curr_sc: <Current total number of shares>
                 dc_percent: <Current daily price change percent>
                 dc_price: <Current daily price change>
-            } 
+            }
         """
         # Initialse session
         with self.sessionmanager() as session:
             # Get issuer codes for all currently stored shares
             share_codes = session.query(Share.issuercode).all()
-        
+
         # Initialise share data
         share_data = dict()
         # Iterate over each share issuer code
@@ -230,14 +243,16 @@ class GoogleDatabaseAPI:
             # Get issuer code
             issuercode = code[0]
             # Call ASX API
-            address = "https://www.asx.com.au/asx/1/company/%s?fields=primary_share" % issuercode
+            address = ("https://www.asx.com.au/asx/1/company/"
+                       "%s?fields=primary_share") % issuercode
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
             if('code' not in asxdata and asxdata['code'] == issuercode):
                 # If unsuccessful, skip this share and try the next one
-                # TODO: Rather than skip, maybe throw an exception or make it return
-                #       false after doing everything else, as some shares may be
-                #       removed from ASX later and may not work correctly.
+                # TODO: Rather than skip, maybe throw an exception or make it
+                #       return false after doing everything else, as some
+                #       shares may be removed from ASX later and may not
+                #       work correctly.
                 continue
             # Add data to dictionary
             share_data[issuercode] = {
@@ -247,17 +262,22 @@ class GoogleDatabaseAPI:
                 "dc_percent": asxdata['primary_share']['change_in_percent'],
                 "dc_price": asxdata['primary_share']['change_price']
             }
-        
+
         # Initialse session
         with self.sessionmanager() as session:
             # Iterate over each share and update its values
             for issuercode in share_data:
                 # Get share data
-                curr_price = float(share_data[issuercode]["curr_price"])
-                curr_mc = int(share_data[issuercode]["curr_mc"])
-                curr_sc = int(share_data[issuercode]["curr_sc"])
-                dc_percent = float(share_data[issuercode]["dc_percent"].strip('%'))/100
-                dc_price = float(share_data[issuercode]["dc_price"])
+                curr_price = float(
+                    share_data[issuercode]["curr_price"])
+                curr_mc = int(
+                    share_data[issuercode]["curr_mc"])
+                curr_sc = int(
+                    share_data[issuercode]["curr_sc"])
+                dc_percent = float(
+                    share_data[issuercode]["dc_percent"].strip('%'))/100
+                dc_price = float(
+                    share_data[issuercode]["dc_price"])
                 # Update share field
                 share = session.query(Share).get(issuercode)
                 share.price = curr_price
@@ -267,9 +287,9 @@ class GoogleDatabaseAPI:
                 share.daychangeprice = dc_price
                 # Create and add new share price record
                 shareprice = SharePrice(
-                    issuercode = issuercode,
-                    recordtime = datetime.utcnow(),
-                    price = curr_price
+                    issuercode=issuercode,
+                    recordtime=datetime.utcnow(),
+                    price=curr_price
                 )
                 session.add(shareprice)
         # Return true as update was successful

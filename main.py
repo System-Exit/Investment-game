@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import (Flask, render_template, request,
+                   redirect, url_for, flash, jsonify)
 from flask_bootstrap import Bootstrap
-from config import Config
 from flask_login import LoginManager, current_user, login_user, logout_user
+from config import Config
 from models import User
 from forms import UserLoginForm, UserRegistrationForm
 from gdb_api import GoogleDatabaseAPI
@@ -14,6 +15,7 @@ Bootstrap(app)
 login_manager = LoginManager(app)
 app.config.from_object(Config)
 gdb = GoogleDatabaseAPI()
+
 
 # Routing for each page
 # TODO: Change where routing is handled
@@ -28,6 +30,7 @@ def index():
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
     return render_template('index.html')
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
@@ -53,7 +56,8 @@ def registration():
         email = form.email.data
         gender = form.gender.data
         # Call database API to create user
-        userAdded = gdb.adduser(username, password, fname, lname, email, gender)
+        userAdded = gdb.adduser(username, password, fname,
+                                lname, email, gender)
         # Check if user was added to database
         if(userAdded):
             # Redirect to index with success message
@@ -65,6 +69,7 @@ def registration():
             return redirect(url_for('registration'))
     # Render template
     return render_template('registration.html', form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -96,10 +101,12 @@ def login():
     # Render template
     return render_template('login.html', form=form)
 
+
 @login_manager.user_loader
 def load_user(userID):
     with gdb.sessionmanager() as session:
         return gdb.getuser(session, userID)
+
 
 @app.route('/logout')
 def logout():
@@ -115,6 +122,7 @@ def logout():
     # Redirect back to index
     return redirect(url_for('index'))
 
+
 @app.route('/dashboard')
 def dashboard():
     """
@@ -127,13 +135,16 @@ def dashboard():
         return redirect(url_for('index'))
     return render_template('dashboard.html')
 
+
 @app.route('/shares')
 def sharelist():
     """
     Displays current values for all shares.
 
     """
-    pass
+    shares = gdb.getshares()
+    return render_template('TODO', shares=shares)
+
 
 @app.route('/tasks/updateshares')
 def sharesupdate():
