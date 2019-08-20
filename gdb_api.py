@@ -208,8 +208,25 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get shares
             shares = session.query(Share).all()
-            # Return shares
-            return shares
+            # Initialise share list
+            sharelist = list()
+            # Iterate over shares and get share data
+            for share in shares:
+                # Append share data to share list
+                sharelist.append(
+                    {
+                        "issuercode": share.issuercode,
+                        "companyname": share.companyname,
+                        "industrygroupname": share.industrygroupname,
+                        "currentprice": share.currentprice,
+                        "marketcapitalisation": share.marketcapitalisation,
+                        "sharecount": share.sharecount,
+                        "daychangepercent": share.daychangepercent,
+                        "daychangeprice": share.daychangeprice
+                    }
+                )
+            # Return share data
+            return sharelist
 
     def updateshares(self):
         """
@@ -243,7 +260,7 @@ class GoogleDatabaseAPI:
             # Get issuer code
             issuercode = code[0]
             # Call ASX API
-            address = ("https://www.asx.com.au/asx/1/company/"
+            address = ("https://www.asx.com.au/asx/1/share/"
                        "%s?fields=primary_share") % issuercode
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
@@ -256,11 +273,11 @@ class GoogleDatabaseAPI:
                 continue
             # Add data to dictionary
             share_data[issuercode] = {
-                "curr_price": asxdata['primary_share']['last_price'],
-                "curr_mc": asxdata['primary_share']['market_cap'],
-                "curr_sc": asxdata['primary_share']['number_of_shares'],
-                "dc_percent": asxdata['primary_share']['change_in_percent'],
-                "dc_price": asxdata['primary_share']['change_price']
+                "curr_price": asxdata['last_price'],
+                "curr_mc": asxdata['market_cap'],
+                "curr_sc": asxdata['number_of_shares'],
+                "dc_percent": asxdata['change_in_percent'],
+                "dc_price": asxdata['change_price']
             }
 
         # Initialse session
@@ -294,3 +311,7 @@ class GoogleDatabaseAPI:
                 session.add(shareprice)
         # Return true as update was successful
         return True
+
+if __name__ == "__main__":
+    gdb = GoogleDatabaseAPI()
+    print(gdb.getshares())

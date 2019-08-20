@@ -143,7 +143,7 @@ def sharelist():
 
     """
     shares = gdb.getshares()
-    return render_template('TODO', shares=shares)
+    return render_template('shares.html', shares=shares)
 
 
 @app.route('/tasks/updateshares')
