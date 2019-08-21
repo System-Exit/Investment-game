@@ -20,17 +20,43 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    {% for share in shares %}
-        <div>
-            Code: {{ share.issuercode }} 
-            Name: {{ share.companyname }} 
-            Industry: {{ share.industrygroupname }}
-            Price: {{ share.currentprice }}
-            Market Cap: {{ share.marketcapitalisation }}
-            Share count: {{ share.sharecount }}
-            Change %: {{ share.daychangepercent }}
-            Change $: {{ share.daychangeprice }}
-        </div>
-    {% endfor %}
+    <div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Price</th>
+                <th>Change %</th>
+                <th>Change $</th>
+                <th>Market Cap</th>
+                <th>Price Graph</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for share in shares %}
+            <tr>
+                <th scope="row">{{ share.issuercode }}</th>
+                <td>{{ share.companyname }}</td>
+                <td>{{ share.industrygroupname }}</td>
+                <td>{{ share.currentprice }}</td>
+                {% if share.daychangepercent >= 0 %}
+                <td class=text-success>{{share.daychangepercent}}</td>
+                <td class=text-success>{{ share.daychangeprice}}</td>
+                {% else %}
+                <td class=text-danger>{{share.daychangepercent}}</td>
+                <td class=text-danger>{{ share.daychangeprice}}</td>
+                {% endif %}
+                <td>{{share.marketcapitalisation}}</td>
+                <td>GRAPH</td>
+                <td><button type="button" class="btn btn-success">Buy</button></td>
+                <td><button type="button" class="btn btn-danger">Sell</button></td>
+            
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
 </div>
 {% endblock %}
