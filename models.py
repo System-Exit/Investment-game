@@ -1,11 +1,12 @@
 from config import Config
-from sqlalchemy import create_engine
+from sqlalchemy import (Column, Integer, String, Boolean, BigInteger,
+                        Float, DateTime, ForeignKey, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
-from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Float, DateTime, ForeignKey
 from flask_login import UserMixin
 
 Base = declarative_base()
+
 
 class User(Base, UserMixin):
     """Model for user accounts."""
@@ -24,6 +25,7 @@ class User(Base, UserMixin):
     def get_id(self):
         return self.userID
 
+
 class Share(Base):
     """Model for shares."""
     # Table name
@@ -38,12 +40,14 @@ class Share(Base):
     daychangepercent = Column(Float, nullable=False, unique=False)
     daychangeprice = Column(Float, nullable=False, unique=False)
 
+
 class SharePrice(Base):
     """Model for share price record."""
     # Table name
     __tablename__ = 'SHAREPRICE'
     # Table Columns
-    issuercode = Column(String(3), ForeignKey('SHARE.issuercode'), primary_key=True)
+    issuercode = Column(String(3), ForeignKey('SHARE.issuercode'),
+                        primary_key=True)
     recordtime = Column(DateTime, primary_key=True)
     price = Column(Float, nullable=False, unique=False)
 

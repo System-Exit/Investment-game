@@ -1,0 +1,62 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Budding Investors{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+{% endblock %}
+{% block content %}
+<div id="index-body">
+    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == "success" %}    
+                    <div class="flash-success">{{ message }}</div>
+                {% endif %}
+                {% if category == "error" %}    
+                    <div class="flash-error">{{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Price</th>
+                <th>Change %</th>
+                <th>Change $</th>
+                <th>Market Cap</th>
+                <th>Price Graph</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for share in shares %}
+            <tr>
+                <th scope="row">{{ share.issuercode }}</th>
+                <td>{{ share.companyname }}</td>
+                <td>{{ share.industrygroupname }}</td>
+                <td>{{ share.currentprice }}</td>
+                {% if share.daychangepercent >= 0 %}
+                <td class=text-success>{{share.daychangepercent}}</td>
+                <td class=text-success>{{ share.daychangeprice}}</td>
+                {% else %}
+                <td class=text-danger>{{share.daychangepercent}}</td>
+                <td class=text-danger>{{ share.daychangeprice}}</td>
+                {% endif %}
+                <td>{{share.marketcapitalisation}}</td>
+                <td>GRAPH</td>
+                <td><button type="button" class="btn btn-success">Buy</button></td>
+                <td><button type="button" class="btn btn-danger">Sell</button></td>
+            
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}
