@@ -135,6 +135,9 @@ def dashboard():
         return redirect(url_for('index'))
     return render_template('dashboard.html')
 
+@app.route('/portfolio')
+def portfolio():
+    return redirect(url_for('dashboard'))
 
 @app.route('/shares')
 def sharelist():
