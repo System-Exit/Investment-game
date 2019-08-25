@@ -24,6 +24,33 @@ class User(Base, UserMixin):
     def get_id(self):
         return self.userID
 
+
+class Usershare(Base):
+    """Model for Usershares"""
+    __tablename__ = "USERSHARE"
+    IDuser = Column(Integer, ForeignKey('USER.userID'), primary_key=True)
+    shareID = Column(String(3), ForeignKey('SHARE.issuercode'), primary_key=True)
+    value = Column(Float, nullable=False, unique=False)
+    quantity = Column(BigInteger, nullable=False, unique=False)
+
+
+class Transaction(Base):
+    """Model for Transaction"""
+    __tablename__ = "TRANSACTION"
+    transID = Column(Integer, primary_key=True)
+    stockID = Column(String(45), ForeignKey('SHARE.issuercode'), primary_key=False)
+    uID = Column(Integer, ForeignKey('USER.userID'), primary_key=False)
+    datetime = Column(DateTime, nullable=False, unique=False)
+    transtype = Column(String(1), nullable=False, unique=False)
+    feeval = Column(Float, nullable=False, unique=False)
+    stocktransval = Column(Float, nullable=False, unique=False)
+    totaltransval = Column(Float, nullable=False, unique=False)
+    quantity = Column(BigInteger, nullable=False, unique=False)
+    status = Column(String(20), nullable=False)
+    value = Column(Float, nullable=False, unique=False)
+    quantity = Column(BigInteger, nullable=False, unique=False)
+
+
 class Share(Base):
     """Model for shares."""
     # Table name
