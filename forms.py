@@ -10,8 +10,10 @@ class UserLoginForm(FlaskForm):
     Form for user registration
 
     """
-    username = StringField('Username', validators=[DataRequired('Username is required')])
-    password = PasswordField('Password', validators=[DataRequired('Password is required')])
+    username = StringField('Username', validators=[
+        DataRequired('Username is required')])
+    password = PasswordField('Password', validators=[
+        DataRequired('Password is required')])
     submit = SubmitField('Log In')
 
 
@@ -20,11 +22,18 @@ class UserRegistrationForm(FlaskForm):
     Form for user registration
 
     """
-    username = StringField('Username', validators=[DataRequired('Username is required')])
-    password = PasswordField('Password', validators=[DataRequired('Password is required')])
-    fname = StringField('First Name', validators=[DataRequired('First name is required')])
-    lname = StringField('Last Name', validators=[DataRequired('Last name is required')])
-    dob = DateField('Date of Birth', validators=[DataRequired('Date of birth is requred')])
-    email = EmailField('Email', validators=[DataRequired('Valid email address is required')])
-    gender = SelectField('Gender', choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
+    username = StringField('Username', validators=[
+        DataRequired('Username is required')])
+    password = PasswordField('Password', validators=[
+        DataRequired('Password is required')])
+    fname = StringField('First Name', validators=[
+        DataRequired('First name is required')])
+    lname = StringField('Last Name', validators=[
+        DataRequired('Last name is required')])
+    dob = DateField('Date of Birth', validators=[
+        DataRequired('Date of birth is requred')])
+    email = EmailField('Email', validators=[
+        DataRequired('Valid email address is required')])
+    gender = SelectField('Gender', choices=[
+        ('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
     submit = SubmitField('Register')
