@@ -27,8 +27,10 @@ class User(Base, UserMixin):
 
 
 class Usershare(Base):
+    # Table name
     """Model for Usershares"""
     __tablename__ = "USERSHARE"
+    # Table Columns
     IDuser = Column(Integer, ForeignKey('USER.userID'), primary_key=True)
     shareID = Column(String(3), ForeignKey('SHARE.issuercode'), primary_key=True)
     value = Column(Float, nullable=False, unique=False)
@@ -36,7 +38,9 @@ class Usershare(Base):
 
 
 class Transaction(Base):
+    # Table name
     """Model for Transaction"""
+    # Table Columns
     __tablename__ = "TRANSACTION"
     transID = Column(Integer, primary_key=True)
     stockID = Column(String(45), ForeignKey('SHARE.issuercode'), primary_key=False)
