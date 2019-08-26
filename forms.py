@@ -37,3 +37,17 @@ class UserRegistrationForm(FlaskForm):
     gender = SelectField('Gender', choices=[
         ('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
     submit = SubmitField('Register')
+
+
+class BuyShareForm(FlaskForm):
+    """
+    Form for buying shares
+
+    """
+    sharecode = StringField('Company Code', validators=[
+        DataRequired('Company Code is required')]) 
+    quantity = StringField('Quantity to Purchase', validators=[
+        DataRequired('Quantity is required')])
+    submit = SubmitField('Purchase')
+
+      

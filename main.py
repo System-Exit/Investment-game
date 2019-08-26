@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
 from config import Config
 from models import User
-from forms import UserLoginForm, UserRegistrationForm
+from forms import UserLoginForm, UserRegistrationForm, BuyShareForm
 from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
@@ -156,6 +156,27 @@ def sharesupdate():
     gdb.updateshares()
     # Return a success response
     return jsonify(success=True)
+
+
+@app.route('/buyshare')
+def buyshare():
+    """
+    Buy share for the user.
+
+    """
+    # Checks if user is logged in 
+    if current_user.is_authenticated:
+        # Redirect to dashboard
+        return redirect(url_for('dashboard'))
+    # Initialise buy share form
+    form = BuyShareForm()
+    # Validate and process form data
+    if(form.validate_on_submit()):
+        # Buys shares
+        companycode = form.sharecode.data
+        buyquantity = form.quantity.data
+
+    return render_template('buyshare.html')
 
 # Run the app
 if __name__ == '__main__':
