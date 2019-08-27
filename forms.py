@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField
 from wtforms.fields.html5 import EmailField, DateField
 from wtforms.validators import DataRequired
 
@@ -46,7 +46,7 @@ class BuyShareForm(FlaskForm):
     """
     sharecode = StringField('Company Code', validators=[
         DataRequired('Company Code is required')]) 
-    quantity = StringField('Quantity to Purchase', validators=[
+    quantity = IntegerField('Quantity to Purchase', validators=[
         DataRequired('Quantity is required')])
     submit = SubmitField('Purchase')
 
