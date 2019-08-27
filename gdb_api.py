@@ -7,7 +7,7 @@ from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, date
 
 
 class GoogleDatabaseAPI:
@@ -50,7 +50,8 @@ class GoogleDatabaseAPI:
         finally:
             session.close()
 
-    def adduser(self, username, userpass, firstname, lastname, email, gender):
+    def adduser(self, username, userpass, firstname,
+                lastname, email, dob, gender):
         """
         Add new user to user database table with given details.
         Also handles hashing and salting of given password.
@@ -61,6 +62,7 @@ class GoogleDatabaseAPI:
             firstname (str): First name of new user.
             lastname (str): Last name of new user.
             email (str): Email of new user.
+            dob (date): Date of birth of new user.
             gender (str): Gender identity of new user.
 
         Returns:
@@ -78,13 +80,15 @@ class GoogleDatabaseAPI:
             passhash = PasswordHasher().hash(userpass)
             # Create user
             user = User(
-                firstname=firstname,
-                lastname=lastname,
-                email=email,
-                gender=gender,
-                username=username,
-                userpass=passhash,
-                verified=True
+                firstname=str(firstname),
+                lastname=str(lastname),
+                email=str(email),
+                dob=dob,
+                gender=str(gender),
+                username=str(username),
+                userpass=str(passhash),
+                verified=True,
+                balance=1000000
                 )
             # Add user to database
             session.add(user)
@@ -163,22 +167,23 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Check that share isn't already added to database
             share = session.query(Share).filter(
-                Share.issuercode == issuercode).first()
+                Share.issuerID == issuercode).first()
             if(share is not None):
                 return False
             # Get share data from ASX
             # TODO: Move ASX API call elsewhere
             address = ("https://www.asx.com.au/asx/1/company/"
-                       "%s?fields=primary_share") % issuercode
+                       f"{issuercode}?fields=primary_share")
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
             if('code' not in asxdata and asxdata['code'] != issuercode):
                 return False
             # Create new share record
             share = Share(
-                issuercode=asxdata['code'],
-                companyname=asxdata['name_short'],
-                industrygroupname=asxdata['industry_group_name'],
+                issuerID=asxdata['code'],
+                abbrevname=asxdata['name_abbrev'],
+                shortname=asxdata['name_short'],
+                industrysector=asxdata['sector_name'],
                 currentprice=float(
                     asxdata['primary_share']['last_price']),
                 marketcapitalisation=int(
@@ -215,9 +220,10 @@ class GoogleDatabaseAPI:
                 # Append share data to share list
                 sharelist.append(
                     {
-                        "issuercode": share.issuercode,
-                        "companyname": share.companyname,
-                        "industrygroupname": share.industrygroupname,
+                        "issuerID": share.issuerID,
+                        "abbrevname": share.abbrevname,
+                        "shortname": share.shortname,
+                        "industrysector": share.industrysector,
                         "currentprice": share.currentprice,
                         "marketcapitalisation": share.marketcapitalisation,
                         "sharecount": share.sharecount,
@@ -304,7 +310,7 @@ class GoogleDatabaseAPI:
                 share.daychangeprice = dc_price
                 # Create and add new share price record
                 shareprice = SharePrice(
-                    issuercode=issuercode,
+                    issuerID=issuercode,
                     recordtime=datetime.utcnow(),
                     price=curr_price
                 )
@@ -314,4 +320,9 @@ class GoogleDatabaseAPI:
 
 if __name__ == "__main__":
     gdb = GoogleDatabaseAPI()
-    print(gdb.getshares())
+    # Add some default stocks
+    stocks = ["AMC", "ANZ", "BHP", "BXB", "CBA", "CSL", "GMG", "IAG",
+              "MQG", "NAB", "RIO", "S32", "SCG", "SUN", "TCL", "TLS",
+              "WBC", "WES", "WOW", "WPL"]
+    for stock in stocks:
+        gdb.addshare(stock)

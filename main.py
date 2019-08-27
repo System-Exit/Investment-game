@@ -57,7 +57,7 @@ def registration():
         gender = form.gender.data
         # Call database API to create user
         userAdded = gdb.adduser(username, password, fname,
-                                lname, email, gender)
+                                lname, email, dob, gender)
         # Check if user was added to database
         if(userAdded):
             # Redirect to index with success message
@@ -164,7 +164,7 @@ def buyshare():
     Buy share for the user.
 
     """
-    # Checks if user is logged in 
+    # Checks if user is logged in
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
