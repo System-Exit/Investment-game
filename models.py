@@ -29,7 +29,8 @@ class User(Base, UserMixin):
 
 
 class Usershare(Base):
-    """Model for Usershares"""
+    """ Model for Usershares """
+    # TODO: Consider removing this table or adding more useful info
     # Table name
     __tablename__ = "USERSHARE"
     # Table Columns
@@ -37,7 +38,8 @@ class Usershare(Base):
                     primary_key=True)
     issuerID = Column(String(3), ForeignKey('SHARE.issuerID'),
                       primary_key=True)
-    value = Column(Float, nullable=False, unique=False)
+    profit = Column(Float, nullable=False, unique=False)
+    loss = Column(Float, nullable=False, unique=False)
     quantity = Column(BigInteger, nullable=False, unique=False)
 
 
@@ -100,4 +102,3 @@ if __name__ == "__main__":
         drivername, username, password, host, database, query))
     # Create tables
     Base.metadata.create_all(engine)
-
