@@ -5,9 +5,32 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
 {% endblock %}
 {% block content %}
-<div id="index-body">
-    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
-<h2>Under Construction</h2>
-</div>
+    <form action="" method="POST" class="registration-form">
+        {{ form.hidden_tag() }}
+        <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+        alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == "success" %}    
+                        <div class="flash-success">{{ message }}</div>
+                    {% endif %}
+                    {% if category == "error" %}    
+                        <div class="flash-error">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div>
+            {{ form.sharecode.label }}
+            <br>
+            {{ form.sharecode() }}
+        </div>
+        <div>
+            {{ form.quantity.label }}
+            <br>
+            {{ form.quantity() }}
+        </div>
+        <div>{{ form.submit() }}</div>
+    </form>
 {% endblock %}
