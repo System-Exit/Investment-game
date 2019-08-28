@@ -37,9 +37,9 @@
         <tbody>
         {% for share in shares %}
             <tr>
-                <th scope="row">{{ share.issuercode }}</th>
-                <td>{{ share.companyname }}</td>
-                <td>{{ share.industrygroupname }}</td>
+                <th scope="row">{{ share.issuerID }}</th>
+                <td>{{ share.abbrevname }}</td>
+                <td>{{ share.industrysector }}</td>
                 <td>{{ share.currentprice }}</td>
                 {% if share.daychangepercent >= 0 %}
                 <td class=text-success>{{share.daychangepercent}}</td>
@@ -50,8 +50,9 @@
                 {% endif %}
                 <td>{{share.marketcapitalisation}}</td>
                 <td>GRAPH</td>
-                <td><button type="button" class="btn btn-success">Buy</button></td>
+                <td><a href="buyshare" button type="submit" class="btn btn-success">Buy</button></td>
                 <td><button type="button" class="btn btn-danger">Sell</button></td>
+                
             
             </tr>
         {% endfor %}

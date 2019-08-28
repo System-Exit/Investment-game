@@ -1,5 +1,5 @@
 from config import Config
-from models import User, Share, SharePrice
+from models import User, Share, SharePrice, Usershare, Transaction
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
@@ -7,7 +7,7 @@ from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, date
 
 
 class GoogleDatabaseAPI:
@@ -50,7 +50,8 @@ class GoogleDatabaseAPI:
         finally:
             session.close()
 
-    def adduser(self, username, userpass, firstname, lastname, email, gender):
+    def adduser(self, username, userpass, firstname,
+                lastname, email, dob, gender):
         """
         Add new user to user database table with given details.
         Also handles hashing and salting of given password.
@@ -61,6 +62,7 @@ class GoogleDatabaseAPI:
             firstname (str): First name of new user.
             lastname (str): Last name of new user.
             email (str): Email of new user.
+            dob (date): Date of birth of new user.
             gender (str): Gender identity of new user.
 
         Returns:
@@ -78,13 +80,15 @@ class GoogleDatabaseAPI:
             passhash = PasswordHasher().hash(userpass)
             # Create user
             user = User(
-                firstname=firstname,
-                lastname=lastname,
-                email=email,
-                gender=gender,
-                username=username,
-                userpass=passhash,
-                verified=True
+                firstname=str(firstname),
+                lastname=str(lastname),
+                email=str(email),
+                dob=dob,
+                gender=str(gender),
+                username=str(username),
+                userpass=str(passhash),
+                verified=True,
+                balance=1000000
                 )
             # Add user to database
             session.add(user)
@@ -131,20 +135,21 @@ class GoogleDatabaseAPI:
                 # User doesn't exist, return false
                 return False, None
 
-    def getuser(self, session, userID):
+    def getuser(self, userID):
         """
-        Gets and returns user object based on given ID.
-        This needs to be given a session, as the returned model is
-        connected to the session it is aquired from.
+        Gets and returns a detached user object based on given ID.
 
         Args:
-            session: Session from context manager defined in this class.
             userID (str): The ID of the user to get.
         Returns:
             The user model object for that user.
         """
-        # Get user
-        user = session.query(User).get(userID)
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get user
+            user = session.query(User).get(userID)
+            # Deteach user from session
+            session.expunge(user)
         # Return user
         return user
 
@@ -163,22 +168,23 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Check that share isn't already added to database
             share = session.query(Share).filter(
-                Share.issuercode == issuercode).first()
+                Share.issuerID == issuercode).first()
             if(share is not None):
                 return False
             # Get share data from ASX
             # TODO: Move ASX API call elsewhere
             address = ("https://www.asx.com.au/asx/1/company/"
-                       "%s?fields=primary_share") % issuercode
+                       f"{issuercode}?fields=primary_share")
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
             if('code' not in asxdata and asxdata['code'] != issuercode):
                 return False
             # Create new share record
             share = Share(
-                issuercode=asxdata['code'],
-                companyname=asxdata['name_short'],
-                industrygroupname=asxdata['industry_group_name'],
+                issuerID=asxdata['code'],
+                abbrevname=asxdata['name_abbrev'],
+                shortname=asxdata['name_short'],
+                industrysector=asxdata['sector_name'],
                 currentprice=float(
                     asxdata['primary_share']['last_price']),
                 marketcapitalisation=int(
@@ -215,9 +221,10 @@ class GoogleDatabaseAPI:
                 # Append share data to share list
                 sharelist.append(
                     {
-                        "issuercode": share.issuercode,
-                        "companyname": share.companyname,
-                        "industrygroupname": share.industrygroupname,
+                        "issuerID": share.issuerID,
+                        "abbrevname": share.abbrevname,
+                        "shortname": share.shortname,
+                        "industrysector": share.industrysector,
                         "currentprice": share.currentprice,
                         "marketcapitalisation": share.marketcapitalisation,
                         "sharecount": share.sharecount,
@@ -251,20 +258,20 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Get issuer codes for all currently stored shares
-            share_codes = session.query(Share.issuercode).all()
+            share_codes = session.query(Share.issuerID).all()
 
         # Initialise share data
         share_data = dict()
         # Iterate over each share issuer code
         for code in share_codes:
             # Get issuer code
-            issuercode = code[0]
+            issuerID = code[0]
             # Call ASX API
             address = ("https://www.asx.com.au/asx/1/share/"
-                       "%s?fields=primary_share") % issuercode
+                       "%s?fields=primary_share") % issuerID
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
-            if('code' not in asxdata and asxdata['code'] == issuercode):
+            if('code' not in asxdata and asxdata['code'] == issuerID):
                 # If unsuccessful, skip this share and try the next one
                 # TODO: Rather than skip, maybe throw an exception or make it
                 #       return false after doing everything else, as some
@@ -272,7 +279,7 @@ class GoogleDatabaseAPI:
                 #       work correctly.
                 continue
             # Add data to dictionary
-            share_data[issuercode] = {
+            share_data[issuerID] = {
                 "curr_price": asxdata['last_price'],
                 "curr_mc": asxdata['market_cap'],
                 "curr_sc": asxdata['number_of_shares'],
@@ -283,20 +290,20 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Iterate over each share and update its values
-            for issuercode in share_data:
+            for issuerID in share_data:
                 # Get share data
                 curr_price = float(
-                    share_data[issuercode]["curr_price"])
+                    share_data[issuerID]["curr_price"])
                 curr_mc = int(
-                    share_data[issuercode]["curr_mc"])
+                    share_data[issuerID]["curr_mc"])
                 curr_sc = int(
-                    share_data[issuercode]["curr_sc"])
+                    share_data[issuerID]["curr_sc"])
                 dc_percent = float(
-                    share_data[issuercode]["dc_percent"].strip('%'))/100
+                    share_data[issuerID]["dc_percent"].strip('%'))/100
                 dc_price = float(
-                    share_data[issuercode]["dc_price"])
+                    share_data[issuerID]["dc_price"])
                 # Update share field
-                share = session.query(Share).get(issuercode)
+                share = session.query(Share).get(issuerID)
                 share.price = curr_price
                 share.marketcapitalisation = curr_mc
                 share.sharecount = curr_sc
@@ -304,7 +311,7 @@ class GoogleDatabaseAPI:
                 share.daychangeprice = dc_price
                 # Create and add new share price record
                 shareprice = SharePrice(
-                    issuercode=issuercode,
+                    issuerID=issuerID,
                     recordtime=datetime.utcnow(),
                     price=curr_price
                 )
@@ -312,6 +319,135 @@ class GoogleDatabaseAPI:
         # Return true as update was successful
         return True
 
+    def buyshare(self, userID, issuerID, quantity):
+        """
+        Adds a new transaction of a user purchasing shares.
+        Also updates user shares table.
+        TODO: Return reason for false return
+
+        Args:
+            userID (str): ID of user that is making the purchase.
+            issuerID (str): ID of share that is being purchased.
+            quantity (int): Ammount of shares being purchased.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that user exists
+            user = session.query(User).get(userID)
+            if(user is None):
+                return False
+            # Check that share exists
+            share = session.query(Share).get(issuerID)
+            if(share is None):
+                return False
+            # Calculate costs for purchase including fee
+            sharesprice = (share.currentprice * quantity)
+            feesprice = 50 + (sharesprice * 0.01)
+            totalprice = (sharesprice + feesprice)
+            # Check that user can purchase share
+            if(user.balance < totalprice):
+                return False
+            # Create and add transaction
+            transaction = Transaction(
+                issuerID=issuerID,
+                userID=userID,
+                datetime=datetime.utcnow(),
+                transtype='B',
+                feeval=feesprice,
+                stocktransval=sharesprice,
+                totaltransval=totalprice,
+                quantity=quantity,
+                status="Valid"
+            )
+            session.add(transaction)
+            # Update user shares table
+            usershare = session.query(Usershare).filter(
+                Usershare.userID == userID,
+                Usershare.issuerID == issuerID).first()
+            # If the share doesn't already exist, create new record
+            if(usershare is None):
+                usershare = Usershare(
+                    userID=userID,
+                    issuerID=issuerID,
+                    profit=0,
+                    loss=totalprice,
+                    quantity=quantity
+                )
+                session.add(usershare)
+            # Otherwise, update existing usershare record
+            else:
+                usershare.loss = usershare.loss + sharesprice
+                usershare.quantity = usershare.quantity + quantity
+            # Subtract from user balance
+            user.balance -= totalprice
+            # Return true for success
+            return True
+
+    def sellshare(self, userID, issuerID, quantity):
+        """
+        Adds a new transaction of a user selling shares.
+        Also updates user shares table.
+        TODO: Return reason for false return
+
+        Args:
+            userID (str): ID of user that is making the sale.
+            issuerID (str): ID of share that is being sold.
+            quantity (int): Ammount of shares being sold.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that user exists
+            user = session.query(User).get(userID)
+            if(user is None):
+                return False
+            # Check that share exists
+            share = session.query(Share).get(issuerID)
+            if(share is None):
+                return False
+            # Check that user has shares
+            usershare = session.query(Usershare).filter(
+                Usershare.userID == userID,
+                Usershare.issuerID == issuerID).first()
+            if(usershare is None):
+                return False
+            # Check that user can sell the quantity of shares
+            if(usershare.quantity < quantity):
+                return False
+            # Calculate costs for sale including fee
+            sharesprice = (share.currentprice * quantity)
+            feesprice = 50 + (sharesprice * 0.0025)
+            totalprice = (sharesprice - feesprice)
+            # Create and add transaction
+            transaction = Transaction(
+                issuerID=issuerID,
+                userID=userID,
+                datetime=datetime.utcnow(),
+                transtype='S',
+                feeval=feesprice,
+                stocktransval=sharesprice,
+                totaltransval=totalprice,
+                quantity=quantity,
+                status="Valid"
+            )
+            session.add(transaction)
+            # Update user shares table
+            usershare.profit = usershare.profit + totalprice
+            usershare.quantity = usershare.quantity - quantity
+            # Add to user balance
+            user.balance += totalprice
+            # Return true for success
+            return True
+
 if __name__ == "__main__":
+    # Initialize API
     gdb = GoogleDatabaseAPI()
-    print(gdb.getshares())
+    # Add some default stocks
+    # stocks = ["AMC", "ANZ", "BHP", "BXB", "CBA", "CSL", "GMG", "IAG",
+    #           "MQG", "NAB", "RIO", "S32", "SCG", "SUN", "TCL", "TLS",
+    #           "WBC", "WES", "WOW", "WPL"]
+    # for stock in stocks:
+    #     gdb.addshare(stock)
+    # Attempt a purchase
+    print(gdb.sellshare(1, "ANZ", 10))

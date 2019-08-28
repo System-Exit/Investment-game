@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
 from config import Config
 from models import User
-from forms import UserLoginForm, UserRegistrationForm
+from forms import UserLoginForm, UserRegistrationForm, BuyShareForm
 from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
@@ -57,7 +57,7 @@ def registration():
         gender = form.gender.data
         # Call database API to create user
         userAdded = gdb.adduser(username, password, fname,
-                                lname, email, gender)
+                                lname, email, dob, gender)
         # Check if user was added to database
         if(userAdded):
             # Redirect to index with success message
@@ -104,8 +104,7 @@ def login():
 
 @login_manager.user_loader
 def load_user(userID):
-    with gdb.sessionmanager() as session:
-        return gdb.getuser(session, userID)
+    return gdb.getuser(userID)
 
 
 @app.route('/logout')
@@ -133,7 +132,9 @@ def dashboard():
     if not current_user.is_authenticated:
         # Redirect to index
         return redirect(url_for('index'))
-    return render_template('dashboard.html')
+    # Get current user
+    user = current_user
+    return render_template('dashboard.html', user=user)
 
 @app.route('/portfolio')
 def portfolio():
@@ -159,6 +160,39 @@ def sharesupdate():
     gdb.updateshares()
     # Return a success response
     return jsonify(success=True)
+
+
+@app.route('/buyshare', methods=['GET', 'POST'])
+def buyshare():
+    """
+    Buy share for the user.
+
+    """
+    # Checks if user is logged in
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Initialise buy share form
+    form = BuyShareForm()
+    # Validate and process form data
+    if(form.validate_on_submit()):
+        # Buys shares
+        issuerID = form.sharecode.data
+        quantity = form.quantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        buyshare = gdb.buyshare(userID, issuerID, quantity)
+        if(buyshare):
+            # Redirect to index with success message
+            flash("Buyshare successful!", category="success")
+            return redirect(url_for('dashboard'))
+        else:
+            # Redirect to registration with warning message
+            flash("Buyshare unsuccessful!", category="error")
+            return redirect(url_for('index'))
+
+    return render_template('buyshare.html', form=form)
 
 # Run the app
 if __name__ == '__main__':
