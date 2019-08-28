@@ -379,6 +379,8 @@ class GoogleDatabaseAPI:
             else:
                 usershare.loss = usershare.loss + sharesprice
                 usershare.quantity = usershare.quantity + quantity
+            # Subtract from user balance
+            user.balance -= totalprice
             # Return true for success
             return True
 
@@ -433,6 +435,8 @@ class GoogleDatabaseAPI:
             # Update user shares table
             usershare.profit = usershare.profit + totalprice
             usershare.quantity = usershare.quantity - quantity
+            # Add to user balance
+            user.balance += totalprice
             # Return true for success
             return True
 

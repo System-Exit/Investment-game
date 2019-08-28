@@ -177,7 +177,7 @@ def buyshare():
         # Buys shares
         issuerID = form.sharecode.data
         quantity = form.quantity.data
-        userID = 1
+        userID = current_user.userID
         # Call buyshare API
         buyshare = gdb.buyshare(userID, issuerID, quantity)
         if(buyshare):
