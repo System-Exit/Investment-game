@@ -135,20 +135,21 @@ class GoogleDatabaseAPI:
                 # User doesn't exist, return false
                 return False, None
 
-    def getuser(self, session, userID):
+    def getuser(self, userID):
         """
-        Gets and returns user object based on given ID.
-        This needs to be given a session, as the returned model is
-        connected to the session it is aquired from.
+        Gets and returns a detached user object based on given ID.
 
         Args:
-            session: Session from context manager defined in this class.
             userID (str): The ID of the user to get.
         Returns:
             The user model object for that user.
         """
-        # Get user
-        user = session.query(User).get(userID)
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get user
+            user = session.query(User).get(userID)
+            # Deteach user from session
+            session.expunge(user)
         # Return user
         return user
 

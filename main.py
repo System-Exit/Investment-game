@@ -104,8 +104,7 @@ def login():
 
 @login_manager.user_loader
 def load_user(userID):
-    with gdb.sessionmanager() as session:
-        return gdb.getuser(session, userID)
+    return gdb.getuser(userID)
 
 
 @app.route('/logout')
@@ -133,7 +132,9 @@ def dashboard():
     if not current_user.is_authenticated:
         # Redirect to index
         return redirect(url_for('index'))
-    return render_template('dashboard.html')
+    # Get current user
+    user = current_user
+    return render_template('dashboard.html', user=user)
 
 
 @app.route('/shares')
