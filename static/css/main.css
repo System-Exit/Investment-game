@@ -17,6 +17,28 @@ body
     font-weight: bold;
     padding: 5px;
 }
+/* Navigation */
+#top-left-corner
+{
+    position: fixed;
+    width: 200px;
+    top: 0;
+    left: 0;
+}
+#top-bar
+{
+    position: fixed;
+    width: auto;
+    top: 0;
+    left: 0;
+}
+#side-bar
+{
+    position: fixed;
+    width: 200px;
+    height:auto;
+    left: 0;
+}
 
 /* Index page */
 #index-body a

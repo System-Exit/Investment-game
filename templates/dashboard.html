@@ -1,9 +1,4 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}Budding Investors{% endblock %}
-{% block styles %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
-{% endblock %}
+{% extends "layout.html" %}
 {% block content %}
 <div id="index-body">
     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 

@@ -1,0 +1,20 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Budding Investors{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+{% endblock %}
+<div id="top-left-corner">
+    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+    alt="Placeholder Profile Icon" height="auto" width="auto">
+</div>
+<div id="top-bar">
+    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+    alt="Budding Investors" height="auto" width="auto">
+</div>
+<div id="side-bar">
+
+</div>
+{% block content %}
+
+{% endblock %}

@@ -204,7 +204,8 @@ class GoogleDatabaseAPI:
 
     def getshares(self):
         """
-        Returns a list of all shares contained in the database.
+        Returns a list of all share objects contained in the database.
+        Detaches shares from session, so changes cannot be made directly.
 
         Returns:
             A list of every share in the database with stored data.
@@ -214,26 +215,11 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get shares
             shares = session.query(Share).all()
-            # Initialise share list
-            sharelist = list()
-            # Iterate over shares and get share data
+            # Detach all share objects from session
             for share in shares:
-                # Append share data to share list
-                sharelist.append(
-                    {
-                        "issuerID": share.issuerID,
-                        "abbrevname": share.abbrevname,
-                        "shortname": share.shortname,
-                        "industrysector": share.industrysector,
-                        "currentprice": share.currentprice,
-                        "marketcapitalisation": share.marketcapitalisation,
-                        "sharecount": share.sharecount,
-                        "daychangepercent": share.daychangepercent,
-                        "daychangeprice": share.daychangeprice
-                    }
-                )
-            # Return share data
-            return sharelist
+                session.expunge(share)
+        # Return share data
+        return shares
 
     def updateshares(self):
         """
@@ -440,6 +426,42 @@ class GoogleDatabaseAPI:
             # Return true for success
             return True
 
+    def getusersharesinfo(self, userID):
+        """
+        Returns all the shares that a user owns along
+        with relevant share information as well.
+
+        Args:
+            userID (str): ID of user to get owned shares of.
+        Returns:
+            List of shares that user owns with data from
+            usershare and share tables combined.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get all shares that the user owns combined with share info
+            results = session.query(Usershare, Share).\
+                join(Share).\
+                filter(Usershare.userID == 1).\
+                all()
+            # Detach all objects from session
+            for result in results:
+                for obj in result:
+                    session.expunge(obj)
+        # Process results into list of combined objects
+        usershares = list()
+        for result in results:
+                # Remove unecessary variables from result dictionaries
+                # and combine result dictionaries into one.
+                result[0].__dict__.pop('_sa_instance_state', None)
+                result[1].__dict__.pop('_sa_instance_state', None)
+                combinedres = {**result[0].__dict__, **result[1].__dict__}
+                usershares.append(combinedres)
+        # Return processed usershares
+        return usershares
+
+
 if __name__ == "__main__":
     # Initialize API
     gdb = GoogleDatabaseAPI()
@@ -449,5 +471,3 @@ if __name__ == "__main__":
     #           "WBC", "WES", "WOW", "WPL"]
     # for stock in stocks:
     #     gdb.addshare(stock)
-    # Attempt a purchase
-    print(gdb.sellshare(1, "ANZ", 10))

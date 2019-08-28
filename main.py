@@ -91,9 +91,8 @@ def login():
         # Check if username and password is valid
         valid, userID = gdb.verifyuser(username, password)
         if(valid):
-            with gdb.sessionmanager() as session:
-                user = gdb.getuser(session, userID)
-                login_user(user)
+            user = gdb.getuser(userID)
+            login_user(user)
             return redirect(url_for('dashboard'))
         else:
             flash("Invalid username or password.", category="error")
@@ -136,9 +135,21 @@ def dashboard():
     user = current_user
     return render_template('dashboard.html', user=user)
 
+
 @app.route('/portfolio')
 def portfolio():
-    return redirect(url_for('dashboard'))
+    # Redirect user to index if they are not logged in
+    if not current_user.is_authenticated:
+        # Redirect to index
+        return redirect(url_for('index'))
+    # Get user info
+    user = current_user
+    # Get processed usershare info
+    usershares = gdb.getusersharesinfo(user.userID)
+    # Render template
+    return render_template('portfolio.html', user=user,
+                           usershares=usershares)
+
 
 @app.route('/shares')
 def sharelist():
