@@ -6,18 +6,25 @@
         <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
     </head>
     <body>
+        <div id="top-left-corner">
+            <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+             alt="Placeholder Profile Icon">
+        </div>
         <div id="top-bar">
-            <div id="top-left-corner">
-                <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-                alt="Placeholder Profile Icon">
-            </div>
             <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
             alt="Budding Investors">
         </div>
         <div id="side-bar">
-
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('sharelist') }}">Shares</a></li>
+                <li><a href="{{ url_for('portfolio') }}">My Protfolio</a></li>
+                <li><a href="{{ url_for('logout') }}">Sign out</a></li>
+            </ul>
         </div>
-        {% block content %}{% endblock %}
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </body>
