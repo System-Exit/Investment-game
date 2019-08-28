@@ -1,20 +1,24 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}Budding Investors{% endblock %}
-{% block styles %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
-{% endblock %}
-<div id="top-left-corner">
-    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-    alt="Placeholder Profile Icon" height="auto" width="auto">
-</div>
-<div id="top-bar">
-    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-    alt="Budding Investors" height="auto" width="auto">
-</div>
-<div id="side-bar">
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Budding Investors</title>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    </head>
+    <body>
+        <div id="top-bar">
+            <div id="top-left-corner">
+                <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+                alt="Placeholder Profile Icon">
+            </div>
+            <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+            alt="Budding Investors">
+        </div>
+        <div id="side-bar">
 
-</div>
-{% block content %}
-
-{% endblock %}
+        </div>
+        {% block content %}{% endblock %}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </body>
+</html>
