@@ -1,13 +1,20 @@
+{% set navigation_items = [
+    (url_for('dashboard'), 'dashboard', 'Dashboard'),
+    (url_for('sharelist'), 'shares', 'Shares'),
+    (url_for('portfolio'), 'portfolio', 'Portfolio'),
+    (url_for('logout'), 'logout', 'Sign Out')
+] -%}
+{% set active_page = active_page|default(None) -%}
 <!DOCTYPE html>
 <html>
     <head>
         <title>Budding Investors</title>
-        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
     </head>
     <body>
         <div id="top-left-corner">
-            <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+            <img src="{{url_for('static', filename='images/user.svg')}}" 
              alt="Placeholder Profile Icon">
         </div>
         <div id="top-bar">
@@ -16,10 +23,14 @@
         </div>
         <div id="side-bar">
             <ul>
-                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('sharelist') }}">Shares</a></li>
-                <li><a href="{{ url_for('portfolio') }}">My Protfolio</a></li>
-                <li><a href="{{ url_for('logout') }}">Sign out</a></li>
+                {% for href, id, caption in navigation_items %}
+                    <li>
+                        <a href="{{ href }}"
+                            {% if id == active_page %} class="active" {% endif %}>
+                            {{ caption }}
+                        </a>
+                    </li>
+                {% endfor %}
             </ul>
         </div>
         <div id="content">

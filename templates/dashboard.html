@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% set active_page = "dashboard" %}
 {% block content %}
 <div id="index-body">
     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
@@ -6,6 +7,5 @@
     {% include "messageblock.html" %}
     <h1>Budding Investors is currently under construction!</h1>
     <h2>You are currently logged in as {{ user.username }}.</h2>
-    <a href="logout">Log out.</a>
 </div>
 {% endblock %}
