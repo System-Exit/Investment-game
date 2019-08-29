@@ -4,44 +4,44 @@
 <div id="index-body">
     {% include "messageblock.html" %}
     <div class="container">
-    <h2>All Owned Shares</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Company</th>
-                <th>Industry</th>
-                <th>Price</th>
-                <th>Change %</th>
-                <th>Change $</th>
-                <th>Market Cap</th>
-                <th>Number Owned</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for share in usershares %}
-            <tr>
-                <th scope="row">{{ share.issuerID }}</th>
-                <td>{{ share.abbrevname }}</td>
-                <td>{{ share.industrysector }}</td>
-                <td>{{ share.currentprice }}</td>
-                {% if share.daychangepercent >= 0 %}
-                <td class=text-success>{{share.daychangepercent}}</td>
-                <td class=text-success>{{ share.daychangeprice}}</td>
-                {% else %}
-                <td class=text-danger>{{share.daychangepercent}}</td>
-                <td class=text-danger>{{ share.daychangeprice}}</td>
-                {% endif %}
-                <td>{{share.marketcapitalisation}}</td>
-                <td>{{ share.quantity }}</td>
-                <td><a href="buyshare" button type="submit" class="btn btn-success">Buy</button></td>
-                <td><button type="button" class="btn btn-danger">Sell</button></td>
-                
-            
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <h2>All Owned Shares</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Company</th>
+                    <th>Industry</th>
+                    <th>Price</th>
+                    <th>Change %</th>
+                    <th>Change $</th>
+                    <th>Market Cap</th>
+                    <th>Number Owned</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for share in usershares %}
+                <tr>
+                    <th scope="row">{{ share.issuerID }}</th>
+                    <td>{{ share.abbrevname }}</td>
+                    <td>{{ share.industrysector }}</td>
+                    <td>{{ share.currentprice }}</td>
+                    {% if share.daychangepercent >= 0 %}
+                    <td class=text-success>{{share.daychangepercent}}</td>
+                    <td class=text-success>{{ share.daychangeprice}}</td>
+                    {% else %}
+                    <td class=text-danger>{{share.daychangepercent}}</td>
+                    <td class=text-danger>{{ share.daychangeprice}}</td>
+                    {% endif %}
+                    <td>{{share.marketcapitalisation}}</td>
+                    <td>{{ share.quantity }}</td>
+                    <td><button name="{{ share.issuerID }}" onclick="CompanyValue(this.name)" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button></td>
+                    <td><button name="{{ share.issuerID }}" onclick="CompanyValue(this.name)" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% include "sharemodals.html" %}
 </div>
+<script src="{{url_for('static', filename='scripts/script.js')}}"></script>
 {% endblock %}

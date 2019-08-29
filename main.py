@@ -4,7 +4,8 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
 from config import Config
 from models import User
-from forms import UserLoginForm, UserRegistrationForm, BuyShareForm
+from forms import (UserLoginForm, UserRegistrationForm,
+                   BuyShareForm, SellShareForm)
 from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
@@ -142,13 +143,49 @@ def portfolio():
     if not current_user.is_authenticated:
         # Redirect to index
         return redirect(url_for('index'))
+    # Initialise buy and sell share forms
+    buyform = BuyShareForm()
+    sellform = SellShareForm()
+    # Validate and process form data
+    if(buyform.validate_on_submit()):
+        # Buys shares
+        issuerID = buyform.sharecode.data
+        quantity = buyform.quantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        buyshare = gdb.buyshare(userID, issuerID, quantity)
+        if(buyshare):
+            # Redirect to index with success message
+            flash("Buyshare successful!", category="success")
+            return redirect(url_for('dashboard'))
+        else:
+            # Redirect to registration with warning message
+            flash("Buyshare unsuccessful!", category="error")
+            return redirect(url_for('dashboard'))
+    # Validate and process form data
+    if(sellform.validate_on_submit()):
+        # Buys shares
+        issuerID = sellform.sharecode.data
+        quantity = sellform.quantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        sellshare = gdb.sellshare(userID, issuerID, quantity)
+        if(sellshare):
+            # Redirect to index with success message
+            flash("Share sale successful!", category="success")
+            return redirect(url_for('dashboard'))
+        else:
+            # Redirect to registration with warning message
+            flash("Share sale unsuccessful!", category="error")
+            return redirect(url_for('dashboard'))
     # Get user info
     user = current_user
     # Get processed usershare info
     usershares = gdb.getusersharesinfo(user.userID)
     # Render template
     return render_template('portfolio.html', user=user,
-                           usershares=usershares)
+                           usershares=usershares, buyform=buyform, 
+                           sellform=sellform)
 
 
 @app.route('/shares', methods=['GET', 'POST'])
@@ -161,13 +198,14 @@ def sharelist():
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
-    # Initialise buy share form
-    form = BuyShareForm()
+    # Initialise buy and sell share forms
+    buyform = BuyShareForm()
+    sellform = SellShareForm()
     # Validate and process form data
-    if(form.validate_on_submit()):
+    if(buyform.validate_on_submit()):
         # Buys shares
-        issuerID = form.sharecode.data
-        quantity = form.quantity.data
+        issuerID = buyform.sharecode.data
+        quantity = buyform.quantity.data
         userID = current_user.userID
         # Call buyshare API
         buyshare = gdb.buyshare(userID, issuerID, quantity)
@@ -179,9 +217,26 @@ def sharelist():
             # Redirect to registration with warning message
             flash("Buyshare unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
+    # Validate and process form data
+    if(sellform.validate_on_submit()):
+        # Buys shares
+        issuerID = sellform.sharecode.data
+        quantity = sellform.quantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        sellshare = gdb.sellshare(userID, issuerID, quantity)
+        if(sellshare):
+            # Redirect to index with success message
+            flash("Share sale successful!", category="success")
+            return redirect(url_for('dashboard'))
+        else:
+            # Redirect to registration with warning message
+            flash("Share sale unsuccessful!", category="error")
+            return redirect(url_for('dashboard'))
 
     shares = gdb.getshares()
-    return render_template('shares.html', shares=shares, form=form)
+    return render_template('shares.html', shares=shares,
+                           buyform=buyform, sellform=sellform)
 
 
 @app.route('/tasks/updateshares')
