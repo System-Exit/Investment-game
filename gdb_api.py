@@ -443,7 +443,7 @@ class GoogleDatabaseAPI:
             # Get all shares that the user owns combined with share info
             results = session.query(Usershare, Share).\
                 join(Share).\
-                filter(Usershare.userID == 1).\
+                filter(Usershare.userID == userID).\
                 all()
             # Detach all objects from session
             for result in results:
