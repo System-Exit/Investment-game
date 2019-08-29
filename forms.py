@@ -45,11 +45,11 @@ class BuyShareForm(FlaskForm):
     Form for buying shares
 
     """
-    sharecode = StringField('Company Code', validators=[
+    buysharecode = StringField('Company Code', validators=[
         DataRequired('Company Code is required')])
-    quantity = IntegerField('Quantity to Purchase', validators=[
+    buyquantity = IntegerField('Quantity to Purchase', validators=[
         DataRequired('Quantity is required')])
-    submit = SubmitField('Purchase')
+    buysubmit = SubmitField('Purchase', validators=[DataRequired()])
 
 
 class SellShareForm(FlaskForm):
@@ -57,8 +57,8 @@ class SellShareForm(FlaskForm):
     Form for selling shares
 
     """
-    sharecode = StringField('Company Code', validators=[
+    sellsharecode = StringField('Company Code', validators=[
         DataRequired('Company Code is required')])
-    quantity = IntegerField('Quantity to Purchase', validators=[
+    sellquantity = IntegerField('Quantity to Sell', validators=[
         DataRequired('Quantity is required')])
-    submit = SubmitField('Sell')
+    sellsubmit = SubmitField('Sell', validators=[DataRequired()])

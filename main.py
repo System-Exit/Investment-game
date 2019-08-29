@@ -137,7 +137,7 @@ def dashboard():
     return render_template('dashboard.html', user=user)
 
 
-@app.route('/portfolio')
+@app.route('/portfolio', methods=['GET', 'POST'])
 def portfolio():
     # Redirect user to index if they are not logged in
     if not current_user.is_authenticated:
@@ -149,24 +149,24 @@ def portfolio():
     # Validate and process form data
     if(buyform.validate_on_submit()):
         # Buys shares
-        issuerID = buyform.sharecode.data
-        quantity = buyform.quantity.data
+        issuerID = buyform.buysharecode.data
+        quantity = buyform.buyquantity.data
         userID = current_user.userID
         # Call buyshare API
         buyshare = gdb.buyshare(userID, issuerID, quantity)
         if(buyshare):
             # Redirect to index with success message
-            flash("Buyshare successful!", category="success")
+            flash("Share purchase successful!", category="success")
             return redirect(url_for('dashboard'))
         else:
             # Redirect to registration with warning message
-            flash("Buyshare unsuccessful!", category="error")
+            flash("Share purchase unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
     # Validate and process form data
     if(sellform.validate_on_submit()):
         # Buys shares
-        issuerID = sellform.sharecode.data
-        quantity = sellform.quantity.data
+        issuerID = sellform.sellsharecode.data
+        quantity = sellform.sellquantity.data
         userID = current_user.userID
         # Call buyshare API
         sellshare = gdb.sellshare(userID, issuerID, quantity)

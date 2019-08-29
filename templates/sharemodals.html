@@ -14,16 +14,16 @@
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">
                     {% include "messageblock.html" %}
                     <div>
-                        {{ buyform.sharecode.label }}
+                        {{ buyform.buysharecode.label }}
                         <br>
-                        {{ buyform.sharecode() }}
+                        {{ buyform.buysharecode() }}
                     </div>
                     <div>
-                        {{ buyform.quantity.label }}
+                        {{ buyform.buyquantity.label }}
                         <br>
-                        {{ buyform.quantity() }}
+                        {{ buyform.buyquantity() }}
                     </div>
-                    <div>{{ buyform.submit() }}</div>
+                    <div>{{ buyform.buysubmit() }}</div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -49,16 +49,16 @@
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">
                     {% include "messageblock.html" %}
                     <div>
-                        {{ sellform.sharecode.label }}
+                        {{ sellform.sellsharecode.label }}
                         <br>
-                        {{ sellform.sharecode() }}
+                        {{ sellform.sellsharecode() }}
                     </div>
                     <div>
-                        {{ sellform.quantity.label }}
+                        {{ sellform.sellquantity.label }}
                         <br>
-                        {{ sellform.quantity() }}
+                        {{ sellform.sellquantity() }}
                     </div>
-                    <div>{{ sellform.submit() }}</div>
+                    <div>{{ sellform.sellsubmit() }}</div>
                 </form>
             </div>
             <div class="modal-footer">
