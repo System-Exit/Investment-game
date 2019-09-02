@@ -1,5 +1,5 @@
 /** Get company value on click **/
-function CompanyValue(clickedId)
+function SetCompanyValue(companyId, elementId)
 {
-    document.getElementById('sharecode').value=clickedId;
+    document.getElementById(elementId).value=companyId;
 }

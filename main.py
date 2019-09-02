@@ -146,7 +146,7 @@ def portfolio():
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
     sellform = SellShareForm()
-    # Validate and process form data
+    # Validate and process buy shares form data
     if(buyform.validate_on_submit()):
         # Buys shares
         issuerID = buyform.buysharecode.data
@@ -162,7 +162,7 @@ def portfolio():
             # Redirect to registration with warning message
             flash("Share purchase unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
-    # Validate and process form data
+    # Validate and process sell shares form data
     if(sellform.validate_on_submit()):
         # Buys shares
         issuerID = sellform.sellsharecode.data
