@@ -48,12 +48,12 @@ def registration():
     form = UserRegistrationForm()
     # Validate and process form data
     if(form.validate_on_submit()):
-        # Create new user
+        # Get user registration data
         username = form.username.data
         password = form.password.data
         fname = form.fname.data
         lname = form.lname.data
-        dob = form.dob.data
+        dob = f"{form.byear.data}-{form.bmonth.data}-{form.bday.data}"
         email = form.email.data
         gender = form.gender.data
         # Call database API to create user
@@ -66,8 +66,12 @@ def registration():
             return redirect(url_for('index'))
         else:
             # Redirect to registration with warning message
-            flash("Username is already taken!", category="error")
+            flash("Registration unsuccessful!", category="error")
             return redirect(url_for('registration'))
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(error, category="error")
     # Render template
     return render_template('registration.html', form=form)
 
@@ -104,7 +108,7 @@ def login():
 
 @login_manager.user_loader
 def load_user(userID):
-    return gdb.getuser(userID)
+    return gdb.getuserbyid(userID)
 
 
 @app.route('/logout')

@@ -31,9 +31,25 @@
             {{ form.lname() }}
         </div>
         <div>
-            {{ form.dob.label }}
-            <br>
-            {{ form.dob() }}
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan=3>Date of birth</th>
+                    </tr>
+                    <tr>
+                        <td>Day</td>
+                        <td>Month</td>
+                        <td>Year</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ form.bday() }}</td>
+                        <td>{{ form.bmonth() }}</td>
+                        <td>{{ form.byear() }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div>
             {{ form.email.label }}

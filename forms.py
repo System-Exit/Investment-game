@@ -4,6 +4,9 @@ from wtforms import (StringField, PasswordField, SubmitField,
                      SelectField, IntegerField)
 from wtforms.fields.html5 import EmailField, DateField
 from wtforms.validators import DataRequired, Length, Regexp
+from wtforms import ValidationError
+from gdb_api import GoogleDatabaseAPI
+from datetime import datetime, timedelta
 
 
 class UserLoginForm(FlaskForm):
@@ -26,8 +29,7 @@ class UserRegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
         DataRequired('Username is required'),
         Length(min=3, max=32,
-               message=("Username must be between"
-                        " 3 and 32 characters long"))
+               message=("Username must be between 3 and 32 characters long"))
         ])
     password = PasswordField('Password', validators=[
         DataRequired('Password is required'),
@@ -45,13 +47,47 @@ class UserRegistrationForm(FlaskForm):
         DataRequired('First name is required')])
     lname = StringField('Last Name', validators=[
         DataRequired('Last name is required')])
-    dob = DateField('Date of Birth', validators=[
-        DataRequired('Date of birth is requred')])
+    bday = StringField('Day', validators=[
+        DataRequired('Day of birth is requred')])
+    bmonth = StringField('Month', validators=[
+        DataRequired('Month of birth is requred')])
+    byear = StringField('Year', validators=[
+        DataRequired('Year of birth is requred')])
     email = EmailField('Email', validators=[
-        DataRequired('Valid email address is required')])
+        DataRequired('Valid email address is required')
+        ])
     gender = SelectField('Gender', choices=[
         ('M', 'Male'), ('F', 'Female'), ('O', 'Other')])
     submit = SubmitField('Register')
+
+    def validate(self):
+        # Do initial validations
+        validation = super(UserRegistrationForm, self).validate()
+        # Initialise database API for user checks
+        gdb = GoogleDatabaseAPI()
+        # Check if username is already used
+        if(gdb.getuserbyusername(self.username.data) is not None):
+            self.username.errors.append(
+                "Username is already used by another account")
+            validation = False
+        # Check if email is already used
+        if(gdb.getuserbyemail(self.email.data) is not None):
+            self.email.errors.append(
+                "Email is already used by another account.")
+            validation = False
+        # Validate date of birth fields together
+        dob = f"{self.byear.data}-{self.bmonth.data}-{self.bday.data}"
+        try:
+            # Validate that date of birth is a valid date
+            date = datetime.strptime(dob, '%Y-%m-%d')
+            # Validate date is less than 100 years old
+            if(abs(date - datetime.today()) > timedelta(days=365*100)):
+                raise ValueError
+        except ValueError:
+            self.byear.errors.append("Date of birth is invalid.")
+            validation = False
+        # Return the result of validation
+        return validation
 
 
 class BuyShareForm(FlaskForm):

@@ -119,8 +119,29 @@ body
 }
 .registration-form input
 {
-    border-radius: 20px;
+    text-align: center;
+    border-radius: 10px;
     width: 180px;
     padding-left: 10px;
     padding-right: 10px;
+}
+.registration-form table
+{
+    width: 200px;
+}
+.registration-form table th
+{
+    text-align: center;
+}
+input#bday
+{
+    width: 50px;
+}
+input#bmonth
+{
+    width: 50px;
+}
+input#byear
+{
+    width: 80px;
 }

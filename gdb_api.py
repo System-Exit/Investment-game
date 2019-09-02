@@ -50,6 +50,78 @@ class GoogleDatabaseAPI:
         finally:
             session.close()
 
+    def getuserbyid(self, userID):
+        """
+        Gets and returns a detached user object based on given ID.
+
+        Args:
+            userID (str): The ID of the user to get.
+        Returns:
+            The user model object for that user.
+            None if the user doesn't exist.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get user
+            user = session.query(User).filter(
+                   User.userid == userID).first()
+            # Check if a user was returned
+            if(user is None):
+                return None
+            # Deteach user from session
+            session.expunge(user)
+        # Return user
+        return user
+
+    def getuserbyusername(self, username):
+        """
+        Gets and returns a detached user object based on username.
+
+        Args:
+            username (str): Username to check database for.
+        Returns:
+            The user model object for that user.
+            None if the user doesn't exist.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that username is available. If not, return false.
+            user = session.query(User).filter(
+                   User.username == username).first()
+            # Check if a user was returned
+            if(user is None):
+                return None
+            # Deteach user from session
+            session.expunge(user)
+        # Return user
+        return user
+
+    def getuserbyemail(self, email):
+        """
+        Gets and returns a detached user object based on username.
+
+        Args:
+            email (str): Email of the user to get.
+        Returns:
+            The user model object for that user.
+            None if the user doesn't exist.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that username is available. If not, return false.
+            user = session.query(User).filter(
+                   User.email == email).first()
+            # Check if a user was returned
+            if(user is None):
+                return None
+            # Deteach user from session
+            session.expunge(user)
+        # Return user
+        return user
+
     def adduser(self, username, userpass, firstname,
                 lastname, email, dob, gender):
         """
@@ -134,24 +206,6 @@ class GoogleDatabaseAPI:
             else:
                 # User doesn't exist, return false
                 return False, None
-
-    def getuser(self, userID):
-        """
-        Gets and returns a detached user object based on given ID.
-
-        Args:
-            userID (str): The ID of the user to get.
-        Returns:
-            The user model object for that user.
-        """
-        # Initialse session
-        with self.sessionmanager() as session:
-            # Get user
-            user = session.query(User).get(userID)
-            # Deteach user from session
-            session.expunge(user)
-        # Return user
-        return user
 
     def addshare(self, issuercode):
         """
