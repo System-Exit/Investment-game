@@ -63,6 +63,9 @@ class UserRegistrationForm(FlaskForm):
     def validate(self):
         # Do initial validations
         validation = super(UserRegistrationForm, self).validate()
+        # Return false if validations fail
+        if(validation is False):
+            return False
         # Initialise database API for user checks
         gdb = GoogleDatabaseAPI()
         # Check if username is already used
@@ -73,7 +76,7 @@ class UserRegistrationForm(FlaskForm):
         # Check if email is already used
         if(gdb.getuserbyemail(self.email.data) is not None):
             self.email.errors.append(
-                "Email is already used by another account.")
+                "Email is already used by another account")
             validation = False
         # Validate date of birth fields together
         dob = f"{self.byear.data}-{self.bmonth.data}-{self.bday.data}"
@@ -84,7 +87,7 @@ class UserRegistrationForm(FlaskForm):
             if(abs(date - datetime.today()) > timedelta(days=365*100)):
                 raise ValueError
         except ValueError:
-            self.byear.errors.append("Date of birth is invalid.")
+            self.byear.errors.append("Date of birth is invalid")
             validation = False
         # Return the result of validation
         return validation
@@ -101,6 +104,18 @@ class BuyShareForm(FlaskForm):
         DataRequired('Quantity is required')])
     buysubmit = SubmitField('Purchase', validators=[DataRequired()])
 
+    def validate(self):
+        # Do initial validations
+        validation = super(BuyShareForm, self).validate()
+        # Return false if validations fail
+        if(validation is False):
+            return False
+        # Check that quantity is not negative
+        if(self.buyquantity is not None and self.buyquantity.data < 0):
+            self.buyquantity.errors.append("Quantity cannot be nagative")
+            validation = False
+        return validation
+
 
 class SellShareForm(FlaskForm):
     """
@@ -112,3 +127,15 @@ class SellShareForm(FlaskForm):
     sellquantity = IntegerField('Quantity to Sell', validators=[
         DataRequired('Quantity is required')])
     sellsubmit = SubmitField('Sell', validators=[DataRequired()])
+
+    def validate(self):
+        # Do initial validations
+        validation = super(SellShareForm, self).validate()
+        # Return false if validations fail
+        if(validation is False):
+            return False
+        # Check that quantity is not negative
+        if(self.sellquantity.data < 0):
+            self.buyquantity.errors.append("Quantity cannot be nagative")
+            validation = False
+        return validation

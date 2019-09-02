@@ -65,7 +65,7 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get user
             user = session.query(User).filter(
-                   User.userid == userID).first()
+                   User.userID == userID).first()
             # Check if a user was returned
             if(user is None):
                 return None

@@ -96,7 +96,7 @@ def login():
         # Check if username and password is valid
         valid, userID = gdb.verifyuser(username, password)
         if(valid):
-            user = gdb.getuser(userID)
+            user = gdb.getuserbyid(userID)
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
