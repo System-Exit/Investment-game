@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, PasswordField, SubmitField,
                      SelectField, IntegerField)
 from wtforms.fields.html5 import EmailField, DateField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length, Regexp
 
 
 class UserLoginForm(FlaskForm):
@@ -24,9 +24,23 @@ class UserRegistrationForm(FlaskForm):
 
     """
     username = StringField('Username', validators=[
-        DataRequired('Username is required')])
+        DataRequired('Username is required'),
+        Length(min=3, max=32,
+               message=("Username must be between"
+                        " 3 and 32 characters long"))
+        ])
     password = PasswordField('Password', validators=[
-        DataRequired('Password is required')])
+        DataRequired('Password is required'),
+        Length(min=8, max=64,
+               message=("Password must be between"
+                        " 8 and 64 characters long")),
+        Regexp(regex="(?=.*[A-Z]).",
+               message="Password must contain an upper case letter"),
+        Regexp(regex="(?=.*[a-z]).",
+               message="Password must contain a lower case letter"),
+        Regexp(regex="(?=.*\d).",
+               message="Password must contain a number")
+        ])
     fname = StringField('First Name', validators=[
         DataRequired('First name is required')])
     lname = StringField('Last Name', validators=[
