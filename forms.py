@@ -84,7 +84,7 @@ class UserRegistrationForm(FlaskForm):
             # Validate that date of birth is a valid date
             date = datetime.strptime(dob, '%Y-%m-%d')
             # Validate date is less than 100 years old
-            if(abs(date - datetime.today()) > timedelta(days=365*100)):
+            if(date < datetime(1900, 1, 1)):
                 raise ValueError
         except ValueError:
             self.byear.errors.append("Date of birth is invalid")
