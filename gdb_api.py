@@ -294,6 +294,20 @@ class GoogleDatabaseAPI:
         # Return share data
         return shares
 
+    def getsharecount(self):
+        """
+        Get the total number of shares in the database
+
+        Returns:
+            Count of the total number of unique shares.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get share count
+            count = session.query(Share).count()
+        return int(count)
+
     def updateshares(self):
         """
         Updates share and share price tables with new values from ASX.

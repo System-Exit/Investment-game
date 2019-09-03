@@ -258,9 +258,12 @@ def sharelist():
         orderby=orderby,
         order=order,
         offset=offset,
+        # TODO: DEFINE LIMIT IN A CONFIG
         limit=10)
+    # Get share count
+    sharecount = gdb.getsharecount()
     # Render template
-    return render_template('shares.html', shares=shares,
+    return render_template('shares.html', shares=shares, sharecount=sharecount,
                            buyform=buyform, sellform=sellform)
 
 
