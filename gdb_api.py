@@ -285,7 +285,7 @@ class GoogleDatabaseAPI:
             else:
                 pass
             # Filter query by range
-            query.limit(limit).offset(offset)
+            query = query.limit(limit).offset(offset)
             # Get query results
             shares = query.all()
             # Detach all share objects from session

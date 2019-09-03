@@ -8,6 +8,7 @@
         <table id="sharelist" class="table">
             <thead>
                 <tr>
+                    {# Defnine orderable headings #}
                     {% set headings = [
                         ("Code", "issuerID", "asc"),
                         ("Company", "abbrevname", "asc"),
@@ -17,10 +18,13 @@
                         ("Change $", "daychangeprice", "desc"),
                         ("Market Cap", "marketcapitalisation", "desc")
                     ] -%}
+                    {# Get order varaibles from get arguments #}
                     {% set orderby = request.args.get("orderby") %}
                     {% set order = request.args.get("order") %}
+                    {# Define symbols to specify ordering #}
                     {% set ascarrow = " ▲" %}
                     {% set descarrow = " ▼" %}
+                    {# Display each heading in headings list #}
                     {% for heading, fieldname, defaultorder in headings %}
                     <th>
                         {% if orderby == fieldname and order == "asc" %}
@@ -62,6 +66,29 @@
             {% endfor %}
             </tbody>
         </table>
+        {# Get the current page #}
+        {% if request.args.get('page') %}
+            {% set page = request.args.get('page')|int %}
+        {% else %}
+            {% set page = 1 %}
+        {% endif %}
+        {# If the order of shares is defined, include it in the page links #}
+        {% if orderby and order %}
+            {% if page > 1 %}
+                <a href="{{ url_for('sharelist') }}?orderby={{ orderby }}&order={{ order }}&page={{ page-1 }}">Previous</a>
+            {% endif %}
+            {% if page*10 <= shares|length %}
+                <a href="{{ url_for('sharelist') }}?orderby={{ orderby }}&order={{ order }}&page={{ page+1 }}">Next</a>
+            {% endif %}
+        {# If the order is not defined, there is no need to include it in the page links #}
+        {% else %}
+            {% if page > 1 %}
+                <a href="{{ url_for('sharelist') }}?page={{ page-1 }}">Previous</a>
+            {% endif %}
+            {% if page*10 <= shares|length %}
+                <a href="{{ url_for('sharelist') }}?page={{ page+1 }}">Next</a>
+            {% endif %}
+        {% endif %}
     </div>
     {% include "sharemodals.html" %}
 </div>

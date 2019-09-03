@@ -238,12 +238,28 @@ def sharelist():
             flash("Share sale unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
 
-    # Get shares in specified order
-    orderby = request.args.get('orderby') if request.args.get('orderby')\
-        is not None else None
-    order = request.args.get('order') if request.args.get('order')\
-        is not None else "asc"
-    shares = gdb.getshares(orderby=orderby, order=order)
+    # Get field to order by for displaying shares
+    if(request.args.get('orderby')):
+        orderby = request.args.get('orderby')
+    else:
+        orderby = None
+    # Get order for displaying shares
+    if(request.args.get('order')):
+        order = request.args.get('order')
+    else:
+        order = "asc"
+    # Get the page of shares to display and calculate offset
+    if(request.args.get('page')):
+        offset = 10*(int(request.args.get('page'))-1)
+    else:
+        offset = 0
+    # Get shares
+    shares = gdb.getshares(
+        orderby=orderby,
+        order=order,
+        offset=offset,
+        limit=10)
+    # Render template
     return render_template('shares.html', shares=shares,
                            buyform=buyform, sellform=sellform)
 
