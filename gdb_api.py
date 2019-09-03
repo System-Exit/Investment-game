@@ -1,6 +1,6 @@
 from config import Config
 from models import User, Share, SharePrice, Usershare, Transaction
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import json
 import requests
 from datetime import datetime, date
+import math
 
 
 class GoogleDatabaseAPI:
@@ -256,19 +257,37 @@ class GoogleDatabaseAPI:
             # Return success
             return True
 
-    def getshares(self):
+    def getshares(self, orderby=None, order="asc", offset=0, limit=1000):
         """
         Returns a list of all share objects contained in the database.
         Detaches shares from session, so changes cannot be made directly.
 
+        Args:
+            orderby (str): Name of field to sort by.
+            order (str): How to order, 'asc' for acsending,
+                'desc' for descending.
+            offset (int): How many rows to skip of query.
+            limit (int): How many rows to return of query.
         Returns:
-            A list of every share in the database with stored data.
+            A list of every share in the database in given order.
+            None if the search is invalid or if there are no results.
 
         """
         # Initialse session
         with self.sessionmanager() as session:
-            # Get shares
-            shares = session.query(Share).all()
+            # Get all shares
+            query = session.query(Share)
+            # Order query depending on order parameter
+            if(orderby and hasattr(Share, orderby) and order == "asc"):
+                query = query.order_by(asc(getattr(Share, orderby)))
+            elif(orderby and hasattr(Share, orderby) and order == "desc"):
+                query = query.order_by(desc(getattr(Share, orderby)))
+            else:
+                pass
+            # Filter query by range
+            query.limit(limit).offset(offset)
+            # Get query results
+            shares = query.all()
             # Detach all share objects from session
             for share in shares:
                 session.expunge(share)

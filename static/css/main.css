@@ -17,6 +17,7 @@ body
     font-weight: bold;
     padding: 5px;
 }
+
 /* Navigation and Layout */
 #top-bar
 {
@@ -144,4 +145,26 @@ input#bmonth
 input#byear
 {
     width: 80px;
+}
+
+/* Share listing page */
+#sharelist th
+{
+    text-align: center;
+}
+#sharelist th a
+{
+    font-size: inherit;
+    color: black;
+    text-decoration-line: none;
+}
+#sharelist th a:hover
+{
+    color: black;
+    text-decoration-line: underline;
+}
+#sharelist th a:active
+{
+    color: black;
+    text-decoration-line: underline;
 }

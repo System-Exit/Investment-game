@@ -192,7 +192,7 @@ def portfolio():
                            sellform=sellform)
 
 
-@app.route('/shares', methods=['GET', 'POST'])
+@app.route('/sharelist', methods=['GET', 'POST'])
 def sharelist():
     """
     Displays current values for all shares.
@@ -238,7 +238,12 @@ def sharelist():
             flash("Share sale unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
 
-    shares = gdb.getshares()
+    # Get shares in specified order
+    orderby = request.args.get('orderby') if request.args.get('orderby')\
+        is not None else None
+    order = request.args.get('order') if request.args.get('order')\
+        is not None else "asc"
+    shares = gdb.getshares(orderby=orderby, order=order)
     return render_template('shares.html', shares=shares,
                            buyform=buyform, sellform=sellform)
 

@@ -5,16 +5,38 @@
     <h1>All Shares</h1>
     {% include "messageblock.html" %}
     <div class="container">
-        <table class="table">
+        <table id="sharelist" class="table">
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Company</th>
-                    <th>Industry</th>
-                    <th>Price</th>
-                    <th>Change %</th>
-                    <th>Change $</th>
-                    <th>Market Cap</th>
+                    {% set headings = [
+                        ("Code", "issuerID", "asc"),
+                        ("Company", "abbrevname", "asc"),
+                        ("Industry", "industrysector", "asc"),
+                        ("Price", "currentprice", "desc"),
+                        ("Change %", "daychangepercent", "desc"),
+                        ("Change $", "daychangeprice", "desc"),
+                        ("Market Cap", "marketcapitalisation", "desc")
+                    ] -%}
+                    {% set orderby = request.args.get("orderby") %}
+                    {% set order = request.args.get("order") %}
+                    {% set ascarrow = " ▲" %}
+                    {% set descarrow = " ▼" %}
+                    {% for heading, fieldname, defaultorder in headings %}
+                    <th>
+                        {% if orderby == fieldname and order == "asc" %}
+                            {% set fieldorder = "desc" %}
+                        {% elif orderby == fieldname and order == "desc" %}
+                            {% set fieldorder = "asc" %}
+                        {% else %}
+                            {% set fieldorder = defaultorder %}
+                        {% endif %}
+                        <a href="{{ url_for('sharelist') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                            {{ heading }}
+                            {{ ascarrow if orderby == fieldname and order == "asc" }}
+                            {{ descarrow if orderby == fieldname and order == "desc" }}
+                        </a>
+                    </th>
+                    {% endfor %}
                     <th>Price Graph</th>
                 </tr>
             </thead>
