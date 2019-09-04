@@ -264,7 +264,7 @@ def sharelist():
     sharecount = gdb.getsharecount()
     # Render template
     return render_template('shares.html', shares=shares, sharecount=sharecount,
-                           buyform=buyform, sellform=sellform)
+                           countperpage=10, buyform=buyform, sellform=sellform)
 
 
 @app.route('/tasks/updateshares')

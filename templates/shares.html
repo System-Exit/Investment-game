@@ -72,23 +72,36 @@
         {% else %}
             {% set page = 1 %}
         {% endif %}
-        {# If the order of shares is defined, include it in the page links #}
+        {# Detremine the base url for each link#}
         {% if orderby and order %}
-            {% if page > 1 %}
-                <a href="{{ url_for('sharelist') }}?orderby={{ orderby }}&order={{ order }}&page={{ page-1 }}">Previous</a>
-            {% endif %}
-            {% if page*10 < sharecount %} {# TODO: GET LIMIT (10) FROM A CONFIG #}
-                <a href="{{ url_for('sharelist') }}?orderby={{ orderby }}&order={{ order }}&page={{ page+1 }}">Next</a>
-            {% endif %}
-        {# If the order is not defined, there is no need to include it in the page links #}
+            {% set baseurl = url_for('sharelist')+"?orderby={{ orderby }}&order={{ order }}&" %}
         {% else %}
-            {% if page > 1 %}
-                <a href="{{ url_for('sharelist') }}?page={{ page-1 }}">Previous</a>
-            {% endif %}
-            {% if page*10 < sharecount %} {# TODO: GET LIMIT (10) FROM A CONFIG #}
-                <a href="{{ url_for('sharelist') }}?page={{ page+1 }}">Next</a>
-            {% endif %}
+            {% set baseurl = url_for('sharelist')+"?" %}
         {% endif %}
+        {# Calculate max number of pages #}
+        {% set maxpagenum = (sharecount/countperpage)|round|int %}
+        <div class="pagination">
+            {# Display left arrows #}
+            {% if page > 1 %}
+                <a href="{{ baseurl }}page=1">◀◀</a>
+                <a href="{{ baseurl }}page={{ page-1 }}">◀</a>
+            {% endif %}
+            {# Display page numbers #}
+            {% for pagenum in range(page-3, page+3) %}
+                {% if pagenum >= 1 and pagenum <= maxpagenum %}
+                    {% if pagenum != page %}
+                        <a href="{{ baseurl }}page={{ pagenum }}">{{ pagenum }}</a>
+                    {% else %}
+                        <b>{{ page }}</b>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {# Display right arrows #}
+            {% if page*countperpage < sharecount %}
+                <a href="{{  baseurl }}page={{ page+1 }}">▶</a>
+                <a href="{{  baseurl }}page={{ maxpagenum }}">▶▶</a>
+            {% endif %}
+        </div>
     </div>
     {% include "sharemodals.html" %}
 </div>

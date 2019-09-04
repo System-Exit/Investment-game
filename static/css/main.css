@@ -101,9 +101,13 @@ body
 
 
 /* Index page */
-#index-body a
+#login
 {
-    font-size: 24px;
+    font-size: 24;
+}
+#registration
+{
+    font-size: 24;
 }
 
 /* Registration page */
@@ -167,4 +171,9 @@ input#byear
 {
     color: black;
     text-decoration-line: underline;
+}
+.pagination
+{
+    text-align: center;
+    font-size: 24px;
 }
