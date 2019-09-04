@@ -257,6 +257,46 @@ class GoogleDatabaseAPI:
             # Return success
             return True
 
+    def getshare(self, issuercode):
+        """
+        Returns a single share based on the share ID.
+
+        Args:
+            issuercode (str): Issuer ID of the share to get.
+        Returns:
+            Share object with specified issuer code.
+            None if there is no share that matches the issuer code.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get all shares
+            share = session.query(Share).get(issuercode)
+            # Detach share from session
+            session.expunge(share)
+        return share
+
+    def getsharepricehistory(self, issuercode):
+        """
+        Returns the price history of a single share based on the share ID.
+
+        Args:
+            issuercode (str): Issuer ID of the share to get price data for.
+        Returns:
+            All SharePrice objects for that particular share.
+            None if the share doesn't exist or if the share has no price data.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get all shares
+            shareprices = session.query(SharePrice).filter(
+                SharePrice.issuerID == issuercode).all()
+            # Detach all share objects from session
+            for shareprice in shareprices:
+                session.expunge(shareprice)
+        return shareprices
+
     def getshares(self, orderby=None, order="asc", offset=0, limit=1000):
         """
         Returns a list of all share objects contained in the database.
@@ -553,8 +593,10 @@ if __name__ == "__main__":
     # Initialize API
     gdb = GoogleDatabaseAPI()
     # Add some default stocks
-    # stocks = ["AMC", "ANZ", "BHP", "BXB", "CBA", "CSL", "GMG", "IAG",
-    #           "MQG", "NAB", "RIO", "S32", "SCG", "SUN", "TCL", "TLS",
-    #           "WBC", "WES", "WOW", "WPL"]
+    # stocks = []
+    # with open("stock_list.txt") as f:
+    #     lines = f.readlines()
+    #     for line in lines:
+    #         stocks.append(line.strip())
     # for stock in stocks:
     #     gdb.addshare(stock)

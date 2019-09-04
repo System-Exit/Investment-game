@@ -1,5 +1,5 @@
 from flask import (Flask, render_template, request,
-                   redirect, url_for, flash, jsonify)
+                   redirect, url_for, flash, jsonify, abort)
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
 from config import Config
@@ -188,7 +188,7 @@ def portfolio():
     usershares = gdb.getusersharesinfo(user.userID)
     # Render template
     return render_template('portfolio.html', user=user,
-                           usershares=usershares, buyform=buyform, 
+                           usershares=usershares, buyform=buyform,
                            sellform=sellform)
 
 
@@ -263,8 +263,27 @@ def sharelist():
     # Get share count
     sharecount = gdb.getsharecount()
     # Render template
-    return render_template('shares.html', shares=shares, sharecount=sharecount,
+    return render_template('sharelist.html', shares=shares,
+                           sharecount=sharecount,
                            countperpage=10, buyform=buyform, sellform=sellform)
+
+
+@app.route('/share/<issuerID>')
+def share(issuerID):
+    """
+    Displays share information.
+
+    """
+    # Get share information
+    share = gdb.getshare(issuerID)
+    # If the share does not exist, abort with 404 error
+    if(share is None):
+        abort(404)
+    # Get share price history
+    sharepricehistory = gdb.getsharepricehistory(issuerID)
+    # Render template for share page
+    return render_template('share.html', share=share,
+                           sharepricehistory=sharepricehistory)
 
 
 @app.route('/tasks/updateshares')

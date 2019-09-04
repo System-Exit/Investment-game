@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="share-body">
+    {# TODO: Format information #}
+    <h2>{{ share.abbrevname }}</h2>
+    <h3>{{ share.industrysector }}</h3>
+    <p>Current price: {{ share.currentprice }}</p>
+    <p>Change $: {{ share.daychangeprice }}%</p>
+    <p>Change %: ${{ share.daychangeprecent }}</p>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% set active_page = "shares" %}
 {% block content %}
-<div id="index-body">
+<div id="sharelist-body">
     <h1>All Shares</h1>
     {% include "messageblock.html" %}
     <div class="container">
@@ -46,7 +46,8 @@
             </thead>
             <tbody>
             {% for share in shares %}
-                <tr>
+                {% set sharelink = url_for('share', issuerID=share.issuerID) %}
+                <tr onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
                     <td>{{ share.abbrevname }}</td>
                     <td>{{ share.industrysector }}</td>
@@ -74,7 +75,7 @@
         {% endif %}
         {# Detremine the base url for each link#}
         {% if orderby and order %}
-            {% set baseurl = url_for('sharelist')+"?orderby={{ orderby }}&order={{ order }}&" %}
+            {% set baseurl = url_for('sharelist')+"?orderby="+orderby+"&order="+order+"&" %}
         {% else %}
             {% set baseurl = url_for('sharelist')+"?" %}
         {% endif %}
@@ -105,5 +106,4 @@
     </div>
     {% include "sharemodals.html" %}
 </div>
-<script src="{{url_for('static', filename='scripts/script.js')}}"></script>
 {% endblock %}
