@@ -21,7 +21,8 @@
             <tbody>
             {% for share in usershares %}
             {% if share.quantity > 0 %}
-                <tr>
+                {% set sharelink = url_for('share', issuerID=share.issuerID) %}
+                <tr onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
                     <td>{{ share.abbrevname }}</td>
                     <td>{{ share.industrysector }}</td>
@@ -35,8 +36,6 @@
                     {% endif %}
                     <td>{{share.marketcapitalisation}}</td>
                     <td>{{ share.quantity }}</td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button></td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button></td>
                 </tr>
             {% endif %}
             {% endfor %}
@@ -59,7 +58,8 @@
             <tbody>
             {% for share in usershares %}
             {% if share.quantity == 0 %}
-                <tr>
+                {% set sharelink = url_for('share', issuerID=share.issuerID) %}
+                <tr onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
                     <td>{{ share.abbrevname }}</td>
                     <td>{{ share.industrysector }}</td>
@@ -73,15 +73,12 @@
                     {% endif %}
                     <td>{{share.marketcapitalisation}}</td>
                     <td>{{ share.quantity }}</td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button></td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button></td>
                 </tr>
             {% endif %}
             {% endfor %}
             </tbody>
         </table>
     </div>
-    {% include "sharemodals.html" %}
 </div>
 <script src="{{url_for('static', filename='scripts/script.js')}}"></script>
 {% endblock %}

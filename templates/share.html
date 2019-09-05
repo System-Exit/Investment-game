@@ -7,5 +7,8 @@
     <p>Current price: {{ share.currentprice }}</p>
     <p>Change $: {{ share.daychangeprice }}%</p>
     <p>Change %: ${{ share.daychangeprecent }}</p>
+    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button>
+    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button>
 </div>
+{% include "sharemodals.html" %}
 {% endblock %}

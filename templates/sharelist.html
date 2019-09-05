@@ -61,8 +61,6 @@
                     {% endif %}
                     <td>{{share.marketcapitalisation}}</td>
                     <td>GRAPH</td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button></td>
-                    <td><button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button></td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -104,6 +102,5 @@
             {% endif %}
         </div>
     </div>
-    {% include "sharemodals.html" %}
 </div>
 {% endblock %}

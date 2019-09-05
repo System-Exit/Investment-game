@@ -147,49 +147,13 @@ def portfolio():
     if not current_user.is_authenticated:
         # Redirect to index
         return redirect(url_for('index'))
-    # Initialise buy and sell share forms
-    buyform = BuyShareForm()
-    sellform = SellShareForm()
-    # Validate and process buy shares form data
-    if(buyform.validate_on_submit()):
-        # Buys shares
-        issuerID = buyform.buysharecode.data
-        quantity = buyform.buyquantity.data
-        userID = current_user.userID
-        # Call buyshare API
-        buyshare = gdb.buyshare(userID, issuerID, quantity)
-        if(buyshare):
-            # Redirect to index with success message
-            flash("Share purchase successful!", category="success")
-            return redirect(url_for('dashboard'))
-        else:
-            # Redirect to registration with warning message
-            flash("Share purchase unsuccessful!", category="error")
-            return redirect(url_for('dashboard'))
-    # Validate and process sell shares form data
-    if(sellform.validate_on_submit()):
-        # Buys shares
-        issuerID = sellform.sellsharecode.data
-        quantity = sellform.sellquantity.data
-        userID = current_user.userID
-        # Call buyshare API
-        sellshare = gdb.sellshare(userID, issuerID, quantity)
-        if(sellshare):
-            # Redirect to index with success message
-            flash("Share sale successful!", category="success")
-            return redirect(url_for('dashboard'))
-        else:
-            # Redirect to registration with warning message
-            flash("Share sale unsuccessful!", category="error")
-            return redirect(url_for('dashboard'))
     # Get user info
     user = current_user
     # Get processed usershare info
     usershares = gdb.getusersharesinfo(user.userID)
     # Render template
     return render_template('portfolio.html', user=user,
-                           usershares=usershares, buyform=buyform,
-                           sellform=sellform)
+                           usershares=usershares)
 
 
 @app.route('/sharelist', methods=['GET', 'POST'])
@@ -202,6 +166,50 @@ def sharelist():
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Get field to order by for displaying shares
+    if(request.args.get('orderby')):
+        orderby = request.args.get('orderby')
+    else:
+        orderby = None
+    # Get order for displaying shares
+    if(request.args.get('order')):
+        order = request.args.get('order')
+    else:
+        order = "asc"
+    # Get the page of shares to display and calculate offset
+    if(request.args.get('page')):
+        offset = 10*(int(request.args.get('page'))-1)
+    else:
+        offset = 0
+    # Get shares
+    shares = gdb.getshares(
+        orderby=orderby,
+        order=order,
+        offset=offset,
+        # TODO: DEFINE LIMIT IN A CONFIG
+        limit=10)
+    # Get share count
+    sharecount = gdb.getsharecount()
+    # Render template
+    return render_template('sharelist.html', shares=shares,
+                           sharecount=sharecount,
+                           countperpage=10)
+
+
+@app.route('/share/<issuerID>')
+def share(issuerID):
+    """
+    Displays share information.
+
+    """
+    # Get share information
+    share = gdb.getshare(issuerID)
+    # If the share does not exist, abort with 404 error
+    if(share is None):
+        abort(404)
+    # Get share price history
+    sharepricehistory = gdb.getsharepricehistory(issuerID)
+
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
     sellform = SellShareForm()
@@ -238,52 +246,10 @@ def sharelist():
             flash("Share sale unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
 
-    # Get field to order by for displaying shares
-    if(request.args.get('orderby')):
-        orderby = request.args.get('orderby')
-    else:
-        orderby = None
-    # Get order for displaying shares
-    if(request.args.get('order')):
-        order = request.args.get('order')
-    else:
-        order = "asc"
-    # Get the page of shares to display and calculate offset
-    if(request.args.get('page')):
-        offset = 10*(int(request.args.get('page'))-1)
-    else:
-        offset = 0
-    # Get shares
-    shares = gdb.getshares(
-        orderby=orderby,
-        order=order,
-        offset=offset,
-        # TODO: DEFINE LIMIT IN A CONFIG
-        limit=10)
-    # Get share count
-    sharecount = gdb.getsharecount()
-    # Render template
-    return render_template('sharelist.html', shares=shares,
-                           sharecount=sharecount,
-                           countperpage=10, buyform=buyform, sellform=sellform)
-
-
-@app.route('/share/<issuerID>')
-def share(issuerID):
-    """
-    Displays share information.
-
-    """
-    # Get share information
-    share = gdb.getshare(issuerID)
-    # If the share does not exist, abort with 404 error
-    if(share is None):
-        abort(404)
-    # Get share price history
-    sharepricehistory = gdb.getsharepricehistory(issuerID)
     # Render template for share page
     return render_template('share.html', share=share,
-                           sharepricehistory=sharepricehistory)
+                           sharepricehistory=sharepricehistory,
+                           buyform=buyform, sellform=sellform)
 
 
 @app.route('/tasks/updateshares')
