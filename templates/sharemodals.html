@@ -4,11 +4,11 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="ClearForm('buyform')">&times;</button>
                 <h4 class="modal-title">Purchase Shares</h4>
             </div>
             <div class="modal-body">
-                <form action="" method="POST" class="registration-form">
+                <form id="buyform" action="" method="POST">
                     {{ buyform.hidden_tag() }}
                     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">
@@ -39,11 +39,11 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="ClearForm('sellform')">&times;</button>
                 <h4 class="modal-title">Sell Shares</h4>
             </div>
             <div class="modal-body">
-                <form action="" method="POST" class="registration-form">
+                <form id="sellform" action="" method="POST">
                     {{ sellform.hidden_tag() }}
                     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">

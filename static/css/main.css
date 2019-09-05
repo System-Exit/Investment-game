@@ -177,6 +177,8 @@ input#byear
     text-align: center;
     font-size: 24px;
 }
+
+/* Share listing and portfolio page */
 .share-row:hover
 {
     background-color: lightgray;
