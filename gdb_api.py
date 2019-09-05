@@ -608,6 +608,37 @@ class GoogleDatabaseAPI:
         # Return processed usershares
         return usershares
 
+    def gettransactions(self, userID=None, issuerID=None):
+        """
+        Get all transactions for a given user and/or share.
+
+        Args:
+            userID (str): ID of user to filter transactions by.
+                Default is None.
+            issuerID (str): ID of share to filter transactions by.
+                Default is None.
+        Returns:
+            List of transaction objects that match filter criteria.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Query and filter transactions as specified
+            query = session.query(Transaction)
+            # If user ID is specified, filter by user ID
+            if(userID):
+                query = query.filter(Transaction.userID == userID)
+            # If issuer ID for share is specified, filter by share
+            if(issuerID):
+                query = query.filter(Transaction.issuerID == issuerID)
+            # Get query results
+            results = query.all()
+            # Detech all objects from session
+            # Detach all objects from session
+            for result in results:
+                session.expunge(result)
+        # Return resulting list
+        return results
 
 if __name__ == "__main__":
     # Initialize API

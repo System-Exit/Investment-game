@@ -202,14 +202,6 @@ def share(issuerID):
     Displays share information.
 
     """
-    # Get share information
-    share = gdb.getshare(issuerID)
-    # If the share does not exist, abort with 404 error
-    if(share is None):
-        abort(404)
-    # Get share price history
-    sharepricehistory = gdb.getsharepricehistory(issuerID)
-
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
     sellform = SellShareForm()
@@ -246,10 +238,23 @@ def share(issuerID):
             flash("Share sale unsuccessful!", category="error")
             return redirect(url_for('dashboard'))
 
+    # Get share information
+    share = gdb.getshare(issuerID)
+    # If the share does not exist, abort with 404 error
+    if(share is None):
+        abort(404)
+    # Get share price history
+    sharepricehistory = gdb.getsharepricehistory(issuerID)
+    # Get share transaction history for user
+    transactions = gdb.gettransactions(
+        userID=current_user.userID,
+        issuerID=share.issuerID)
+
     # Render template for share page
     return render_template('share.html', share=share,
                            sharepricehistory=sharepricehistory,
-                           buyform=buyform, sellform=sellform)
+                           buyform=buyform, sellform=sellform,
+                           transactions=transactions)
 
 
 @app.route('/tasks/updateshares')

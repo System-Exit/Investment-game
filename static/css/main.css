@@ -204,3 +204,7 @@ input#byear
     padding-left: 10px;
     padding-right: 10px;
 }
+#transaction-list th
+{
+    text-align: center;
+}
