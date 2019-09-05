@@ -264,37 +264,37 @@ def sharesupdate():
     return jsonify(success=True)
 
 
-@app.route('/buyshare', methods=['GET', 'POST'])
-def buyshare():
-    """
-    Buy share for the user.
+# @app.route('/buyshare', methods=['GET', 'POST'])
+# def buyshare():
+#     """
+#     Buy share for the user.
 
-    """
-    # Checks if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Initialise buy share form
-    form = BuyShareForm()
-    # Validate and process form data
-    if(form.validate_on_submit()):
-        # Buys shares
-        issuerID = form.sharecode.data
-        quantity = form.quantity.data
-        userID = current_user.userID
-        # Call buyshare API
-        buyshare = gdb.buyshare(userID, issuerID, quantity)
-        if(buyshare):
-            # Redirect to index with success message
-            flash("Buyshare successful!", category="success")
-            return redirect(url_for('dashboard'))
-        else:
-            # Redirect to registration with warning message
-            flash("Buyshare unsuccessful!", category="error")
-            return redirect(url_for('index'))
+#     """
+#     # Checks if user is logged in
+#     if not current_user.is_authenticated:
+#         # Redirect to login if the user is not authenticated
+#         flash("Logged in user only.", category="error")
+#         return redirect(url_for('login'))
+#     # Initialise buy share form
+#     form = BuyShareForm()
+#     # Validate and process form data
+#     if(form.validate_on_submit()):
+#         # Buys shares
+#         issuerID = form.sharecode.data
+#         quantity = form.quantity.data
+#         userID = current_user.userID
+#         # Call buyshare API
+#         buyshare = gdb.buyshare(userID, issuerID, quantity)
+#         if(buyshare):
+#             # Redirect to index with success message
+#             flash("Buyshare successful!", category="success")
+#             return redirect(url_for('dashboard'))
+#         else:
+#             # Redirect to registration with warning message
+#             flash("Buyshare unsuccessful!", category="error")
+#             return redirect(url_for('index'))
 
-    return render_template('buyshare.html', form=form)
+#     return render_template('buyshare.html', form=form)
 
 # Run the app
 if __name__ == '__main__':

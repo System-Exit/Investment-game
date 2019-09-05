@@ -2,13 +2,17 @@
 {% block content %}
 <div id="share-body">
     {# TODO: Format information #}
-    <h2>{{ share.abbrevname }}</h2>
+    <h2>{{ share.fullname }} ({{ share.issuerID }})</h2>
     <h3>{{ share.industrysector }}</h3>
+    <p>{{ share.description }}</p>
     <p>Current price: {{ share.currentprice }}</p>
     <p>Change $: ${{ share.daychangeprice }}</p>
     <p>Change %: {{ share.daychangepercent }}%</p>
     <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" data-toggle="modal" data-target="#buy-modal">Buy</button>
     <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button>
+    <div id="transaction-list">
+
+    </div>
 </div>
 {% include "sharemodals.html" %}
 {% endblock %}
