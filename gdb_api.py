@@ -237,8 +237,10 @@ class GoogleDatabaseAPI:
             # Create new share record
             share = Share(
                 issuerID=asxdata['code'],
+                fullname=asxdata['name_full'],
                 abbrevname=asxdata['name_abbrev'],
                 shortname=asxdata['name_short'],
+                description=asxdata['principal_activities'],
                 industrysector=asxdata['sector_name'],
                 currentprice=float(
                     asxdata['primary_share']['last_price']),
@@ -250,7 +252,13 @@ class GoogleDatabaseAPI:
                     asxdata['primary_share']['change_in_percent'].
                     strip('%'))/100,
                 daychangeprice=float(
-                    asxdata['primary_share']['change_price'])
+                    asxdata['primary_share']['change_price']),
+                daypricehigh=float(
+                    asxdata['primary_share']['day_high_price']),
+                daypricelow=float(
+                    asxdata['primary_share']['day_low_price']),
+                dayvolume=int(
+                    asxdata['primary_share']['volume'])
             )
             # Add share to share table
             session.add(share)
@@ -397,7 +405,10 @@ class GoogleDatabaseAPI:
                 "curr_mc": asxdata['market_cap'],
                 "curr_sc": asxdata['number_of_shares'],
                 "dc_percent": asxdata['change_in_percent'],
-                "dc_price": asxdata['change_price']
+                "dc_price": asxdata['change_price'],
+                "day_high": asxdata['day_high_price'],
+                "day_low": asxdata['day_low_price'],
+                "day_vol": asxdata['volume']
             }
 
         # Initialse session
@@ -415,6 +426,12 @@ class GoogleDatabaseAPI:
                     share_data[issuerID]["dc_percent"].strip('%'))/100
                 dc_price = float(
                     share_data[issuerID]["dc_price"])
+                day_high = float(
+                    share_data[issuerID]['day_high'])
+                day_low = float(
+                    share_data[issuerID]['day_low'])
+                day_vol = int(
+                    share_data[issuerID]['day_vol'])
                 # Update share field
                 share = session.query(Share).get(issuerID)
                 share.price = curr_price
@@ -422,6 +439,9 @@ class GoogleDatabaseAPI:
                 share.sharecount = curr_sc
                 share.daychangepercent = dc_percent
                 share.daychangeprice = dc_price
+                share.daypricehigh = day_high
+                share.daypricelow = day_low
+                share.dayvolume = day_vol
                 # Create and add new share price record
                 shareprice = SharePrice(
                     issuerID=issuerID,

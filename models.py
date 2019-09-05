@@ -67,14 +67,19 @@ class Share(Base):
     __tablename__ = 'SHARE'
     # Table Columns
     issuerID = Column(String(3), primary_key=True)
-    abbrevname = Column(String(50), nullable=False, unique=True)
+    fullname = Column(String(80), nullable=False, unique=False)
     shortname = Column(String(50), nullable=False, unique=True)
+    abbrevname = Column(String(50), nullable=False, unique=True)
+    description = Column(String(500), nullable=False, unique=False)
     industrysector = Column(String(50), nullable=True, unique=False)
     currentprice = Column(Float, nullable=False, unique=False)
     marketcapitalisation = Column(BigInteger, nullable=False, unique=False)
     sharecount = Column(BigInteger, nullable=False, unique=False)
     daychangepercent = Column(Float, nullable=False, unique=False)
     daychangeprice = Column(Float, nullable=False, unique=False)
+    daypricehigh = Column(Float, nullable=False, unique=False)
+    daypricelow = Column(Float, nullable=False, unique=False)
+    dayvolume = Column(BigInteger, nullable=False, unique=False)
 
 
 class SharePrice(Base):

@@ -183,3 +183,24 @@ input#byear
 {
     background-color: lightgray;
 }
+
+/* Share page */
+.share-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.share-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.share-form input
+{
+    text-align: center;
+    border-radius: 10px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
