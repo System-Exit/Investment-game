@@ -177,3 +177,7 @@ input#byear
     text-align: center;
     font-size: 24px;
 }
+.share-row:hover
+{
+    background-color: lightgray;
+}

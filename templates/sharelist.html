@@ -47,7 +47,7 @@
             <tbody>
             {% for share in shares %}
                 {% set sharelink = url_for('share', issuerID=share.issuerID) %}
-                <tr onclick="location.href='{{ sharelink }}'">
+                <tr class="share-row" onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
                     <td>{{ share.abbrevname }}</td>
                     <td>{{ share.industrysector }}</td>
