@@ -16,7 +16,7 @@
     <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" data-toggle="modal" data-target="#sell-modal">Sell</button>
     {% if transactions %}
         <h2>Your transactions</h2>
-        <table id="transaction-list" class="table">
+        <table id="transaction-table" class="table sortable-table">
             <thead>
                 <tr>
                     {# Defnine orderable headings #}

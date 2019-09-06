@@ -17,6 +17,26 @@ body
     font-weight: bold;
     padding: 5px;
 }
+.sortable-table th
+{
+    text-align: center;
+}
+.sortable-table th a
+{
+    font-size: inherit;
+    color: black;
+    text-decoration-line: none;
+}
+.sortable-table th a:hover
+{
+    color: black;
+    text-decoration-line: underline;
+}
+.sortable-table th a:active
+{
+    color: black;
+    text-decoration-line: underline;
+}
 
 /* Navigation and Layout */
 #top-bar
@@ -152,26 +172,6 @@ input#byear
 }
 
 /* Share listing page */
-#sharelist th
-{
-    text-align: center;
-}
-#sharelist th a
-{
-    font-size: inherit;
-    color: black;
-    text-decoration-line: none;
-}
-#sharelist th a:hover
-{
-    color: black;
-    text-decoration-line: underline;
-}
-#sharelist th a:active
-{
-    color: black;
-    text-decoration-line: underline;
-}
 .pagination
 {
     text-align: center;
@@ -203,24 +203,4 @@ input#byear
     width: 180px;
     padding-left: 10px;
     padding-right: 10px;
-}
-#transaction-list th
-{
-    text-align: center;
-}
-#transaction-list th a
-{
-    font-size: inherit;
-    color: black;
-    text-decoration-line: none;
-}
-#transaction-list th a:hover
-{
-    color: black;
-    text-decoration-line: underline;
-}
-#transaction-list th a:active
-{
-    color: black;
-    text-decoration-line: underline;
 }
