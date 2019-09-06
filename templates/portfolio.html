@@ -4,28 +4,50 @@
 <div id="index-body">
     {% include "messageblock.html" %}
     <div class="container">
-        <h2>Currently Owned Shares</h2>
+        <h2>Your Shares</h2>
         <table class="table">
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Company</th>
-                    <th>Industry</th>
-                    <th>Price</th>
-                    <th>Change %</th>
-                    <th>Change $</th>
-                    <th>Market Cap</th>
-                    <th>Number Owned</th>
+                    {# Defnine orderable headings #}
+                    {% set headings = [
+                        ("Code", "issuerID", "asc"),
+                        ("Price", "currentprice", "desc"),
+                        ("Change %", "daychangepercent", "desc"),
+                        ("Change $", "daychangeprice", "desc"),
+                        ("Quantity", "quantity", "desc"),
+                        ("Value", "value", "desc"),
+                        ("Profit", "net", "desc")
+                    ] -%}
+                    {# Get order varaibles from get arguments #}
+                    {% set orderby = request.args.get("orderby") %}
+                    {% set order = request.args.get("order") %}
+                    {# Define symbols to specify ordering #}
+                    {% set ascarrow = " ▲" %}
+                    {% set descarrow = " ▼" %}
+                    {# Display each heading in headings list #}
+                    {% for heading, fieldname, defaultorder in headings %}
+                    <th>
+                        {% if orderby == fieldname and order == "asc" %}
+                            {% set fieldorder = "desc" %}
+                        {% elif orderby == fieldname and order == "desc" %}
+                            {% set fieldorder = "asc" %}
+                        {% else %}
+                            {% set fieldorder = defaultorder %}
+                        {% endif %}
+                        <a href="{{ url_for('portfolio') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                            {{ heading }}
+                            {{ ascarrow if orderby == fieldname and order == "asc" }}
+                            {{ descarrow if orderby == fieldname and order == "desc" }}
+                        </a>
+                    </th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
             {% for share in usershares %}
-            {% if share.quantity > 0 %}
                 {% set sharelink = url_for('share', issuerID=share.issuerID) %}
                 <tr class="share-row" onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
-                    <td>{{ share.abbrevname }}</td>
-                    <td>{{ share.industrysector }}</td>
                     <td>{{ share.currentprice }}</td>
                     {% if share.daychangepercent >= 0 %}
                     <td class=text-success>{{share.daychangepercent}}</td>
@@ -34,51 +56,48 @@
                     <td class=text-danger>{{share.daychangepercent}}</td>
                     <td class=text-danger>{{ share.daychangeprice}}</td>
                     {% endif %}
-                    <td>{{share.marketcapitalisation}}</td>
                     <td>{{ share.quantity }}</td>
+                    <td>{{ (share.currentprice * share.quantity)|round(4) }}</td>
+                    <td>{{ (share.profit - share.loss)|round(4) }}</td>
                 </tr>
-            {% endif %}
             {% endfor %}
             </tbody>
         </table>
-        <h2>Previously Owned Shares</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Company</th>
-                    <th>Industry</th>
-                    <th>Price</th>
-                    <th>Change %</th>
-                    <th>Change $</th>
-                    <th>Market Cap</th>
-                    <th>Number Owned</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for share in usershares %}
-            {% if share.quantity == 0 %}
-                {% set sharelink = url_for('share', issuerID=share.issuerID) %}
-                <tr onclick="location.href='{{ sharelink }}'">
-                    <th scope="row">{{ share.issuerID }}</th>
-                    <td>{{ share.abbrevname }}</td>
-                    <td>{{ share.industrysector }}</td>
-                    <td>{{ share.currentprice }}</td>
-                    {% if share.daychangepercent >= 0 %}
-                    <td class=text-success>{{share.daychangepercent}}</td>
-                    <td class=text-success>{{ share.daychangeprice}}</td>
-                    {% else %}
-                    <td class=text-danger>{{share.daychangepercent}}</td>
-                    <td class=text-danger>{{ share.daychangeprice}}</td>
-                    {% endif %}
-                    <td>{{share.marketcapitalisation}}</td>
-                    <td>{{ share.quantity }}</td>
-                </tr>
+        {# Get the current page #}
+        {% if request.args.get('page') %}
+            {% set page = request.args.get('page')|int %}
+        {% else %}
+            {% set page = 1 %}
+        {% endif %}
+        {# Detremine the base url for each link#}
+        {% if orderby and order %}
+            {% set baseurl = url_for('portfolio')+"?orderby="+orderby+"&order="+order+"&" %}
+        {% else %}
+            {% set baseurl = url_for('portfolio')+"?" %}
+        {% endif %}
+        {# Calculate max number of pages #}
+        {% set maxpagenum = (sharecount/countperpage)|round|int %}
+        <div class="pagination">
+        {# Display left arrows #}
+        {% if page > 1 %}
+            <a href="{{ baseurl }}page=1">◀◀</a>
+            <a href="{{ baseurl }}page={{ page-1 }}">◀</a>
+        {% endif %}
+        {# Display page numbers #}
+        {% for pagenum in range(page-3, page+3) %}
+            {% if pagenum >= 1 and pagenum <= maxpagenum %}
+                {% if pagenum != page %}
+                    <a href="{{ baseurl }}page={{ pagenum }}">{{ pagenum }}</a>
+                {% else %}
+                    <b>{{ page }}</b>
+                {% endif %}
             {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
+        {% endfor %}
+        {# Display right arrows #}
+        {% if page*countperpage < sharecount %}
+            <a href="{{  baseurl }}page={{ page+1 }}">▶</a>
+            <a href="{{  baseurl }}page={{ maxpagenum }}">▶▶</a>
+        {% endif %}
     </div>
 </div>
-<script src="{{url_for('static', filename='scripts/script.js')}}"></script>
 {% endblock %}

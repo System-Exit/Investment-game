@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <div id="share-body" class="container">
+    {% include "messageblock.html" %}
     {# TODO: Format information better #}
     <h2>{{ share.fullname }} ({{ share.issuerID }})</h2>
     <h3>{{ share.industrysector }}</h3>
@@ -18,10 +19,36 @@
         <table id="transaction-list" class="table">
             <thead>
                 <tr>
-                    <th>Timestamp</th>
-                    <th>Type</th>
-                    <th>Quantity</th>
-                    <th>Transaction value<th>
+                    {# Defnine orderable headings #}
+                    {% set headings = [
+                        ("Timestamp", "datetime", "desc"),
+                        ("Type", "transtype", "asc"),
+                        ("Quantity", "quantity", "desc"),
+                        ("Transaction value", "totaltransval", "desc")
+                    ] -%}
+                    {# Get order varaibles from get arguments #}
+                    {% set orderby = request.args.get("orderby") %}
+                    {% set order = request.args.get("order") %}
+                    {# Define symbols to specify ordering #}
+                    {% set ascarrow = " ▲" %}
+                    {% set descarrow = " ▼" %}
+                    {# Display each heading in headings list #}
+                    {% for heading, fieldname, defaultorder in headings %}
+                    <th>
+                        {% if orderby == fieldname and order == "asc" %}
+                            {% set fieldorder = "desc" %}
+                        {% elif orderby == fieldname and order == "desc" %}
+                            {% set fieldorder = "asc" %}
+                        {% else %}
+                            {% set fieldorder = defaultorder %}
+                        {% endif %}
+                        <a href="{{ url_for('share', issuerID=share.issuerID) }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                            {{ heading }}
+                            {{ ascarrow if orderby == fieldname and order == "asc" }}
+                            {{ descarrow if orderby == fieldname and order == "desc" }}
+                        </a>
+                    </th>
+                    {% endfor %}
                 <tr>
             </thead>
             <tbody>

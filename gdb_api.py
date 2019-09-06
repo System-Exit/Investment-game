@@ -321,7 +321,8 @@ class GoogleDatabaseAPI:
                 Defaults to 1000.
         Returns:
             A list of every share in the database in given order.
-            None if the search is invalid or if there are no results.
+            Total number of results that match criteria.
+
 
         """
         # Initialse session
@@ -335,6 +336,8 @@ class GoogleDatabaseAPI:
                 query = query.order_by(desc(getattr(Share, orderby)))
             else:
                 pass
+            # Get count
+            count = query.count()
             # Filter query by range
             query = query.limit(limit).offset(offset)
             # Get query results
@@ -343,21 +346,7 @@ class GoogleDatabaseAPI:
             for share in shares:
                 session.expunge(share)
         # Return share data
-        return shares
-
-    def getsharecount(self):
-        """
-        Get the total number of shares in the database
-
-        Returns:
-            Count of the total number of unique shares.
-
-        """
-        # Initialse session
-        with self.sessionmanager() as session:
-            # Get share count
-            count = session.query(Share).count()
-        return int(count)
+        return shares, count
 
     def updateshares(self):
         """
@@ -586,7 +575,7 @@ class GoogleDatabaseAPI:
             userID (str): ID of user to get owned shares of.
                 Defaults to None.
             orderby (str): Name of field to sort by.
-                Defaults to None.
+                Defaults to None. Specify 'net' to sort by (profit - loss)
             order (str): How to order, 'asc' for acsending,
                 'desc' for descending. Defaults to "asc"
             offset (int): How many rows to skip of query.
@@ -596,6 +585,7 @@ class GoogleDatabaseAPI:
         Returns:
             List of shares that user owns with data from
             usershare and share tables combined.
+            Total number of results that match criteria.
 
         """
         # Initialse session
@@ -609,14 +599,24 @@ class GoogleDatabaseAPI:
             # TODO: Make more effiecent by nesting the if statements
             if(orderby and hasattr(Share, orderby) and order == "asc"):
                 query = query.order_by(asc(getattr(Share, orderby)))
-            elif(orderby and hasattr(UserShare, orderby) and order == "asc"):
-                query = query.order_by(asc(getattr(UserShare, orderby)))
+            elif(orderby and hasattr(Usershare, orderby) and order == "asc"):
+                query = query.order_by(asc(getattr(Usershare, orderby)))
             elif(orderby and hasattr(Share, orderby) and order == "desc"):
                 query = query.order_by(desc(getattr(Share, orderby)))
-            elif(orderby and hasattr(UserShare, orderby) and order == "desc"):
-                query = query.order_by(desc(getattr(UserShare, orderby)))
+            elif(orderby and hasattr(Usershare, orderby) and order == "desc"):
+                query = query.order_by(desc(getattr(Usershare, orderby)))
+            elif(orderby == "net" and order == "asc"):
+                query = query.order_by(asc(Usershare.profit - Usershare.loss))
+            elif(orderby == "net" and order == "desc"):
+                query = query.order_by(desc(Usershare.profit - Usershare.loss))
+            elif(orderby == "value" and order == "asc"):
+                query = query.order_by(asc(Share.price * Usershare.quantity))
+            elif(orderby == "value" and order == "desc"):
+                query = query.order_by(desc(Share.price * Usershare.quantity))
             else:
                 pass
+            # Get count
+            count = query.count()
             # Filter query by range
             query = query.limit(limit).offset(offset)
             # Get results
@@ -635,7 +635,7 @@ class GoogleDatabaseAPI:
                 combinedres = {**result[0].__dict__, **result[1].__dict__}
                 usershares.append(combinedres)
         # Return processed usershares
-        return usershares
+        return usershares, count
 
     def gettransactions(self, userID=None, issuerID=None,
                         orderby=None, order="asc", offset=0, limit=1000):
@@ -657,6 +657,7 @@ class GoogleDatabaseAPI:
                 Defaults to 1000.
         Returns:
             List of transaction objects that match filter criteria.
+            Total number of results that match criteria.
 
         """
         # Initialse session
@@ -678,6 +679,8 @@ class GoogleDatabaseAPI:
                 query = query.order_by(desc(getattr(Transaction, orderby)))
             else:
                 pass
+            # Get count
+            count = query.count()
             # Filter query by range
             query = query.limit(limit).offset(offset)
             # Get query results
@@ -686,7 +689,7 @@ class GoogleDatabaseAPI:
             for result in results:
                 session.expunge(result)
         # Return resulting list
-        return results
+        return results, count
 
 if __name__ == "__main__":
     # Initialize API

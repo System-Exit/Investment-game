@@ -208,3 +208,19 @@ input#byear
 {
     text-align: center;
 }
+#transaction-list th a
+{
+    font-size: inherit;
+    color: black;
+    text-decoration-line: none;
+}
+#transaction-list th a:hover
+{
+    color: black;
+    text-decoration-line: underline;
+}
+#transaction-list th a:active
+{
+    color: black;
+    text-decoration-line: underline;
+}

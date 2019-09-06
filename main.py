@@ -141,22 +141,49 @@ def dashboard():
     return render_template('dashboard.html', user=user)
 
 
-@app.route('/portfolio', methods=['GET', 'POST'])
+@app.route('/portfolio', methods=['GET'])
 def portfolio():
     # Redirect user to index if they are not logged in
     if not current_user.is_authenticated:
-        # Redirect to index
-        return redirect(url_for('index'))
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
     # Get user info
     user = current_user
+
+    # Get field to order by for displaying shares
+    if(request.args.get('orderby')):
+        orderby = request.args.get('orderby')
+    else:
+        orderby = None
+    # Get order for displaying shares
+    if(request.args.get('order')):
+        order = request.args.get('order')
+    else:
+        order = "asc"
+    # Get the page of shares to display and calculate offset
+    # TODO: DEFINE LIMIT IN A CONFIG
+    limit = 10
+    if(request.args.get('page')):
+        offset = 10*(int(request.args.get('page'))-1)
+    else:
+        offset = 0
     # Get processed usershare info
-    usershares = gdb.getusersharesinfo(user.userID)
+    usershares, sharecount = gdb.getusersharesinfo(
+        userID=user.userID,
+        orderby=orderby,
+        order=order,
+        offset=offset,
+        limit=limit)
+
     # Render template
     return render_template('portfolio.html', user=user,
-                           usershares=usershares)
+                           usershares=usershares,
+                           sharecount=sharecount,
+                           countperpage=10)
 
 
-@app.route('/sharelist', methods=['GET', 'POST'])
+@app.route('/sharelist', methods=['GET'])
 def sharelist():
     """
     Displays current values for all shares.
@@ -177,66 +204,39 @@ def sharelist():
     else:
         order = "asc"
     # Get the page of shares to display and calculate offset
+    # TODO: DEFINE LIMIT IN A CONFIG
+    limit = 10
     if(request.args.get('page')):
         offset = 10*(int(request.args.get('page'))-1)
     else:
         offset = 0
     # Get shares
-    shares = gdb.getshares(
+    shares, sharecount = gdb.getshares(
         orderby=orderby,
         order=order,
         offset=offset,
-        # TODO: DEFINE LIMIT IN A CONFIG
-        limit=10)
-    # Get share count
-    sharecount = gdb.getsharecount()
+        limit=limit)
+
     # Render template
     return render_template('sharelist.html', shares=shares,
                            sharecount=sharecount,
                            countperpage=10)
 
 
-@app.route('/share/<issuerID>')
+@app.route('/share/<issuerID>',  methods=['GET'])
 def share(issuerID):
     """
     Displays share information.
 
     """
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
     sellform = SellShareForm()
-    # Validate and process form data
-    if(buyform.validate_on_submit()):
-        # Buys shares
-        issuerID = buyform.sharecode.data
-        quantity = buyform.quantity.data
-        userID = current_user.userID
-        # Call buyshare API
-        buyshare = gdb.buyshare(userID, issuerID, quantity)
-        if(buyshare):
-            # Redirect to index with success message
-            flash("Buyshare successful!", category="success")
-            return redirect(url_for('dashboard'))
-        else:
-            # Redirect to registration with warning message
-            flash("Buyshare unsuccessful!", category="error")
-            return redirect(url_for('dashboard'))
-    # Validate and process form data
-    if(sellform.validate_on_submit()):
-        # Buys shares
-        issuerID = sellform.sharecode.data
-        quantity = sellform.quantity.data
-        userID = current_user.userID
-        # Call buyshare API
-        sellshare = gdb.sellshare(userID, issuerID, quantity)
-        if(sellshare):
-            # Redirect to index with success message
-            flash("Share sale successful!", category="success")
-            return redirect(url_for('dashboard'))
-        else:
-            # Redirect to registration with warning message
-            flash("Share sale unsuccessful!", category="error")
-            return redirect(url_for('dashboard'))
 
     # Get share information
     share = gdb.getshare(issuerID)
@@ -245,17 +245,92 @@ def share(issuerID):
         abort(404)
     # Get share price history
     sharepricehistory = gdb.getsharepricehistory(issuerID)
+
+    # Get field to order by for displaying shares
+    if(request.args.get('orderby')):
+        orderby = request.args.get('orderby')
+    else:
+        orderby = "datetime"
+    # Get order for displaying shares
+    if(request.args.get('order')):
+        order = request.args.get('order')
+    else:
+        order = "desc"
+    # Get the page of shares to display and calculate offset
+    # TODO: DEFINE LIMIT IN A CONFIG
+    limit = 10
+    if(request.args.get('page')):
+        offset = 10*(int(request.args.get('page'))-1)
+    else:
+        offset = 0
     # Get share transaction history for user
-    transactions = gdb.gettransactions(
+    transactions, transcount = gdb.gettransactions(
         userID=current_user.userID,
-        issuerID=share.issuerID)
+        issuerID=share.issuerID,
+        orderby=orderby,
+        order=order,
+        offset=offset,
+        limit=limit)
 
     # Render template for share page
     return render_template('share.html', share=share,
                            sharepricehistory=sharepricehistory,
                            buyform=buyform, sellform=sellform,
-                           transactions=transactions)
+                           transactions=transactions, transcount=transcount)
 
+
+@app.route('/buyshares', methods=['GET', 'POST'])
+def buyshares():
+    # Checks if user is logged in
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Initialise buy form
+    buyform = BuyShareForm()
+    # Validate and process form data
+    if(buyform.validate_on_submit()):
+        # Buys shares
+        issuerID = buyform.buysharecode.data
+        quantity = buyform.buyquantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        buyshare = gdb.buyshare(userID, issuerID, quantity)
+        if(buyshare):
+            # Flash with success message
+            flash("Share purchase successful!", category="success")
+        else:
+            # Flash with warning message
+            flash("Share purchase unsuccessful!", category="error")
+    # Redirect to reffering page or dashboard
+    return redirect(request.referrer or url_for('dashboard'))
+
+
+@app.route('/sellshares', methods=['GET', 'POST'])
+def sellshares():
+    # Checks if user is logged in
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Initialise buy and sell share forms
+    sellform = SellShareForm()
+    # Validate and process form data
+    if(sellform.validate_on_submit()):
+        # Buys shares
+        issuerID = sellform.sellsharecode.data
+        quantity = sellform.sellquantity.data
+        userID = current_user.userID
+        # Call buyshare API
+        sellshare = gdb.sellshare(userID, issuerID, quantity)
+        if(sellshare):
+            # Flash with success message
+            flash("Share sale successful!", category="success")
+        else:
+            # Flash with warning message
+            flash("Share sale unsuccessful!", category="error")
+    # Redirect to reffering page or dashboard
+    return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/tasks/updateshares')
 def sharesupdate():
