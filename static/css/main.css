@@ -5,6 +5,8 @@ body
     /* background-color: #add8e6; */
     background-color: whitesmoke;
 }
+
+/* Flash Messages */
 .flash-success
 {
     color: green;
@@ -17,6 +19,8 @@ body
     font-weight: bold;
     padding: 5px;
 }
+
+/* Sortable table elements */
 .sortable-table th
 {
     text-align: center;
@@ -36,6 +40,13 @@ body
 {
     color: black;
     text-decoration-line: underline;
+}
+
+/* Pagination for tables */
+.pagination
+{
+    text-align: center;
+    font-size: 24px;
 }
 
 /* Navigation and Layout */
@@ -169,13 +180,6 @@ input#bmonth
 input#byear
 {
     width: 80px;
-}
-
-/* Share listing page */
-.pagination
-{
-    text-align: center;
-    font-size: 24px;
 }
 
 /* Share listing and portfolio page */
