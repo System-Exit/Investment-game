@@ -312,10 +312,13 @@ class GoogleDatabaseAPI:
 
         Args:
             orderby (str): Name of field to sort by.
+                Defaults to None.
             order (str): How to order, 'asc' for acsending,
-                'desc' for descending.
+                'desc' for descending. Defaults to "asc"
             offset (int): How many rows to skip of query.
+                Defaults to 0.
             limit (int): How many rows to return of query.
+                Defaults to 1000.
         Returns:
             A list of every share in the database in given order.
             None if the search is invalid or if there are no results.
@@ -325,7 +328,7 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get all shares
             query = session.query(Share)
-            # Order query depending on order parameter
+            # Order query depending on order parameters
             if(orderby and hasattr(Share, orderby) and order == "asc"):
                 query = query.order_by(asc(getattr(Share, orderby)))
             elif(orderby and hasattr(Share, orderby) and order == "desc"):
@@ -573,13 +576,23 @@ class GoogleDatabaseAPI:
             # Return true for success
             return True
 
-    def getusersharesinfo(self, userID):
+    def getusersharesinfo(self, userID=None,
+                          orderby=None, order="asc", offset=0, limit=1000):
         """
         Returns all the shares that a user owns along
         with relevant share information as well.
 
         Args:
             userID (str): ID of user to get owned shares of.
+                Defaults to None.
+            orderby (str): Name of field to sort by.
+                Defaults to None.
+            order (str): How to order, 'asc' for acsending,
+                'desc' for descending. Defaults to "asc"
+            offset (int): How many rows to skip of query.
+                Defaults to 0.
+            limit (int): How many rows to return of query.
+                Defaults to 1000.
         Returns:
             List of shares that user owns with data from
             usershare and share tables combined.
@@ -588,10 +601,26 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Get all shares that the user owns combined with share info
-            results = session.query(Usershare, Share).\
-                join(Share).\
-                filter(Usershare.userID == userID).\
-                all()
+            query = session.query(Usershare, Share).join(Share)
+            # If specified, filter by user ID
+            if(userID):
+                query = query.filter(Usershare.userID == userID)
+            # Order query depending on order parameters
+            # TODO: Make more effiecent by nesting the if statements
+            if(orderby and hasattr(Share, orderby) and order == "asc"):
+                query = query.order_by(asc(getattr(Share, orderby)))
+            elif(orderby and hasattr(UserShare, orderby) and order == "asc"):
+                query = query.order_by(asc(getattr(UserShare, orderby)))
+            elif(orderby and hasattr(Share, orderby) and order == "desc"):
+                query = query.order_by(desc(getattr(Share, orderby)))
+            elif(orderby and hasattr(UserShare, orderby) and order == "desc"):
+                query = query.order_by(desc(getattr(UserShare, orderby)))
+            else:
+                pass
+            # Filter query by range
+            query = query.limit(limit).offset(offset)
+            # Get results
+            results = query.all()
             # Detach all objects from session
             for result in results:
                 for obj in result:
@@ -608,15 +637,24 @@ class GoogleDatabaseAPI:
         # Return processed usershares
         return usershares
 
-    def gettransactions(self, userID=None, issuerID=None):
+    def gettransactions(self, userID=None, issuerID=None,
+                        orderby=None, order="asc", offset=0, limit=1000):
         """
         Get all transactions for a given user and/or share.
 
         Args:
             userID (str): ID of user to filter transactions by.
-                Default is None.
+                Defaults to None.
             issuerID (str): ID of share to filter transactions by.
-                Default is None.
+                Defaults to None.
+            orderby (str): Name of field to sort by.
+                Defaults to None.
+            order (str): How to order, 'asc' for acsending,
+                'desc' for descending. Defaults to "asc"
+            offset (int): How many rows to skip of query.
+                Defaults to 0.
+            limit (int): How many rows to return of query.
+                Defaults to 1000.
         Returns:
             List of transaction objects that match filter criteria.
 
@@ -631,9 +669,19 @@ class GoogleDatabaseAPI:
             # If issuer ID for share is specified, filter by share
             if(issuerID):
                 query = query.filter(Transaction.issuerID == issuerID)
+            # Order query depending on order parameters
+            if(orderby and hasattr(Transaction, orderby) and
+               order == "asc"):
+                query = query.order_by(asc(getattr(Transaction, orderby)))
+            elif(orderby and hasattr(Transaction, orderby) and
+                 order == "desc"):
+                query = query.order_by(desc(getattr(Transaction, orderby)))
+            else:
+                pass
+            # Filter query by range
+            query = query.limit(limit).offset(offset)
             # Get query results
             results = query.all()
-            # Detech all objects from session
             # Detach all objects from session
             for result in results:
                 session.expunge(result)
