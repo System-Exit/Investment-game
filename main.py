@@ -180,7 +180,7 @@ def portfolio():
     return render_template('portfolio.html', user=user,
                            usershares=usershares,
                            sharecount=sharecount,
-                           countperpage=10)
+                           countperpage=limit)
 
 
 @app.route('/sharelist', methods=['GET'])
@@ -220,7 +220,7 @@ def sharelist():
     # Render template
     return render_template('sharelist.html', shares=shares,
                            sharecount=sharecount,
-                           countperpage=10)
+                           countperpage=limit)
 
 
 @app.route('/share/<issuerID>',  methods=['GET'])
@@ -276,7 +276,8 @@ def share(issuerID):
     return render_template('share.html', share=share,
                            sharepricehistory=sharepricehistory,
                            buyform=buyform, sellform=sellform,
-                           transactions=transactions, transcount=transcount)
+                           transactions=transactions, transcount=transcount,
+                           countperpage=limit)
 
 
 @app.route('/buyshares', methods=['GET', 'POST'])

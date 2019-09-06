@@ -68,6 +68,42 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="pagination">
+            {# Get the current page #}
+            {% if request.args.get('page') %}
+                {% set page = request.args.get('page')|int %}
+            {% else %}
+                {% set page = 1 %}
+            {% endif %}
+            {# Detremine the base url for each link#}
+            {% if orderby and order %}
+                {% set baseurl = url_for('share', issuerID=share.issuerID)+"?orderby="+orderby+"&order="+order+"&" %}
+            {% else %}
+                {% set baseurl = url_for('share', issuerID=share.issuerID)+"?" %}
+            {% endif %}
+            {# Calculate max number of pages #}
+            {% set maxpagenum = (transcount/countperpage)|round(method="ceil")|int %}
+            {# Display left arrows #}
+            {% if page > 1 %}
+                <a href="{{ baseurl }}page=1">◀◀</a>
+                <a href="{{ baseurl }}page={{ page-1 }}">◀</a>
+            {% endif %}
+            {# Display page numbers #}
+            {% for pagenum in range(page-3, page+3) %}
+                {% if pagenum >= 1 and pagenum <= maxpagenum %}
+                    {% if pagenum != page %}
+                        <a href="{{ baseurl }}page={{ pagenum }}">{{ pagenum }}</a>
+                    {% else %}
+                        <b>{{ page }}</b>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {# Display right arrows #}
+            {% if page*countperpage < transcount %}
+                <a href="{{  baseurl }}page={{ page+1 }}">▶</a>
+                <a href="{{  baseurl }}page={{ maxpagenum }}">▶▶</a>
+            {% endif %}
+        </div>
     {% endif %}
 </div>
 {% include "sharemodals.html" %}
