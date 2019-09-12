@@ -610,9 +610,9 @@ class GoogleDatabaseAPI:
             elif(orderby == "net" and order == "desc"):
                 query = query.order_by(desc(Usershare.profit - Usershare.loss))
             elif(orderby == "value" and order == "asc"):
-                query = query.order_by(asc(Share.price * Usershare.quantity))
+                query = query.order_by(asc(Share.currentprice * Usershare.quantity))
             elif(orderby == "value" and order == "desc"):
-                query = query.order_by(desc(Share.price * Usershare.quantity))
+                query = query.order_by(desc(Share.currentprice * Usershare.quantity))
             else:
                 pass
             # Get count
