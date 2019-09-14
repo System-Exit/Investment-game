@@ -203,6 +203,7 @@ class GoogleDatabaseAPI:
                 username=str(username),
                 userpass=str(passhash),
                 verified=True,
+                banned=False,
                 balance=1000000
                 )
             # Add user to database
@@ -772,6 +773,52 @@ class GoogleDatabaseAPI:
                 session.expunge(result)
         # Return resulting list
         return results, count
+
+    def banuser(self, userID):
+        """
+        Sets the specified user as banned.
+
+        Args:
+            userID (str): User ID of user to ban.
+        Returns:
+            bool: True if user was successfully banned.
+                False if the user doesn't exist.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get user
+            user = session.query(User).get(userID)
+            # Check that user exists, returning false if not
+            if not user:
+                return False
+            # Set user as banned
+            user.banned = True
+        # Return success
+        return True
+
+    def unbanuser(self, userID):
+        """
+        Sets the specified user as not banned.
+
+        Args:
+            userID (str): User ID of user to unban.
+        Returns:
+            bool: True if user was successfully unbanned.
+                False if the user doesn't exist.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Get user
+            user = session.query(User).get(userID)
+            # Check that user exists, returning false if not
+            if not user:
+                return False
+            # Set user as not banned
+            user.banned = False
+        # Return success
+        return True
 
 if __name__ == "__main__":
     # Initialize API

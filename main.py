@@ -110,7 +110,10 @@ def login():
 
 @login_manager.user_loader
 def load_user(userID):
-    return gdb.getuserbyid(userID)
+    # Get user object
+    user = gdb.getuserbyid(userID)
+    # Return user object
+    return user
 
 
 @app.route('/logout')
@@ -134,10 +137,17 @@ def dashboard():
     Handles and displays dashboard for user.
 
     """
-    # Redirect user to index if they are not logged in
+    # Check if user is logged in
     if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
         # Redirect to index
         return redirect(url_for('index'))
+
     # Get current user
     user = current_user
     return render_template('dashboard.html', user=user)
@@ -145,14 +155,19 @@ def dashboard():
 
 @app.route('/portfolio', methods=['GET'])
 def portfolio():
-    # Redirect user to index if they are not logged in
+    # Check if user is logged in
     if not current_user.is_authenticated:
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
+        # Redirect to index
+        return redirect(url_for('index'))
+
     # Get user info
     user = current_user
-
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
         orderby = request.args.get('orderby')
@@ -191,10 +206,17 @@ def sharelist():
     Displays current values for all shares.
 
     """
+    # Check if user is logged in
     if not current_user.is_authenticated:
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
+        # Redirect to index
+        return redirect(url_for('index'))
+
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
         orderby = request.args.get('orderby')
@@ -231,10 +253,16 @@ def share(issuerID):
     Displays share information.
 
     """
+    # Check if user is logged in
     if not current_user.is_authenticated:
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
+        # Redirect to index
+        return redirect(url_for('index'))
 
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
@@ -284,11 +312,17 @@ def share(issuerID):
 
 @app.route('/buyshares', methods=['GET', 'POST'])
 def buyshares():
-    # Checks if user is logged in
+    # Check if user is logged in
     if not current_user.is_authenticated:
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
+        # Redirect to index
+        return redirect(url_for('index'))
+
     # Initialise buy form
     buyform = BuyShareForm()
     # Validate and process form data
@@ -311,11 +345,17 @@ def buyshares():
 
 @app.route('/sellshares', methods=['GET', 'POST'])
 def sellshares():
-    # Checks if user is logged in
+    # Check if user is logged in
     if not current_user.is_authenticated:
         # Redirect to login if the user is not authenticated
         flash("Logged in user only.", category="error")
         return redirect(url_for('login'))
+    # Check if the user has been banned
+    if(user.banned):
+        flash("You have been banned.", category="error")
+        # Redirect to index
+        return redirect(url_for('index'))
+
     # Initialise buy and sell share forms
     sellform = SellShareForm()
     # Validate and process form data
@@ -451,6 +491,51 @@ def adminuser(userID):
     # Render template
     return render_template('adminuser.html', user=user)
 
+
+@app.route('/admin/user/<userID>/ban')
+def banuser(userID):
+    # Check that admin is logged in
+    if not session['authenticated_admin']:
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+
+    # Ban user based on ID
+    result = gdb.banuser(userID)
+    # Flash message for whether or not the ban was successful
+    if(result):
+        flash(f"User {userID} has been banned successfully.",
+              category="success")
+    else:
+        flash(f"User {userID} was not not banned successfuly.",
+              category="error")
+
+    # Redirect to reffering page or admin dashboard
+    return redirect(request.referrer or url_for('admindashboard'))
+
+
+@app.route('/admin/user/<userID>/unban')
+def unbanuser(userID):
+    # Check that admin is logged in
+    if not session['authenticated_admin']:
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+
+    # Ban user based on ID
+    result = gdb.banuser(userID)
+    # Flash message for whether or not the ban was successful
+    if(result):
+        flash(f"User {userID} has been unbanned successfully.",
+              category="success")
+    else:
+        flash(f"User {userID} was not not unbanned successfuly.",
+              category="error")
+
+    # Redirect to reffering page or admin dashboard
+    return redirect(request.referrer or url_for('admindashboard'))
 
 @app.route('/tasks/updateshares')
 def sharesupdate():

@@ -22,6 +22,7 @@ class User(Base, UserMixin):
     username = Column(String(64), index=True, unique=True)
     userpass = Column(String(200), unique=False, nullable=False)
     verified = Column(Boolean, unique=False, nullable=False)
+    banned = Column(Boolean, unique=False, nullable=False)
     balance = Column(Float, unique=False, nullable=False)
 
     def get_id(self):
