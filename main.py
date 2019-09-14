@@ -137,34 +137,23 @@ def dashboard():
     Handles and displays dashboard for user.
 
     """
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Get current user
     user = current_user
+    # Render template
     return render_template('dashboard.html', user=user)
 
 
 @app.route('/portfolio', methods=['GET'])
 def portfolio():
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Get user info
     user = current_user
@@ -206,16 +195,10 @@ def sharelist():
     Displays current values for all shares.
 
     """
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
@@ -253,16 +236,10 @@ def share(issuerID):
     Displays share information.
 
     """
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
@@ -312,16 +289,10 @@ def share(issuerID):
 
 @app.route('/buyshares', methods=['GET', 'POST'])
 def buyshares():
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Initialise buy form
     buyform = BuyShareForm()
@@ -345,16 +316,10 @@ def buyshares():
 
 @app.route('/sellshares', methods=['GET', 'POST'])
 def sellshares():
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if(user.banned):
-        flash("You have been banned.", category="error")
-        # Redirect to index
-        return redirect(url_for('index'))
+    # Check valid user is logged in
+    check = checkUserIsLoggedIn()
+    if(check is not True):
+        return check
 
     # Initialise buy and sell share forms
     sellform = SellShareForm()
@@ -374,6 +339,35 @@ def sellshares():
             flash("Share sale unsuccessful!", category="error")
     # Redirect to reffering page or dashboard
     return redirect(request.referrer or url_for('dashboard'))
+
+
+def checkUserIsLoggedIn():
+    """
+    Helper method for checking if the user is logged in or banned.
+    If the user isn't logged in, they are redirected to login page.
+    If the user has been banned, redirect them to index.
+
+    Returns:
+        True is the user is logged in and is not banned.
+        An appropriate redirect if the user is not logged in or banned.
+
+    """
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Check if the user has been banned
+    if current_user.banned:
+        # Inform the user they are banned
+        flash("You have been banned, please contact an admin.",
+              category="error")
+        # Log user out
+        logout_user()
+        # Redirect to index
+        return redirect(url_for('index'))
+    # Return success
+    return True
 
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -399,7 +393,7 @@ def adminlogin():
             return redirect(url_for('admindashboard'))
         else:
             flash("Invalid username or password.", category="error")
-            return redirect(url_for('login'))
+            return redirect(url_for('adminlogin'))
     # Render template
     return render_template('adminlogin.html', form=form)
 
@@ -525,7 +519,7 @@ def unbanuser(userID):
         return redirect(url_for('adminlogin'))
 
     # Ban user based on ID
-    result = gdb.banuser(userID)
+    result = gdb.unbanuser(userID)
     # Flash message for whether or not the ban was successful
     if(result):
         flash(f"User {userID} has been unbanned successfully.",
@@ -536,6 +530,7 @@ def unbanuser(userID):
 
     # Redirect to reffering page or admin dashboard
     return redirect(request.referrer or url_for('admindashboard'))
+
 
 @app.route('/tasks/updateshares')
 def sharesupdate():
