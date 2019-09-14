@@ -1,5 +1,5 @@
 from config import Config
-from models import User, Share, SharePrice, Usershare, Transaction
+from models import User, Share, SharePrice, Usershare, Transaction, Admin
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from argon2 import PasswordHasher
@@ -204,6 +204,46 @@ class GoogleDatabaseAPI:
                     user.userpass = rehash
                 # Since user exists and password is valid, return true
                 return True, user.userID
+            else:
+                # User doesn't exist, return false
+                return False, None
+
+    def verifyadmin(self, username, userpass):
+        """
+        Verifies if the admin with the given username and password exists.
+
+        Args:
+            username (str): Username of admin to verify.
+            userpass (str): Password of admin to verify.
+
+        Retruns:
+            True if the admin exists and valid password, otherwise false.
+            Admin ID if the user exists and valid password, None otherwise.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Initialise password hasher
+            ph = PasswordHasher()
+            # Query if admin exists
+            admin = session.query(Admin).filter(
+                   Admin.username == username).first()
+            # Check if query returns an admin
+            if(admin is not None):
+                # Verify whether the password is valid or not
+                try:
+                    ph.verify(admin.passhash, userpass)
+                except VerifyMismatchError:
+                    # Password does not match, return false
+                    return False, None
+                # Check if password needs to be rehashed
+                if(ph.check_needs_rehash(admin.passhash)):
+                    # Generate new hash
+                    rehash = ph.hash(userpass)
+                    # Update admin record to include new hash
+                    user.passhash = rehash
+                # Since admin exists and password is valid, return true
+                return True, admin.adminID
             else:
                 # User doesn't exist, return false
                 return False, None

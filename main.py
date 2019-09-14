@@ -1,4 +1,4 @@
-from flask import (Flask, render_template, request,
+from flask import (Flask, render_template, request, session,
                    redirect, url_for, flash, jsonify, abort)
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
@@ -10,11 +10,13 @@ from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
 
-# Load app with bootstrap
+# Load app and config
 app = Flask(__name__)
+app.config.from_object(Config)
+
+# Load app modules and interfaces
 Bootstrap(app)
 login_manager = LoginManager(app)
-app.config.from_object(Config)
 gdb = GoogleDatabaseAPI()
 
 
@@ -332,6 +334,54 @@ def sellshares():
             flash("Share sale unsuccessful!", category="error")
     # Redirect to reffering page or dashboard
     return redirect(request.referrer or url_for('dashboard'))
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@app.route('/admin/login', methods=['GET', 'POST'])
+def adminlogin():
+    """
+    Landing and login page for administators.
+
+    """
+    # Initialise login form
+    form = UserLoginForm()
+    # Validate and process form data
+    if form.validate_on_submit():
+        # Get form data
+        username = form.username.data
+        password = form.password.data
+        # Check if username and password is valid
+        valid, userID = gdb.verifyadmin(username, password)
+        if(valid):
+            # Set admin authentication in session
+            session['authenticated_admin'] = True
+            # Redirect to admin dashboard
+            return redirect(url_for('admindashboard'))
+        else:
+            flash("Invalid username or password.", category="error")
+            return redirect(url_for('login'))
+    # Render template
+    return render_template('adminlogin.html', form=form)
+
+
+@app.route('/admin/logout')
+def adminlogout():
+    # Remove session admin authentication
+    session.pop('authenticated_admin', None)
+    # Redirect to admin login
+    return redirect(url_for('adminlogin'))
+
+
+@app.route('/admin/dashboard')
+def admindashboard():
+    # Check that admin is logged in
+    if not session['authenticated_admin']:
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+    # Render template
+    return render_template('admindashboard.html')
 
 
 @app.route('/tasks/updateshares')

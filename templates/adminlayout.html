@@ -1,0 +1,39 @@
+{% set navigation_items = [
+    (url_for('admindashboard'), 'dashboard', 'Dashboard'),
+    (url_for('adminlogout'), 'logout', 'Sign Out')
+] -%}
+{% set active_page = active_page|default(None) -%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Budding Investors</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    </head>
+    <body>
+        <div id="top-left-corner">
+            <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+            alt="Budding Investors">
+        </div>
+        <div id="top-bar">
+        </div>
+        <div id="side-bar">
+            <ul>
+                {% for href, id, caption in navigation_items %}
+                    <li>
+                        <a href="{{ href }}"
+                            {% if id == active_page %} class="active" {% endif %}>
+                            {{ caption }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="{{url_for('static', filename='scripts/script.js')}}"></script>
+    </body>
+</html>

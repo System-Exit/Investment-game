@@ -93,6 +93,15 @@ class SharePrice(Base):
     price = Column(Float, nullable=False, unique=False)
 
 
+class Admin(Base, UserMixin):
+    """ Model for admin user """
+    # Table name
+    __tablename__ = 'ADMIN'
+    # Table Columns
+    adminID = Column(Integer, primary_key=True)
+    username = Column(String(64), index=True, unique=True)
+    passhash = Column(String(200), unique=False, nullable=False)
+
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
     # Define SQL connection parameters
