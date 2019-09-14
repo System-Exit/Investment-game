@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="share-body" class="container">
+    {% include "messageblock.html" %}
+    {# TODO: Format information better #}
+    <h2>User Details</h2>
+    <p>User ID: {{ user.userID }}</p>
+    <p>Username: {{ user.username }}</p>
+    <p>First name: {{ user.firstname }}</p>
+    <p>Last name: {{ user.lastname }}</p>
+    <p>Date of Birth: {{ user.dob }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Gender: {{ user.gender }}</p>
+    <p>Verified: {{ user.verified }}</p>
+</div>
+{% endblock %}

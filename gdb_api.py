@@ -51,6 +51,48 @@ class GoogleDatabaseAPI:
         finally:
             session.close()
 
+    def getusers(self, orderby=None, order="asc", offset=0, limit=1000):
+        """
+        Gets and returns a detached user objects for all users in
+        specified order and limit.
+
+        Args:
+            orderby (str): Name of field to sort by.
+                Defaults to None.
+            order (str): How to order, 'asc' for acsending,
+                'desc' for descending. Defaults to "asc"
+            offset (int): How many rows to skip of query.
+                Defaults to 0.
+            limit (int): How many rows to return of query.
+                Defaults to 1000.
+        Returns:
+            The user model objects in specified order and ammounts.
+            Total number of results that match criteria.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Query all users
+            query = session.query(User)
+            # Order query depending on order parameters
+            if(orderby and hasattr(User, orderby) and order == "asc"):
+                query = query.order_by(asc(getattr(User, orderby)))
+            elif(orderby and hasattr(User, orderby) and order == "desc"):
+                query = query.order_by(desc(getattr(User, orderby)))
+            else:
+                pass
+            # Get count
+            count = query.count()
+            # Filter query by range
+            query = query.limit(limit).offset(offset)
+            # Get query results
+            users = query.all()
+            # Detach all share objects from session
+            for user in users:
+                session.expunge(user)
+        # Return share data
+        return users, count
+
     def getuserbyid(self, userID):
         """
         Gets and returns a detached user object based on given ID.

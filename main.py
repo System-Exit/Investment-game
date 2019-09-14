@@ -366,6 +366,10 @@ def adminlogin():
 
 @app.route('/admin/logout')
 def adminlogout():
+    """
+    Handles logout for admin.
+
+    """
     # Remove session admin authentication
     session.pop('authenticated_admin', None)
     # Redirect to admin login
@@ -374,6 +378,10 @@ def adminlogout():
 
 @app.route('/admin/dashboard')
 def admindashboard():
+    """
+    Displays dashboard for administrator.
+
+    """
     # Check that admin is logged in
     if not session['authenticated_admin']:
         # Redirect to login if the admin is not authenticated
@@ -382,6 +390,66 @@ def admindashboard():
         return redirect(url_for('adminlogin'))
     # Render template
     return render_template('admindashboard.html')
+
+
+@app.route('/admin/userlist')
+def adminuserlist():
+    """
+    Lists all users for administrator.
+
+    """
+    # Check that admin is logged in
+    if not session['authenticated_admin']:
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+    # Get field to order by for displaying shares
+    if(request.args.get('orderby')):
+        orderby = request.args.get('orderby')
+    else:
+        orderby = None
+    # Get order for displaying shares
+    if(request.args.get('order')):
+        order = request.args.get('order')
+    else:
+        order = "asc"
+    # Get the page of shares to display and calculate offset
+    # TODO: DEFINE LIMIT IN A CONFIG
+    limit = 10
+    if(request.args.get('page')):
+        offset = 10*(int(request.args.get('page'))-1)
+    else:
+        offset = 0
+    # Get users
+    users, usercount = gdb.getusers(
+        orderby=orderby,
+        order=order,
+        offset=offset,
+        limit=limit)
+    # Render template
+    return render_template('adminuserlist.html',
+                           users=users,
+                           usercount=usercount,
+                           countperpage=limit)
+
+
+@app.route('/admin/user/<userID>')
+def adminuser(userID):
+    """
+    Displays details of a user for an administrator.
+
+    """
+    # Check that admin is logged in
+    if not session['authenticated_admin']:
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+    # Get user based on user ID
+    user = gdb.getuserbyid(userID)
+    # Render template
+    return render_template('adminuser.html', user=user)
 
 
 @app.route('/tasks/updateshares')
