@@ -367,22 +367,34 @@ class GoogleDatabaseAPI:
             session.expunge(share)
         return share
 
-    def getsharepricehistory(self, issuercode):
+    def getsharepricehistory(self, issuercode, starttime=None, endtime=None):
         """
         Returns the price history of a single share based on the share ID.
+        Start time and end time can be specified to get a range of times.
 
         Args:
             issuercode (str): Issuer ID of the share to get price data for.
+            starttime (datetime): Include history after this time.
+            endtime (datetime): Include history before this time.
         Returns:
-            All SharePrice objects for that particular share.
+            All SharePrice objects for that particular share withn
+            specified time.
             None if the share doesn't exist or if the share has no price data.
 
         """
         # Initialse session
         with self.sessionmanager() as session:
             # Get all shares
-            shareprices = session.query(SharePrice).filter(
-                SharePrice.issuerID == issuercode).all()
+            query = session.query(SharePrice).filter(
+                SharePrice.issuerID == issuercode)
+            # Filter times before start time
+            if(isinstance(starttime, datetime)):
+                query = query.filter(SharePrice.recordtime > starttime)
+            # Filter times after end time
+            if(isinstance(endtime, datetime)):
+                query = query.filter(SharePrice.recordtime < endtime)
+            # Get shareprices
+            shareprices = query.all()
             # Detach all share objects from session
             for shareprice in shareprices:
                 session.expunge(shareprice)
