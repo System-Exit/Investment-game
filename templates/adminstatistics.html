@@ -1,0 +1,14 @@
+{% extends "adminlayout.html" %}
+{% set active_page = "statistics" %}
+{% block content %}
+<div id="share-body" class="container">
+    {% include "messageblock.html" %}
+    <h2>User Statistics</h2>
+    <div>
+        <h3>Gender distribution</h3>
+        <p>Male: {{ (genderdist.male*100)|round(2) }}%</p>
+        <p>Female: {{ (genderdist.female*100)|round(2) }}%</p>
+        <p>Other: {{ (genderdist.other*100)|round(2) }}%</p>
+    </div>
+</div>
+{% endblock %}
