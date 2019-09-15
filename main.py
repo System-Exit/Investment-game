@@ -536,7 +536,6 @@ def unbanuser(userID):
 def adminstatistics():
     """
     Lists statistics of userbase to admin.
-    TODO: Potentially move statistics calculation to API for efficiency
 
     """
     # Check that admin is logged in
@@ -546,29 +545,12 @@ def adminstatistics():
               category="error")
         return redirect(url_for('adminlogin'))
 
-    # Get all users
-    users, usercount = gdb.getusers()
-
-    # Calculate gender distribution
-    gendercounts = dict()
-    gendercounts['M'] = 0
-    gendercounts['F'] = 0
-    gendercounts['O'] = 0
-    for user in users:
-        if(user.gender == 'M'):
-            gendercounts['M'] += 1
-        elif(user.gender == 'F'):
-            gendercounts['F'] += 1
-        elif(user.gender == 'O'):
-            gendercounts['O'] += 1
-    genderdist = dict()
-    genderdist['male'] = gendercounts['M'] / usercount
-    genderdist['female'] = gendercounts['F'] / usercount
-    genderdist['other'] = gendercounts['O'] / usercount
+    # Get all user statistics
+    userstatistics = gdb.getuserstatistics()
 
     # Render template with statistics
     return render_template('adminstatistics.html',
-                           genderdist=genderdist)
+                           userstatistics=userstatistics)
 
 @app.route('/tasks/updateshares')
 def sharesupdate():

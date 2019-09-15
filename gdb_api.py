@@ -7,7 +7,8 @@ from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
 import json
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from dateutil.relativedelta import relativedelta
 import math
 
 
@@ -821,6 +822,61 @@ class GoogleDatabaseAPI:
             user.banned = False
         # Return success
         return True
+
+    def getuserstatistics(self):
+        """
+        Queries, calculates and returns different user statistics.
+        TODO: Potentially move different statistics into seperate methods.
+
+        Returns:
+            A dictionary of statistics as follows:
+            - Gender distribution as 'genderdist' dict that contains the
+                decimal percentage for each gender, male, female and other.
+            - Age group distribution as 'agegroupdist' dict that contains the
+                decimal percentage for each age group of '0to12', '13to17',
+                '18to25' and '26toinf'.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Query all users
+            userquery = session.query(User)
+            # Get user count
+            usercount = userquery.count()
+
+            # Initialise statistics
+            statistics = dict()
+            # Get gender distribution
+            statistics['genderdist'] = {
+                'male': userquery.filter(
+                    User.gender == 'M').count() / usercount,
+                'female': userquery.filter(
+                    User.gender == 'F').count() / usercount,
+                'other': userquery.filter(
+                    User.gender == 'O').count() / usercount
+            }
+            # Get age group distribution
+            statistics['agegroupdist'] = {
+                '0to12': userquery.filter(
+                        User.dob > date.today() - relativedelta(years=13)
+                    ).count() / usercount,
+                '13to17': userquery.filter(
+                        User.dob <= date.today() - relativedelta(years=13)
+                    ).filter(
+                        User.dob > date.today() - relativedelta(years=18)
+                    ).count() / usercount,
+                '18to25': userquery.filter(
+                        User.dob <= date.today() - relativedelta(years=18)
+                    ).filter(
+                        User.dob > date.today() - relativedelta(years=26)
+                    ).count() / usercount,
+                '26toinf': userquery.filter(
+                        User.dob <= date.today() - relativedelta(years=26)
+                    ).count() / usercount
+            }
+
+            # Return statistics
+            return statistics
 
 if __name__ == "__main__":
     # Initialize API

@@ -6,9 +6,16 @@
     <h2>User Statistics</h2>
     <div>
         <h3>Gender distribution</h3>
-        <p>Male: {{ (genderdist.male*100)|round(2) }}%</p>
-        <p>Female: {{ (genderdist.female*100)|round(2) }}%</p>
-        <p>Other: {{ (genderdist.other*100)|round(2) }}%</p>
+        <p>Male: {{ (userstatistics.genderdist['male']*100)|round(2) }}%</p>
+        <p>Female: {{ (userstatistics.genderdist['female']*100)|round(2) }}%</p>
+        <p>Other: {{ (userstatistics.genderdist['other']*100)|round(2) }}%</p>
+    </div>
+    <div>
+        <h3>Age distribution</h3>
+        <p>12 or below: {{ (userstatistics.agegroupdist['0to12']*100)|round(2) }}%</p>
+        <p>13 to 17: {{ (userstatistics.agegroupdist['13to17']*100)|round(2) }}%</p>
+        <p>18 to 25: {{ (userstatistics.agegroupdist['18to25']*100)|round(2) }}%</p>
+        <p>26 or above: {{ (userstatistics.agegroupdist['26toinf']*100)|round(2) }}%</p>
     </div>
 </div>
 {% endblock %}
