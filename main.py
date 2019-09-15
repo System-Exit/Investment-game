@@ -552,6 +552,7 @@ def adminstatistics():
     return render_template('adminstatistics.html',
                            userstatistics=userstatistics)
 
+
 @app.route('/tasks/updateshares')
 def sharesupdate():
     """
