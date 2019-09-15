@@ -141,6 +141,35 @@ body
     font-size: 24;
 }
 
+/* Login page */
+.login-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.login-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.login-form input
+{
+    text-align: center;
+    border-radius: 10px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.login-form table
+{
+    width: 200px;
+}
+.login-form table th
+{
+    text-align: center;
+}
+
 /* Registration page */
 .registration-form
 {
