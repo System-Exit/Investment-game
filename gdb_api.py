@@ -830,10 +830,10 @@ class GoogleDatabaseAPI:
 
         Returns:
             A dictionary of statistics as follows:
-            - Gender distribution as 'genderdist' dict that contains the
-                decimal percentage for each gender, male, female and other.
-            - Age group distribution as 'agegroupdist' dict that contains the
-                decimal percentage for each age group of '0to12', '13to17',
+            - Gender distribution as 'gendercounts' dict that contains the
+                integer count for each gender, male, female and other.
+            - Age group distribution as 'agegroupcounts' dict that contains the
+                integer count for each age group of '0to12', '13to17',
                 '18to25' and '26toinf'.
 
         """
@@ -847,32 +847,32 @@ class GoogleDatabaseAPI:
             # Initialise statistics
             statistics = dict()
             # Get gender distribution
-            statistics['genderdist'] = {
+            statistics['gendercounts'] = {
                 'male': userquery.filter(
-                    User.gender == 'M').count() / usercount,
+                    User.gender == 'M').count(),
                 'female': userquery.filter(
-                    User.gender == 'F').count() / usercount,
+                    User.gender == 'F').count(),
                 'other': userquery.filter(
-                    User.gender == 'O').count() / usercount
+                    User.gender == 'O').count()
             }
             # Get age group distribution
-            statistics['agegroupdist'] = {
+            statistics['agegroupcounts'] = {
                 '0to12': userquery.filter(
                         User.dob > date.today() - relativedelta(years=13)
-                    ).count() / usercount,
+                    ).count(),
                 '13to17': userquery.filter(
                         User.dob <= date.today() - relativedelta(years=13)
                     ).filter(
                         User.dob > date.today() - relativedelta(years=18)
-                    ).count() / usercount,
+                    ).count(),
                 '18to25': userquery.filter(
                         User.dob <= date.today() - relativedelta(years=18)
                     ).filter(
                         User.dob > date.today() - relativedelta(years=26)
-                    ).count() / usercount,
+                    ).count(),
                 '26toinf': userquery.filter(
                         User.dob <= date.today() - relativedelta(years=26)
-                    ).count() / usercount
+                    ).count()
             }
 
             # Return statistics
