@@ -1,21 +1,86 @@
 {% extends "adminlayout.html" %}
 {% set active_page = "statistics" %}
 {% block content %}
-<div id="share-body" class="container">
+<div id="statistics-body" class="container">
     {% include "messageblock.html" %}
     <h2>User Statistics</h2>
     <div>
         <h3>Gender distribution</h3>
-        <p>Male: {{ (userstatistics.genderdist['male']*100)|round(2) }}%</p>
-        <p>Female: {{ (userstatistics.genderdist['female']*100)|round(2) }}%</p>
-        <p>Other: {{ (userstatistics.genderdist['other']*100)|round(2) }}%</p>
+        <div id="gender-pie-chart-container">
+            <canvas id="gender-pie-chart"></canvas>
+        </div>
     </div>
     <div>
         <h3>Age distribution</h3>
-        <p>12 or below: {{ (userstatistics.agegroupdist['0to12']*100)|round(2) }}%</p>
-        <p>13 to 17: {{ (userstatistics.agegroupdist['13to17']*100)|round(2) }}%</p>
-        <p>18 to 25: {{ (userstatistics.agegroupdist['18to25']*100)|round(2) }}%</p>
-        <p>26 or above: {{ (userstatistics.agegroupdist['26toinf']*100)|round(2) }}%</p>
+        <div id="age-pie-chart-container">
+            <canvas id="age-pie-chart"></canvas>
+        </div>
     </div>
 </div>
+{# Chart.js and statistics graphs scripts #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+<script>
+    // Generate gender data for pie chart
+    var genderPieChartData = {
+        datasets: [{
+            data: [
+                {{ userstatistics.gendercounts['male'] }},
+                {{ userstatistics.gendercounts['female'] }},
+                {{ userstatistics.gendercounts['other'] }}
+            ],
+            backgroundColor: [
+                "rgba(0, 0, 255, 1)",
+                "rgba(255, 0, 255, 1)",
+                "rgba(128, 128, 128)"
+            ]
+        }],
+        labels: [
+            'Male',
+            'Female',
+            'Other'
+        ]
+    }
+    // Generate age data for pie chart
+    var agePieChartData = {
+        datasets: [{
+            label: 'Age groups',
+            data: [
+                {{ userstatistics.agegroupcounts['0to12'] }},
+                {{ userstatistics.agegroupcounts['13to17'] }},
+                {{ userstatistics.agegroupcounts['18to25'] }},
+                {{ userstatistics.agegroupcounts['26toinf'] }}
+            ],
+            backgroundColor: "rgba(0, 0, 255, 1)",
+        }],
+        labels: [
+            '0 - 12',
+            '13 - 17',
+            '18 - 25',
+            '26+'
+        ]
+    }
+    var agePieChartOptions = {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    precision: 0
+                }
+            }]
+        }
+    }
+    // Create charts
+    window.onload = function() {
+        var ctx = document.getElementById("gender-pie-chart").getContext("2d");
+        var genderPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: genderPieChartData
+        });
+        var ctx = document.getElementById("age-pie-chart").getContext("2d");
+        var agePieChart = new Chart(ctx, {
+            type: 'bar',
+            data: agePieChartData,
+            options: agePieChartOptions
+        });
+    }
+</script>
 {% endblock %}

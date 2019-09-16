@@ -208,3 +208,21 @@ input#byear
     padding-left: 10px;
     padding-right: 10px;
 }
+
+/* Admin statistics page charts */
+#statsistics-body
+{
+    text-align: center;
+}
+#gender-pie-chart-container
+{
+    display: inline-block;
+    height: 250px;
+    width: 500px;
+}
+#age-pie-chart-container
+{
+    display: inline-block;
+    height: 250px;
+    width: 500px;
+}
