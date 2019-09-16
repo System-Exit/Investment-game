@@ -43,7 +43,6 @@
     // Generate age data for pie chart
     var agePieChartData = {
         datasets: [{
-            label: 'Age groups',
             data: [
                 {{ userstatistics.agegroupcounts['0to12'] }},
                 {{ userstatistics.agegroupcounts['13to17'] }},
@@ -59,9 +58,30 @@
             '26+'
         ]
     }
+    // Age pie chart options
     var agePieChartOptions = {
+        legend: {
+            display: false
+        },
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem) {
+                    return tooltipItem.yLabel;
+                }
+            }
+        },
         scales: {
+            xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Age Group'
+                }
+            }],
             yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Count'
+                },
                 ticks: {
                     precision: 0
                 }
