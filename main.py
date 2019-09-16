@@ -105,7 +105,7 @@ def login():
             flash("Invalid username or password.", category="error")
             return redirect(url_for('login'))
     # Render template
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, userbalance=current_user.balance)
 
 
 @login_manager.user_loader
