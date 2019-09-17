@@ -29,9 +29,16 @@ def index():
     Handles landing page, which provides users links to register of login.
 
     """
+    # Check if user is already logged in
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
+    # Check if admin is already logged in
+    if checkAdminIsLoggedIn() is True:
+        # Redirect to admin dashboard
+        return redirect(url_for('admindashboard'))
+
+    # Render template
     return render_template('index.html')
 
 
@@ -42,10 +49,15 @@ def registration():
     Provides user a form to input registration information.
 
     """
-    # Checks if user is already logged in
+    # Check if user is already logged in
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
+    # Check if admin is already logged in
+    if checkAdminIsLoggedIn() is True:
+        # Redirect to admin dashboard
+        return redirect(url_for('admindashboard'))
+
     # Initialise registration form
     form = UserRegistrationForm()
     # Validate and process form data
@@ -85,9 +97,15 @@ def login():
     Procides user with a login form and checks that input matches a valid user.
 
     """
+    # Check if user is already logged in
     if current_user.is_authenticated:
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
+    # Check if admin is already logged in
+    if checkAdminIsLoggedIn() is True:
+        # Redirect to admin dashboard
+        return redirect(url_for('admindashboard'))
+
     # Initialise login form
     form = UserLoginForm()
     # Validate and process form data
@@ -341,35 +359,6 @@ def sellshares():
     return redirect(request.referrer or url_for('dashboard'))
 
 
-def checkUserIsLoggedIn():
-    """
-    Helper method for checking if the user is logged in or banned.
-    If the user isn't logged in, they are redirected to login page.
-    If the user has been banned, redirect them to index.
-
-    Returns:
-        True is the user is logged in and is not banned.
-        An appropriate redirect if the user is not logged in or banned.
-
-    """
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
-    # Check if the user has been banned
-    if current_user.banned:
-        # Inform the user they are banned
-        flash("You have been banned, please contact an admin.",
-              category="error")
-        # Log user out
-        logout_user()
-        # Redirect to index
-        return redirect(url_for('index'))
-    # Return success
-    return True
-
-
 @app.route('/admin', methods=['GET', 'POST'])
 @app.route('/admin/login', methods=['GET', 'POST'])
 def adminlogin():
@@ -377,6 +366,10 @@ def adminlogin():
     Landing and login page for administators.
 
     """
+    # Check if admin is already logged in
+    if checkAdminIsLoggedIn() is True:
+        return redirect(url_for('admindashboard'))
+
     # Initialise login form
     form = UserLoginForm()
     # Validate and process form data
@@ -416,12 +409,11 @@ def admindashboard():
     Displays dashboard for administrator.
 
     """
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
+
     # Render template
     return render_template('admindashboard.html')
 
@@ -432,12 +424,11 @@ def adminuserlist():
     Lists all users for administrator.
 
     """
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
+
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
         orderby = request.args.get('orderby')
@@ -474,12 +465,11 @@ def adminuser(userID):
     Displays details of a user for an administrator.
 
     """
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
+
     # Get user based on user ID
     user = gdb.getuserbyid(userID)
     # Render template
@@ -488,12 +478,10 @@ def adminuser(userID):
 
 @app.route('/admin/user/<userID>/ban')
 def banuser(userID):
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
 
     # Ban user based on ID
     result = gdb.banuser(userID)
@@ -511,12 +499,10 @@ def banuser(userID):
 
 @app.route('/admin/user/<userID>/unban')
 def unbanuser(userID):
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
 
     # Ban user based on ID
     result = gdb.unbanuser(userID)
@@ -538,12 +524,10 @@ def adminstatistics():
     Lists statistics of userbase to admin.
 
     """
-    # Check that admin is logged in
-    if not session['authenticated_admin']:
-        # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
-        return redirect(url_for('adminlogin'))
+    # Check admin is logged in
+    check = checkAdminIsLoggedIn()
+    if check is not True:
+        return check
 
     # Get all user statistics
     userstatistics = gdb.getuserstatistics()
@@ -551,6 +535,57 @@ def adminstatistics():
     # Render template with statistics
     return render_template('adminstatistics.html',
                            userstatistics=userstatistics)
+
+
+def checkUserIsLoggedIn():
+    """
+    Helper method for checking if the user is logged in or banned.
+    If the user isn't logged in, they are redirected to login page.
+    If the user has been banned, redirect them to index.
+
+    Returns:
+        True is the user is logged in and is not banned.
+        An appropriate redirect if the user is not logged in or banned.
+
+    """
+    # Check if user is logged in
+    if not current_user.is_authenticated:
+        # Redirect to login if the user is not authenticated
+        flash("Logged in user only.", category="error")
+        return redirect(url_for('login'))
+    # Check if the user has been banned
+    if current_user.banned:
+        # Inform the user they are banned
+        flash("You have been banned, please contact an admin.",
+              category="error")
+        # Log user out
+        logout_user()
+        # Redirect to index
+        return redirect(url_for('index'))
+    # Return success
+    return True
+
+
+def checkAdminIsLoggedIn():
+    """
+    Helper method for checking if an admin is logged in.
+    If the admin isn't logged in, they are redirected to login page.
+    If the user has been banned, redirect them to index.
+
+    Returns:
+        True is the admin is authenticated.
+        An appropriate redirect if the user is not authenticated.
+
+    """
+    # Check that admin is logged in
+    if ('authenticated_admin' not in session or
+       not session['authenticated_admin']):
+        # Redirect to login if the admin is not authenticated
+        flash("You must be an admin to access this page.",
+              category="error")
+        return redirect(url_for('adminlogin'))
+    # Since admin is authenticated, return true
+    return True
 
 
 @app.route('/tasks/updateshares')
