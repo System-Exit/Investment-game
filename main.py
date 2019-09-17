@@ -34,8 +34,8 @@ def index():
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
     # Check if admin is already logged in
-    if checkAdminIsLoggedIn() is True:
-        # Redirect to admin dashboard
+    check = checkAdminIsLoggedIn()
+    if check is True:
         return redirect(url_for('admindashboard'))
 
     # Render template
@@ -54,8 +54,8 @@ def registration():
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
     # Check if admin is already logged in
-    if checkAdminIsLoggedIn() is True:
-        # Redirect to admin dashboard
+    check = checkAdminIsLoggedIn()
+    if check is True:
         return redirect(url_for('admindashboard'))
 
     # Initialise registration form
@@ -102,8 +102,8 @@ def login():
         # Redirect to dashboard
         return redirect(url_for('dashboard'))
     # Check if admin is already logged in
-    if checkAdminIsLoggedIn() is True:
-        # Redirect to admin dashboard
+    check = checkAdminIsLoggedIn()
+    if check is True:
         return redirect(url_for('admindashboard'))
 
     # Initialise login form
@@ -156,9 +156,9 @@ def dashboard():
 
     """
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Get current user
     user = current_user
@@ -169,9 +169,9 @@ def dashboard():
 @app.route('/portfolio', methods=['GET'])
 def portfolio():
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Get user info
     user = current_user
@@ -214,9 +214,9 @@ def sharelist():
 
     """
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
@@ -255,9 +255,9 @@ def share(issuerID):
 
     """
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
@@ -308,9 +308,9 @@ def share(issuerID):
 @app.route('/buyshares', methods=['GET', 'POST'])
 def buyshares():
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Initialise buy form
     buyform = BuyShareForm()
@@ -335,9 +335,9 @@ def buyshares():
 @app.route('/sellshares', methods=['GET', 'POST'])
 def sellshares():
     # Check valid user is logged in
-    check = checkUserIsLoggedIn()
+    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
     if(check is not True):
-        return check
+        return redirect
 
     # Initialise buy and sell share forms
     sellform = SellShareForm()
@@ -367,7 +367,8 @@ def adminlogin():
 
     """
     # Check if admin is already logged in
-    if checkAdminIsLoggedIn() is True:
+    check = checkAdminIsLoggedIn()
+    if check is True:
         return redirect(url_for('admindashboard'))
 
     # Initialise login form
@@ -410,9 +411,9 @@ def admindashboard():
 
     """
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        return check
+        return redirect
 
     # Render template
     return render_template('admindashboard.html')
@@ -425,11 +426,9 @@ def adminuserlist():
 
     """
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        flash("You must be an admin to access this page.",
-              category="error")
-        return check
+        return redirect
 
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
@@ -468,11 +467,9 @@ def adminuser(userID):
 
     """
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        flash("You must be an admin to access this page.",
-              category="error")
-        return check
+        return redirect
 
     # Get user based on user ID
     user = gdb.getuserbyid(userID)
@@ -483,11 +480,9 @@ def adminuser(userID):
 @app.route('/admin/user/<userID>/ban')
 def banuser(userID):
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        flash("You must be an admin to access this page.",
-              category="error")
-        return check
+        return redirect
 
     # Ban user based on ID
     result = gdb.banuser(userID)
@@ -506,11 +501,9 @@ def banuser(userID):
 @app.route('/admin/user/<userID>/unban')
 def unbanuser(userID):
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        flash("You must be an admin to access this page.",
-              category="error")
-        return check
+        return redirect
 
     # Ban user based on ID
     result = gdb.unbanuser(userID)
@@ -533,9 +526,9 @@ def adminstatistics():
 
     """
     # Check admin is logged in
-    check = checkAdminIsLoggedIn()
+    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
     if check is not True:
-        return check
+        return redirect
 
     # Get all user statistics
     userstatistics = gdb.getuserstatistics()
@@ -545,12 +538,17 @@ def adminstatistics():
                            userstatistics=userstatistics)
 
 
-def checkUserIsLoggedIn():
+def checkUserIsLoggedIn(warnuser=False, getredirect=False):
     """
     Helper method for checking if the user is logged in or banned.
     If the user isn't logged in, they are redirected to login page.
     If the user has been banned, redirect them to index.
 
+    Args:
+        warnuser (bool): Whether or not to flash warning to user.
+            Defaults to False.
+        getredirect (bool): Whether or not to include a redirect along with
+            the result. Defaults to False.
     Returns:
         True is the user is logged in and is not banned.
         An appropriate redirect if the user is not logged in or banned.
@@ -558,20 +556,37 @@ def checkUserIsLoggedIn():
     """
     # Check if user is logged in
     if not current_user.is_authenticated:
-        # Redirect to login if the user is not authenticated
-        flash("Logged in user only.", category="error")
-        return redirect(url_for('login'))
+        # Flash error if specified
+        if warnuser is True:
+            flash("Logged in user only.", category="error")
+        # Return false and redirect to login if specified
+        if getredirect:
+            # Redirect to index
+            return False, redirect(url_for('login'))
+        else:
+            return False
     # Check if the user has been banned
     if current_user.banned:
-        # Inform the user they are banned
-        flash("You have been banned, please contact an admin.",
-              category="error")
+        # Inform the user they are banned if specified
+        if warnuser is True:
+            flash("You have been banned, please contact an admin.",
+                  category="error")
         # Log user out
         logout_user()
-        # Redirect to index
-        return redirect(url_for('index'))
-    # Return success
-    return True
+        # Return false and a redirect to index if specified
+        if getredirect:
+            # Redirect to index
+            return False, redirect(url_for('index'))
+        else:
+            return False
+    # Flash warning if specified
+    if warnuser is True:
+        flash("Already logged in.", category="error")
+    # Since user is authenticated, return true and no redirect if specified
+    if getredirect:
+        return True, None
+    else:
+        return True
 
 
 def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
@@ -595,7 +610,7 @@ def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
     if ('authenticated_admin' not in session or
        not session['authenticated_admin']):
         # Flash error if specified
-        if warn_user is True:
+        if warnuser is True:
             flash("You must be an admin to access this page.",
                   category="error")
         # Return false and a redirect if specified
@@ -605,6 +620,9 @@ def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
             return False
         # Redirect to login if the admin is not authenticated
         return redirect(url_for('adminlogin'))
+    # Flash warning if specified
+    if warnuser is True:
+        flash("Already logged in as admin.", category="error")
     # Since admin is authenticated, return true and no redirect if specified
     if getredirect:
         return True, None
