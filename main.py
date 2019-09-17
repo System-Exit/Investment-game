@@ -34,6 +34,8 @@ def user_login_required(f):
             # Return redirect to login
             return redirect(url_for('login'))
         if current_user.banned:
+            # Log user out so they can't access their account
+            logout_user()
             # Flash warning that user has been banned
             flash("You have been banned, please contact an admin.",
                   category="error")
