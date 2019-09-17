@@ -580,9 +580,9 @@ def checkUserIsLoggedIn(warnuser=False, getredirect=False):
             return False, redirect(url_for('index'))
         else:
             return False
-    # Flash warning if specified
-    if warnuser is True:
-        flash("Already logged in.", category="error")
+    # Flash warning if specified (TODO: Rework)
+    # if warnuser is True:
+    #     flash("Already logged in.", category="error")
     # Since user is authenticated, return true and no redirect if specified
     if getredirect:
         return True, None
@@ -621,9 +621,9 @@ def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
             return False
         # Redirect to login if the admin is not authenticated
         return redirect(url_for('adminlogin'))
-    # Flash warning if specified
-    if warnuser is True:
-        flash("Already logged in as admin.", category="error")
+    # Flash warning if specified (TODO: Rework)
+    # if warnuser is True:
+    #     flash("Already logged in as admin.", category="error")
     # Since admin is authenticated, return true and no redirect if specified
     if getredirect:
         return True, None
