@@ -123,7 +123,7 @@ def login():
             flash("Invalid username or password.", category="error")
             return redirect(url_for('login'))
     # Render template
-    return render_template('login.html', form=form, userbalance=current_user.balance)
+    return render_template('login.html', form=form)
 
 
 @login_manager.user_loader
@@ -163,7 +163,8 @@ def dashboard():
     # Get current user
     user = current_user
     # Render template
-    return render_template('dashboard.html', user=user)
+    return render_template('dashboard.html', user=user,
+                           userbalance=current_user.balance)
 
 
 @app.route('/portfolio', methods=['GET'])
