@@ -105,6 +105,40 @@
             {% endif %}
         </div>
     {% endif %}
+    <canvas id="shareprice-history"></canvas>
+    {% for shareprice in sharepricehistory %}
+        <p>{{ shareprice.recordtime }}</p>
+    {% endfor %}
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+<script>
+    var pricegraphdata = {
+        datasets: [{
+            data: [
+            {% for shareprice in sharepricehistory %}
+                { x: "{{ shareprice.recordtime }}", y: {{ shareprice.price }}},
+            {% endfor %}
+        ]
+        }]
+    };
+    var pricegraphoptions = {
+        scales: {
+            xAxes: [{
+                type: 'time'
+            }]
+        }
+    };
+    window.onload = function() {
+        var ctx = document.getElementById("shareprice-history").getContext("2d");
+        var pricegraph = new Chart(ctx, {
+            type: 'line',
+            data:  pricegraphdata,
+            options: pricegraphoptions,
+        });
+    }
+</script>
+
+
 {% include "sharemodals.html" %}
 {% endblock %}

@@ -7,7 +7,7 @@ from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
 import json
 import requests
-from datetime import datetime, date
+from datetime import datetime, timedelta
 import math
 
 
@@ -837,11 +837,4 @@ class GoogleDatabaseAPI:
 if __name__ == "__main__":
     # Initialize API
     gdb = GoogleDatabaseAPI()
-    # Add some default stocks
-    # stocks = []
-    # with open("stock_list.txt") as f:
-    #     lines = f.readlines()
-    #     for line in lines:
-    #         stocks.append(line.strip())
-    # for stock in stocks:
-    #     gdb.addshare(stock)
+
