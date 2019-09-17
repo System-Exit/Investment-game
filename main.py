@@ -6,6 +6,7 @@ from config import Config
 from models import User
 from forms import (UserLoginForm, UserRegistrationForm,
                    BuyShareForm, SellShareForm)
+from functools import wraps
 from gdb_api import GoogleDatabaseAPI
 
 MyCloud = True
@@ -20,6 +21,46 @@ login_manager = LoginManager(app)
 gdb = GoogleDatabaseAPI()
 
 
+def user_login_required(f):
+    """
+    Decorator for routes that require user logins.
+
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            # Flash warning that user login is required
+            flash("Logged in user only.", category="error")
+            # Return redirect to login
+            return redirect(url_for('login'))
+        if current_user.banned:
+            # Flash warning that user has been banned
+            flash("You have been banned, please contact an admin.",
+                  category="error")
+            # Return redirect to index
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def admin_login_required(f):
+    """
+    Decorator for routes that require admin logins.
+
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if ('authenticated_admin' not in session or
+           not session['authenticated_admin']):
+            # Flash warning that admin login is required
+            flash("You must be an admin to access this page.",
+                  category="error")
+            # Return redirect
+            return redirect(url_for('adminlogin'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 # Routing for each page
 # TODO: Change where routing is handled
 @app.route('/')
@@ -29,15 +70,6 @@ def index():
     Handles landing page, which provides users links to register of login.
 
     """
-    # Check if user is already logged in
-    if current_user.is_authenticated:
-        # Redirect to dashboard
-        return redirect(url_for('dashboard'))
-    # Check if admin is already logged in
-    check = checkAdminIsLoggedIn()
-    if check is True:
-        return redirect(url_for('admindashboard'))
-
     # Render template
     return render_template('index.html')
 
@@ -49,15 +81,6 @@ def registration():
     Provides user a form to input registration information.
 
     """
-    # Check if user is already logged in
-    if current_user.is_authenticated:
-        # Redirect to dashboard
-        return redirect(url_for('dashboard'))
-    # Check if admin is already logged in
-    check = checkAdminIsLoggedIn()
-    if check is True:
-        return redirect(url_for('admindashboard'))
-
     # Initialise registration form
     form = UserRegistrationForm()
     # Validate and process form data
@@ -97,15 +120,6 @@ def login():
     Procides user with a login form and checks that input matches a valid user.
 
     """
-    # Check if user is already logged in
-    if current_user.is_authenticated:
-        # Redirect to dashboard
-        return redirect(url_for('dashboard'))
-    # Check if admin is already logged in
-    check = checkAdminIsLoggedIn()
-    if check is True:
-        return redirect(url_for('admindashboard'))
-
     # Initialise login form
     form = UserLoginForm()
     # Validate and process form data
@@ -150,16 +164,12 @@ def logout():
 
 
 @app.route('/dashboard')
+@user_login_required
 def dashboard():
     """
     Handles and displays dashboard for user.
 
     """
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Get current user
     user = current_user
     # Render template
@@ -168,12 +178,8 @@ def dashboard():
 
 
 @app.route('/portfolio', methods=['GET'])
+@user_login_required
 def portfolio():
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Get user info
     user = current_user
     # Get field to order by for displaying shares
@@ -209,16 +215,12 @@ def portfolio():
 
 
 @app.route('/sharelist', methods=['GET'])
+@user_login_required
 def sharelist():
     """
     Displays current values for all shares.
 
     """
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
         orderby = request.args.get('orderby')
@@ -250,16 +252,12 @@ def sharelist():
 
 
 @app.route('/share/<issuerID>',  methods=['GET'])
+@user_login_required
 def share(issuerID):
     """
     Displays share information.
 
     """
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Initialise buy and sell share forms
     buyform = BuyShareForm()
     sellform = SellShareForm()
@@ -307,12 +305,8 @@ def share(issuerID):
 
 
 @app.route('/buyshares', methods=['GET', 'POST'])
+@user_login_required
 def buyshares():
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Initialise buy form
     buyform = BuyShareForm()
     # Validate and process form data
@@ -334,12 +328,8 @@ def buyshares():
 
 
 @app.route('/sellshares', methods=['GET', 'POST'])
+@user_login_required
 def sellshares():
-    # Check valid user is logged in
-    check, redirect = checkUserIsLoggedIn(warnuser=True, getredirect=True)
-    if(check is not True):
-        return redirect
-
     # Initialise buy and sell share forms
     sellform = SellShareForm()
     # Validate and process form data
@@ -367,11 +357,6 @@ def adminlogin():
     Landing and login page for administators.
 
     """
-    # Check if admin is already logged in
-    check = checkAdminIsLoggedIn()
-    if check is True:
-        return redirect(url_for('admindashboard'))
-
     # Initialise login form
     form = UserLoginForm()
     # Validate and process form data
@@ -406,31 +391,23 @@ def adminlogout():
 
 
 @app.route('/admin/dashboard')
+@admin_login_required
 def admindashboard():
     """
     Displays dashboard for administrator.
 
     """
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Render template
     return render_template('admindashboard.html')
 
 
 @app.route('/admin/userlist')
+@admin_login_required
 def adminuserlist():
     """
     Lists all users for administrator.
 
     """
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
         orderby = request.args.get('orderby')
@@ -462,16 +439,12 @@ def adminuserlist():
 
 
 @app.route('/admin/user/<userID>')
+@admin_login_required
 def adminuser(userID):
     """
     Displays details of a user for an administrator.
 
     """
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Get user based on user ID
     user = gdb.getuserbyid(userID)
     # Render template
@@ -479,12 +452,8 @@ def adminuser(userID):
 
 
 @app.route('/admin/user/<userID>/ban')
+@admin_login_required
 def banuser(userID):
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Ban user based on ID
     result = gdb.banuser(userID)
     # Flash message for whether or not the ban was successful
@@ -500,12 +469,8 @@ def banuser(userID):
 
 
 @app.route('/admin/user/<userID>/unban')
+@admin_login_required
 def unbanuser(userID):
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Ban user based on ID
     result = gdb.unbanuser(userID)
     # Flash message for whether or not the ban was successful
@@ -521,114 +486,18 @@ def unbanuser(userID):
 
 
 @app.route('/admin/statistics')
+@admin_login_required
 def adminstatistics():
     """
     Lists statistics of userbase to admin.
 
     """
-    # Check admin is logged in
-    check, redirect = checkAdminIsLoggedIn(warnuser=True, getredirect=True)
-    if check is not True:
-        return redirect
-
     # Get all user statistics
     userstatistics = gdb.getuserstatistics()
 
     # Render template with statistics
     return render_template('adminstatistics.html',
                            userstatistics=userstatistics)
-
-
-def checkUserIsLoggedIn(warnuser=False, getredirect=False):
-    """
-    Helper method for checking if the user is logged in or banned.
-    If the user isn't logged in, they are redirected to login page.
-    If the user has been banned, redirect them to index.
-
-    Args:
-        warnuser (bool): Whether or not to flash warning to user.
-            Defaults to False.
-        getredirect (bool): Whether or not to include a redirect along with
-            the result. Defaults to False.
-    Returns:
-        True is the user is logged in and is not banned.
-        An appropriate redirect if the user is not logged in or banned.
-
-    """
-    # Check if user is logged in
-    if not current_user.is_authenticated:
-        # Flash error if specified
-        if warnuser is True:
-            flash("Logged in user only.", category="error")
-        # Return false and redirect to login if specified
-        if getredirect:
-            # Redirect to index
-            return False, redirect(url_for('login'))
-        else:
-            return False
-    # Check if the user has been banned
-    if current_user.banned:
-        # Inform the user they are banned if specified
-        if warnuser is True:
-            flash("You have been banned, please contact an admin.",
-                  category="error")
-        # Log user out
-        logout_user()
-        # Return false and a redirect to index if specified
-        if getredirect:
-            # Redirect to index
-            return False, redirect(url_for('index'))
-        else:
-            return False
-    # Flash warning if specified (TODO: Rework)
-    # if warnuser is True:
-    #     flash("Already logged in.", category="error")
-    # Since user is authenticated, return true and no redirect if specified
-    if getredirect:
-        return True, None
-    else:
-        return True
-
-
-def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
-    """
-    Helper method for checking if an admin is logged in.
-    If the admin isn't logged in, they are redirected to login page.
-    If the user has been banned, redirect them to index.
-
-    Args:
-        warnuser (bool): Whether or not to flash warning to user.
-            Defaults to False.
-        getredirect (bool): Whether or not to include a redirect along with
-            the result. Defaults to False.
-    Returns:
-        True is the admin is authenticated, false otherwise.
-        If getredirect is set to true, an appropriate redirect
-            if the user is not authenticated as an admin.
-
-    """
-    # Check that admin is logged in
-    if ('authenticated_admin' not in session or
-       not session['authenticated_admin']):
-        # Flash error if specified
-        if warnuser is True:
-            flash("You must be an admin to access this page.",
-                  category="error")
-        # Return false and a redirect if specified
-        if getredirect:
-            return False, redirect(url_for('adminlogin'))
-        else:
-            return False
-        # Redirect to login if the admin is not authenticated
-        return redirect(url_for('adminlogin'))
-    # Flash warning if specified (TODO: Rework)
-    # if warnuser is True:
-    #     flash("Already logged in as admin.", category="error")
-    # Since admin is authenticated, return true and no redirect if specified
-    if getredirect:
-        return True, None
-    else:
-        return True
 
 
 @app.route('/tasks/updateshares')
