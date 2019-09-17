@@ -427,6 +427,8 @@ def adminuserlist():
     # Check admin is logged in
     check = checkAdminIsLoggedIn()
     if check is not True:
+        flash("You must be an admin to access this page.",
+              category="error")
         return check
 
     # Get field to order by for displaying shares
@@ -468,6 +470,8 @@ def adminuser(userID):
     # Check admin is logged in
     check = checkAdminIsLoggedIn()
     if check is not True:
+        flash("You must be an admin to access this page.",
+              category="error")
         return check
 
     # Get user based on user ID
@@ -481,6 +485,8 @@ def banuser(userID):
     # Check admin is logged in
     check = checkAdminIsLoggedIn()
     if check is not True:
+        flash("You must be an admin to access this page.",
+              category="error")
         return check
 
     # Ban user based on ID
@@ -502,6 +508,8 @@ def unbanuser(userID):
     # Check admin is logged in
     check = checkAdminIsLoggedIn()
     if check is not True:
+        flash("You must be an admin to access this page.",
+              category="error")
         return check
 
     # Ban user based on ID
@@ -566,26 +574,42 @@ def checkUserIsLoggedIn():
     return True
 
 
-def checkAdminIsLoggedIn():
+def checkAdminIsLoggedIn(warnuser=False, getredirect=False):
     """
     Helper method for checking if an admin is logged in.
     If the admin isn't logged in, they are redirected to login page.
     If the user has been banned, redirect them to index.
 
+    Args:
+        warnuser (bool): Whether or not to flash warning to user.
+            Defaults to False.
+        getredirect (bool): Whether or not to include a redirect along with
+            the result. Defaults to False.
     Returns:
-        True is the admin is authenticated.
-        An appropriate redirect if the user is not authenticated.
+        True is the admin is authenticated, false otherwise.
+        If getredirect is set to true, an appropriate redirect
+            if the user is not authenticated as an admin.
 
     """
     # Check that admin is logged in
     if ('authenticated_admin' not in session or
        not session['authenticated_admin']):
+        # Flash error if specified
+        if warn_user is True:
+            flash("You must be an admin to access this page.",
+                  category="error")
+        # Return false and a redirect if specified
+        if getredirect:
+            return False, redirect(url_for('adminlogin'))
+        else:
+            return False
         # Redirect to login if the admin is not authenticated
-        flash("You must be an admin to access this page.",
-              category="error")
         return redirect(url_for('adminlogin'))
-    # Since admin is authenticated, return true
-    return True
+    # Since admin is authenticated, return true and no redirect if specified
+    if getredirect:
+        return True, None
+    else:
+        return True
 
 
 @app.route('/tasks/updateshares')
