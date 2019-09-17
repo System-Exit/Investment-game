@@ -477,14 +477,14 @@ class GoogleDatabaseAPI:
                 continue
             # Add data to dictionary
             share_data[issuerID] = {
-                "curr_price": asxdata['last_price'],
-                "curr_mc": asxdata['market_cap'],
-                "curr_sc": asxdata['number_of_shares'],
-                "dc_percent": asxdata['change_in_percent'],
-                "dc_price": asxdata['change_price'],
-                "day_high": asxdata['day_high_price'],
-                "day_low": asxdata['day_low_price'],
-                "day_vol": asxdata['volume']
+                "currentprice": asxdata['last_price'],
+                "marketcapitalisation": asxdata['market_cap'],
+                "sharecount": asxdata['number_of_shares'],
+                "daychangepercent": asxdata['change_in_percent'],
+                "daychangeprice": asxdata['change_price'],
+                "daypricehigh": asxdata['day_high_price'],
+                "daypricelow": asxdata['day_low_price'],
+                "dayvolume": asxdata['volume']
             }
 
         # Initialse session
@@ -492,37 +492,37 @@ class GoogleDatabaseAPI:
             # Iterate over each share and update its values
             for issuerID in share_data:
                 # Get share data
-                curr_price = float(
-                    share_data[issuerID]["curr_price"])
-                curr_mc = int(
-                    share_data[issuerID]["curr_mc"])
-                curr_sc = int(
-                    share_data[issuerID]["curr_sc"])
-                dc_percent = float(
-                    share_data[issuerID]["dc_percent"].strip('%'))/100
-                dc_price = float(
-                    share_data[issuerID]["dc_price"])
-                day_high = float(
-                    share_data[issuerID]['day_high'])
-                day_low = float(
-                    share_data[issuerID]['day_low'])
-                day_vol = int(
-                    share_data[issuerID]['day_vol'])
+                currentprice = float(
+                    share_data[issuerID]["currentprice"])
+                marketcapitalisation = int(
+                    share_data[issuerID]["marketcapitalisation"])
+                sharecount = int(
+                    share_data[issuerID]["sharecount"])
+                daychangepercent = float(
+                    share_data[issuerID]["daychangepercent"].strip('%'))/100
+                daychangeprice = float(
+                    share_data[issuerID]["daychangeprice"])
+                daypricehigh = float(
+                    share_data[issuerID]['daypricehigh'])
+                daypricelow = float(
+                    share_data[issuerID]['daypricelow'])
+                dayvolume = int(
+                    share_data[issuerID]['dayvolume'])
                 # Update share field
                 share = session.query(Share).get(issuerID)
-                share.price = curr_price
-                share.marketcapitalisation = curr_mc
-                share.sharecount = curr_sc
-                share.daychangepercent = dc_percent
-                share.daychangeprice = dc_price
-                share.daypricehigh = day_high
-                share.daypricelow = day_low
-                share.dayvolume = day_vol
+                share.currentprice = currentprice
+                share.marketcapitalisation = marketcapitalisation
+                share.sharecount = sharecount
+                share.daychangepercent = daychangepercent
+                share.daychangeprice = daychangeprice
+                share.daypricehigh = daypricehigh
+                share.daypricelow = daypricelow
+                share.dayvolume = dayvolume
                 # Create and add new share price record
                 shareprice = SharePrice(
                     issuerID=issuerID,
                     recordtime=datetime.utcnow(),
-                    price=curr_price
+                    price=currentprice
                 )
                 session.add(shareprice)
         # Return true as update was successful
