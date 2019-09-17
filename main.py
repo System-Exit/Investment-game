@@ -307,6 +307,10 @@ def share(issuerID):
 @app.route('/buyshares', methods=['GET', 'POST'])
 @user_login_required
 def buyshares():
+    """
+    Handles the purchase of shares.
+
+    """
     # Initialise buy form
     buyform = BuyShareForm()
     # Validate and process form data
@@ -330,6 +334,10 @@ def buyshares():
 @app.route('/sellshares', methods=['GET', 'POST'])
 @user_login_required
 def sellshares():
+    """
+    Handles the selling of shares.
+
+    """
     # Initialise buy and sell share forms
     sellform = SellShareForm()
     # Validate and process form data
