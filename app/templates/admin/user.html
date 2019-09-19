@@ -1,4 +1,4 @@
-{% extends "adminlayout.html" %}
+{% extends "admin/layout.html" %}
 {% block content %}
 <div id="share-body" class="container">
     {% include "messageblock.html" %}
@@ -14,10 +14,10 @@
     <p>Verified: {{ user.verified }}</p>
     <p>Banned: {{ user.banned }}</p>
     {% if user.banned == False %}
-        {% set banlink = url_for('main.banuser', userID=user.userID) %}
+        {% set banlink = url_for('admin.banuser', userID=user.userID) %}
         <button onclick="BanUser('{{ banlink }}')">Ban user</button>
     {% elif user.banned == True %}
-        {% set unbanlink = url_for('main.unbanuser', userID=user.userID) %}
+        {% set unbanlink = url_for('admin.unbanuser', userID=user.userID) %}
         <button onclick="UnbanUser('{{ unbanlink }}')">Unban user</button>
     {% endif %}
 </div>

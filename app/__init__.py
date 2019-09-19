@@ -27,11 +27,11 @@ def create_app(config_class=Config):
 
     # Import parts of our application
     from app.main import bp as main_bp
-    # from app.admin import bp as admin_bp
+    from app.admin import bp as admin_bp
 
     # Register Blueprints
     app.register_blueprint(main_bp)
-    # app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
 
     # Return the app
     return app
