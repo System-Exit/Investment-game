@@ -34,7 +34,7 @@
                         {% else %}
                             {% set fieldorder = defaultorder %}
                         {% endif %}
-                        <a href="{{ url_for('sharelist') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                        <a href="{{ url_for('main.sharelist') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
                             {{ heading }}
                             {{ ascarrow if orderby == fieldname and order == "asc" }}
                             {{ descarrow if orderby == fieldname and order == "desc" }}
@@ -46,7 +46,7 @@
             </thead>
             <tbody>
             {% for share in shares %}
-                {% set sharelink = url_for('share', issuerID=share.issuerID) %}
+                {% set sharelink = url_for('main.share', issuerID=share.issuerID) %}
                 <tr class="share-row" onclick="location.href='{{ sharelink }}'">
                     <th scope="row">{{ share.issuerID }}</th>
                     <td>{{ share.abbrevname }}</td>
@@ -74,9 +74,9 @@
             {% endif %}
             {# Detremine the base url for each link#}
             {% if orderby and order %}
-                {% set baseurl = url_for('sharelist')+"?orderby="+orderby+"&order="+order+"&" %}
+                {% set baseurl = url_for('main.sharelist')+"?orderby="+orderby+"&order="+order+"&" %}
             {% else %}
-                {% set baseurl = url_for('sharelist')+"?" %}
+                {% set baseurl = url_for('main.sharelist')+"?" %}
             {% endif %}
             {# Calculate max number of pages #}
             {% set maxpagenum = (sharecount/countperpage)|round(method="ceil")|int %}

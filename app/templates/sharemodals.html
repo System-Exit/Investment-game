@@ -8,7 +8,7 @@
                 <h4 class="modal-title">Purchase Shares</h4>
             </div>
             <div class="modal-body">
-                <form id="buyform" class="share-form" action="{{ url_for('buyshares') }}" method="POST">
+                <form id="buyform" class="share-form" action="{{ url_for('main.buyshares') }}" method="POST">
                     {{ buyform.hidden_tag() }}
                     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">
@@ -42,7 +42,7 @@
                 <h4 class="modal-title">Sell Shares</h4>
             </div>
             <div class="modal-body">
-                <form id="sellform" class="share-form" action="{{ url_for('sellshares') }}" method="POST">
+                <form id="sellform" class="share-form" action="{{ url_for('main.sellshares') }}" method="POST">
                     {{ sellform.hidden_tag() }}
                     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
                     alt="Budding Investors" height="auto" width="auto" class="reg-logo">

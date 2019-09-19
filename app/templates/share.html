@@ -42,7 +42,7 @@
                         {% else %}
                             {% set fieldorder = defaultorder %}
                         {% endif %}
-                        <a href="{{ url_for('share', issuerID=share.issuerID) }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                        <a href="{{ url_for('main.share', issuerID=share.issuerID) }}?orderby={{ fieldname }}&order={{ fieldorder }}">
                             {{ heading }}
                             {{ ascarrow if orderby == fieldname and order == "asc" }}
                             {{ descarrow if orderby == fieldname and order == "desc" }}
@@ -77,9 +77,9 @@
             {% endif %}
             {# Detremine the base url for each link#}
             {% if orderby and order %}
-                {% set baseurl = url_for('share', issuerID=share.issuerID)+"?orderby="+orderby+"&order="+order+"&" %}
+                {% set baseurl = url_for('main.share', issuerID=share.issuerID)+"?orderby="+orderby+"&order="+order+"&" %}
             {% else %}
-                {% set baseurl = url_for('share', issuerID=share.issuerID)+"?" %}
+                {% set baseurl = url_for('main.share', issuerID=share.issuerID)+"?" %}
             {% endif %}
             {# Calculate max number of pages #}
             {% set maxpagenum = (transcount/countperpage)|round(method="ceil")|int %}

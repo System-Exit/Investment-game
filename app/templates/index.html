@@ -10,10 +10,10 @@
     alt="Budding Investors" height="auto" width="auto" class="reg-logo">
     {% include "messageblock.html" %}
     <h1>Budding Investors is currently under construction!</h1>
-    <a id="login" href="{{ url_for('login') }}">Log in!</a>
+    <a id="login" href="{{ url_for('main.login') }}">Log in!</a>
     <br>
-    <a id="registration" href="{{ url_for('registration') }}">Sign up!</a>
+    <a id="registration" href="{{ url_for('main.registration') }}">Sign up!</a>
     <br>
-    <a id="adminlogin" href="{{ url_for('adminlogin') }}">Admin login.</a>
+    <a id="adminlogin" href="{{ url_for('main.adminlogin') }}">Admin login.</a>
 </div>
 {% endblock %}

@@ -33,7 +33,7 @@
                         {% else %}
                             {% set fieldorder = defaultorder %}
                         {% endif %}
-                        <a href="{{ url_for('adminuserlist') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
+                        <a href="{{ url_for('main.adminuserlist') }}?orderby={{ fieldname }}&order={{ fieldorder }}">
                             {{ heading }}
                             {{ ascarrow if orderby == fieldname and order == "asc" }}
                             {{ descarrow if orderby == fieldname and order == "desc" }}
@@ -44,7 +44,7 @@
             </thead>
             <tbody>
             {% for user in users %}
-                {% set userlink = url_for('adminuser', userID=user.userID) %}
+                {% set userlink = url_for('main.adminuser', userID=user.userID) %}
                 <tr class="user-row" onclick="location.href='{{ userlink }}'">
                     <th scope="row">{{ user.userID }}</th>
                     <td>{{ user.username }}</td>
@@ -65,9 +65,9 @@
             {% endif %}
             {# Detremine the base url for each link#}
             {% if orderby and order %}
-                {% set baseurl = url_for('adminuserlist')+"?orderby="+orderby+"&order="+order+"&" %}
+                {% set baseurl = url_for('main.adminuserlist')+"?orderby="+orderby+"&order="+order+"&" %}
             {% else %}
-                {% set baseurl = url_for('adminuserlist')+"?" %}
+                {% set baseurl = url_for('main.adminuserlist')+"?" %}
             {% endif %}
             {# Calculate max number of pages #}
             {% set maxpagenum = (usercount/countperpage)|round(method="ceil")|int %}
