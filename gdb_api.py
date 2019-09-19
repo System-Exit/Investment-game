@@ -1,4 +1,3 @@
-from config import Config
 from models import User, Share, SharePrice, Usershare, Transaction, Admin
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
@@ -17,18 +16,34 @@ class GoogleDatabaseAPI:
     API class for handling calls to google cloud SQL database.
 
     """
-    def __init__(self):
+    def __init__(self, app=None):
         """
-        Initialise connection to database and setup API.
+        Initialise API class.
+        If given a flask app, will initialise API for app.
+
+        """
+        # If an app is passed, initialise with the app and return
+        if app:
+            self.init_app(app)
+            return
+        # Return without doing anything
+        return
+
+    def init_app(self, app):
+        """
+        Initialises database API for a flask app.
+
+        Args:
+            app: The Flask app to initialise database API for.
 
         """
         # Define SQL connection parameters
         drivername = 'mysql+pymysql'
-        username = Config.GDB_USERNAME
-        password = Config.GDB_PASSWORD
-        host = Config.GDB_HOST
-        database = Config.GDB_DATABASE
-        query = Config.GDB_QUERY
+        username = app.config['GDB_USERNAME']
+        password = app.config['GDB_PASSWORD']
+        host = app.config['GDB_HOST']
+        database = app.config['GDB_DATABASE']
+        query = app.config['GDB_QUERY']
         # Create engine
         engine = create_engine("%s://%s:%s@%s/%s%s" % (
             drivername, username, password, host, database, query))

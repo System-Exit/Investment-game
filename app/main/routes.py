@@ -1,24 +1,12 @@
 from flask import (Flask, render_template, request, session,
                    redirect, url_for, flash, jsonify, abort)
-from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
-from config import Config
 from models import User
-from forms import (UserLoginForm, UserRegistrationForm,
-                   BuyShareForm, SellShareForm)
 from functools import wraps
-from gdb_api import GoogleDatabaseAPI
-
-MyCloud = True
-
-# Load app and config
-app = Flask(__name__)
-app.config.from_object(Config)
-
-# Load app modules and interfaces
-Bootstrap(app)
-login_manager = LoginManager(app)
-gdb = GoogleDatabaseAPI()
+from app import gdb, login_manager
+from app.main import bp
+from app.main.forms import (UserLoginForm, UserRegistrationForm,
+                            BuyShareForm, SellShareForm)
 
 
 def user_login_required(f):
@@ -32,7 +20,7 @@ def user_login_required(f):
             # Flash warning that user login is required
             flash("Logged in user only.", category="error")
             # Return redirect to login
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         if current_user.banned:
             # Log user out so they can't access their account
             logout_user()
@@ -40,7 +28,7 @@ def user_login_required(f):
             flash("You have been banned, please contact an admin.",
                   category="error")
             # Return redirect to index
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -58,15 +46,14 @@ def admin_login_required(f):
             flash("You must be an admin to access this page.",
                   category="error")
             # Return redirect
-            return redirect(url_for('adminlogin'))
+            return redirect(url_for('main.adminlogin'))
         return f(*args, **kwargs)
     return decorated_function
 
 
 # Routing for each page
-# TODO: Change where routing is handled
-@app.route('/')
-@app.route('/index')
+@bp.route('/')
+@bp.route('/index')
 def index():
     """
     Handles landing page, which provides users links to register of login.
@@ -76,7 +63,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/registration', methods=['GET', 'POST'])
+@bp.route('/registration', methods=['GET', 'POST'])
 def registration():
     """
     Handles registration for registration page.
@@ -102,11 +89,11 @@ def registration():
         if(userAdded):
             # Redirect to index with success message
             flash("Registration successful!", category="success")
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         else:
             # Redirect to registration with warning message
             flash("Registration unsuccessful!", category="error")
-            return redirect(url_for('registration'))
+            return redirect(url_for('main.registration'))
     else:
         for field, errors in form.errors.items():
             for error in errors:
@@ -115,7 +102,7 @@ def registration():
     return render_template('registration.html', form=form)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Handles user login for login page.
@@ -134,10 +121,10 @@ def login():
         if(valid):
             user = gdb.getuserbyid(userID)
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('main.dashboard'))
         else:
             flash("Invalid username or password.", category="error")
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
     # Render template
     return render_template('login.html', form=form)
 
@@ -150,7 +137,7 @@ def load_user(userID):
     return user
 
 
-@app.route('/logout')
+@bp.route('/logout')
 def logout():
     """
     Handles logging out for user.
@@ -162,10 +149,10 @@ def logout():
         # Redirect to index page
         flash("Successfully logged out.", category="success")
     # Redirect back to index
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 
-@app.route('/dashboard')
+@bp.route('/dashboard')
 @user_login_required
 def dashboard():
     """
@@ -179,7 +166,7 @@ def dashboard():
                            userbalance=current_user.balance)
 
 
-@app.route('/portfolio', methods=['GET'])
+@bp.route('/portfolio', methods=['GET'])
 @user_login_required
 def portfolio():
     # Get user info
@@ -216,7 +203,7 @@ def portfolio():
                            countperpage=limit)
 
 
-@app.route('/sharelist', methods=['GET'])
+@bp.route('/sharelist', methods=['GET'])
 @user_login_required
 def sharelist():
     """
@@ -253,7 +240,7 @@ def sharelist():
                            countperpage=limit)
 
 
-@app.route('/share/<issuerID>',  methods=['GET'])
+@bp.route('/share/<issuerID>',  methods=['GET'])
 @user_login_required
 def share(issuerID):
     """
@@ -306,7 +293,7 @@ def share(issuerID):
                            countperpage=limit)
 
 
-@app.route('/buyshares', methods=['GET', 'POST'])
+@bp.route('/buyshares', methods=['GET', 'POST'])
 @user_login_required
 def buyshares():
     """
@@ -330,10 +317,10 @@ def buyshares():
             # Flash with warning message
             flash("Share purchase unsuccessful!", category="error")
     # Redirect to reffering page or dashboard
-    return redirect(request.referrer or url_for('dashboard'))
+    return redirect(request.referrer or url_for('main.dashboard'))
 
 
-@app.route('/sellshares', methods=['GET', 'POST'])
+@bp.route('/sellshares', methods=['GET', 'POST'])
 @user_login_required
 def sellshares():
     """
@@ -357,11 +344,11 @@ def sellshares():
             # Flash with warning message
             flash("Share sale unsuccessful!", category="error")
     # Redirect to reffering page or dashboard
-    return redirect(request.referrer or url_for('dashboard'))
+    return redirect(request.referrer or url_for('main.dashboard'))
 
 
-@app.route('/admin', methods=['GET', 'POST'])
-@app.route('/admin/login', methods=['GET', 'POST'])
+@bp.route('/admin', methods=['GET', 'POST'])
+@bp.route('/admin/login', methods=['GET', 'POST'])
 def adminlogin():
     """
     Landing and login page for administators.
@@ -380,15 +367,15 @@ def adminlogin():
             # Set admin authentication in session
             session['authenticated_admin'] = True
             # Redirect to admin dashboard
-            return redirect(url_for('admindashboard'))
+            return redirect(url_for('main.admindashboard'))
         else:
             flash("Invalid username or password.", category="error")
-            return redirect(url_for('adminlogin'))
+            return redirect(url_for('main.adminlogin'))
     # Render template
     return render_template('adminlogin.html', form=form)
 
 
-@app.route('/admin/logout')
+@bp.route('/admin/logout')
 def adminlogout():
     """
     Handles logout for admin.
@@ -397,10 +384,10 @@ def adminlogout():
     # Remove session admin authentication
     session.pop('authenticated_admin', None)
     # Redirect to admin login
-    return redirect(url_for('adminlogin'))
+    return redirect(url_for('main.adminlogin'))
 
 
-@app.route('/admin/dashboard')
+@bp.route('/admin/dashboard')
 @admin_login_required
 def admindashboard():
     """
@@ -411,7 +398,7 @@ def admindashboard():
     return render_template('admindashboard.html')
 
 
-@app.route('/admin/userlist')
+@bp.route('/admin/userlist')
 @admin_login_required
 def adminuserlist():
     """
@@ -448,7 +435,7 @@ def adminuserlist():
                            countperpage=limit)
 
 
-@app.route('/admin/user/<userID>')
+@bp.route('/admin/user/<userID>')
 @admin_login_required
 def adminuser(userID):
     """
@@ -461,7 +448,7 @@ def adminuser(userID):
     return render_template('adminuser.html', user=user)
 
 
-@app.route('/admin/user/<userID>/ban')
+@bp.route('/admin/user/<userID>/ban')
 @admin_login_required
 def banuser(userID):
     # Ban user based on ID
@@ -475,10 +462,10 @@ def banuser(userID):
               category="error")
 
     # Redirect to reffering page or admin dashboard
-    return redirect(request.referrer or url_for('admindashboard'))
+    return redirect(request.referrer or url_for('main.admindashboard'))
 
 
-@app.route('/admin/user/<userID>/unban')
+@bp.route('/admin/user/<userID>/unban')
 @admin_login_required
 def unbanuser(userID):
     # Ban user based on ID
@@ -492,10 +479,10 @@ def unbanuser(userID):
               category="error")
 
     # Redirect to reffering page or admin dashboard
-    return redirect(request.referrer or url_for('admindashboard'))
+    return redirect(request.referrer or url_for('main.admindashboard'))
 
 
-@app.route('/admin/statistics')
+@bp.route('/admin/statistics')
 @admin_login_required
 def adminstatistics():
     """
@@ -510,7 +497,7 @@ def adminstatistics():
                            userstatistics=userstatistics)
 
 
-@app.route('/tasks/updateshares')
+@bp.route('/tasks/updateshares')
 def sharesupdate():
     """
     Update shares database.
