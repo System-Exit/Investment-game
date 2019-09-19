@@ -909,4 +909,3 @@ class GoogleDatabaseAPI:
 if __name__ == "__main__":
     # Initialize API
     gdb = GoogleDatabaseAPI()
-
