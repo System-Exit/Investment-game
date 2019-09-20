@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import ValidationError
 from gdb_api import GoogleDatabaseAPI
 from datetime import datetime, timedelta
+from app import gdb
 
 
 class UserLoginForm(FlaskForm):
@@ -66,8 +67,6 @@ class UserRegistrationForm(FlaskForm):
         # Return false if validations fail
         if(validation is False):
             return False
-        # Initialise database API for user checks
-        gdb = GoogleDatabaseAPI()
         # Check if username is already used
         if(gdb.getuserbyusername(self.username.data) is not None):
             self.username.errors.append(
