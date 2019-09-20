@@ -61,10 +61,10 @@ class GoogleDatabaseAPI:
         database = app.config['GDB_DATABASE']
         query = app.config['GDB_QUERY']
         # Create engine
-        engine = create_engine("%s://%s:%s@%s/%s%s" % (
+        self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
             drivername, username, password, host, database, query))
         # Define session maker
-        self.Session = sessionmaker(bind=engine)
+        self.Session = sessionmaker(bind=self.engine)
 
     @contextmanager
     def sessionmanager(self):

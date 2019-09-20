@@ -1,5 +1,6 @@
 from gdb_api import GoogleDatabaseAPI
 from config import Config
+from models import Base
 import unittest
 import os
 
@@ -19,7 +20,10 @@ class TestConfig(Config):
 
 class TestGoogleDatabaseAPI(unittest.TestCase):
     def setUp(self):
+        # Initialise database interface
         self.gdb = GoogleDatabaseAPI(config_class=TestConfig)
+        # Create all tables if they don't exist
+        Base.metadata.create_all(self.gdb.engine)
 
     def tearDown(self):
         pass
