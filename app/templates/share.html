@@ -105,6 +105,59 @@
             {% endif %}
         </div>
     {% endif %}
+    <canvas id="shareprice-history"></canvas>
+    {% for shareprice in sharepricehistory %}
+        <p>{{ shareprice.recordtime }}</p>
+    {% endfor %}
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+<script>
+    var pricegraphdata = {
+        datasets: [{
+            label: ["{{ share.fullname }}"],
+            data: [
+            {% for shareprice in sharepricehistory %}
+                { x: "{{ shareprice.recordtime }}", y: {{ shareprice.price }}},
+            {% endfor %}
+        ],
+        /*
+        backgroundColor: [
+            'rgba(255, 255, 255, 0.8)'
+        ],*/
+        borderColor: [
+            'rgba(255,99,132,1)'
+        ],
+        pointRadius: 5,
+        pointBorderColor: 'rgba(0, 0, 0, 0.8)',
+        pointStyle:'circles'
+        }]
+    };
+    var pricegraphoptions = {
+        scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    unit: 'hour',
+                    round: 'hour',
+                    tooltipFormat: "h:mm:ss a",
+                    displayFormats: {
+                        hour: 'MMM D, h:mm A'
+                    }
+                }
+            }]
+        }
+    };
+    window.onload = function() {
+        var ctx = document.getElementById("shareprice-history").getContext("2d");
+        var pricegraph = new Chart(ctx, {
+            type: 'line',
+            data:  pricegraphdata,
+            options: pricegraphoptions,
+        });
+    }
+</script>
+
+
 {% include "sharemodals.html" %}
 {% endblock %}
