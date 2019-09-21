@@ -922,33 +922,49 @@ class GoogleDatabaseAPI:
 
             # Return statistics
             return statistics
-    
+
     def getleaderboard(self):
+        """
+        Get users and fields needed for a leaderboard preordered.
+
+        Returns:
+            A list of results for the leaderboard ordered by total.
+            The returned format is:
+                result.userID: ID of the user.
+                result.username: Username of the user.
+                result.sharesvalue: Total value of shares user has.
+                result.balance: Current balance for user.
+                result.totalvalue: Total shares values and user balance.
+
+        """
         # Initialse session
         with self.sessionmanager() as session:
             # Query all the shares and user shares
-            leaderboard = (session.query(
-                        User.username,
-                        User.userID,
-                        func.sum(Usershare.quantity * Share.price))
-                     .join(User)
-                     .join(Usershare)
-                     .join(Share)
-                     .group_by(Usershare.userID)).all()
-            # Query returns users and account values for users who own shares
-            # leaderboard = session.execute('''select USER.username, USERSHARE.userID, sum(SHARE.currentprice * USERSHARE.quantity) as subtotal, USER.balance, 
-            # (sum(SHARE.currentprice * USERSHARE.quantity) + USER.balance) as total
-            # from USERSHARE inner join SHARE on USERSHARE.issuerID = SHARE.issuerID join USER on 
-            # USERSHARE.userID = USER.userID
-            # group by USERSHARE.userID order by total desc''')
-
+            query = session.query(
+                User.userID,
+                User.username,
+                func.ifnull(func.sum(Usershare.quantity * Share.currentprice),
+                            0).label("sharesvalue"),
+                User.balance,
+                func.ifnull(func.sum(Usershare.quantity * Share.currentprice) +
+                            User.balance, User.balance).label("totalvalue")
+            )
+            # Outer join query with usershare and share tables
+            query = query.outerjoin(Usershare).outerjoin(Share)
+            # Group the query by user ID
+            query = query.group_by(User.userID)
+            # Order the query by total
+            query = query.order_by(desc("totalvalue"))
+            # Get the results
+            leaderboard = query.all()
         # Return leaderboard
         return leaderboard
 
 if __name__ == "__main__":
     # Initialize API
     from config import Config
-    gdb = GoogleDatabaseAPI(Config)
+    gdb = GoogleDatabaseAPI(config_class=Config)
     # Test leaderboard
     lead = gdb.getleaderboard()
-    print(lead[0])
+    for userlead in lead:
+        print(userlead.total)
