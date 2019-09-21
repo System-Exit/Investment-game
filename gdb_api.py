@@ -1,6 +1,7 @@
 from models import User, Share, SharePrice, Usershare, Transaction, Admin
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
@@ -907,19 +908,31 @@ class GoogleDatabaseAPI:
             return statistics
     
     def getleaderboard(self):
-    
         # Initialse session
         with self.sessionmanager() as session:
-            #Query returns users and account values for users who own shares
-            leaderboard = session.execute('''select USER.username, USERSHARE.userID, sum(SHARE.currentprice * USERSHARE.quantity) as subtotal, USER.balance, 
-(sum(SHARE.currentprice * USERSHARE.quantity) + USER.balance) as total
-from USERSHARE inner join SHARE on USERSHARE.issuerID = SHARE.issuerID join USER on 
-USERSHARE.userID = USER.userID
-group by USERSHARE.userID order by total desc''')
-            
+            # Query all the shares and user shares
+            leaderboard = (session.query(
+                        User.username,
+                        User.userID,
+                        func.sum(Usershare.quantity * Share.price))
+                     .join(User)
+                     .join(Usershare)
+                     .join(Share)
+                     .group_by(Usershare.userID)).all()
+            # Query returns users and account values for users who own shares
+            # leaderboard = session.execute('''select USER.username, USERSHARE.userID, sum(SHARE.currentprice * USERSHARE.quantity) as subtotal, USER.balance, 
+            # (sum(SHARE.currentprice * USERSHARE.quantity) + USER.balance) as total
+            # from USERSHARE inner join SHARE on USERSHARE.issuerID = SHARE.issuerID join USER on 
+            # USERSHARE.userID = USER.userID
+            # group by USERSHARE.userID order by total desc''')
+
         # Return leaderboard
         return leaderboard
 
 if __name__ == "__main__":
     # Initialize API
-    gdb = GoogleDatabaseAPI()
+    from config import Config
+    gdb = GoogleDatabaseAPI(Config)
+    # Test leaderboard
+    lead = gdb.getleaderboard()
+    print(lead[0])
