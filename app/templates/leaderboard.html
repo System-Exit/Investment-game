@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="sharelist-body">
+    <h1>Leaderboard</h1>
+    {% include "messageblock.html" %}
+    <div class="container">
+        <table id="share-table" class="table sortable-table">
+            <tbody>
+                <tr>
+                    <th>Username</th>
+                    <th>Portfolio value</th>
+                    <th>Account Balance</th>
+                    <th>Total value</th>
+                </tr>            
+            {% for row in leaderboard %}
+                <tr>
+                    
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+{% endblock %}

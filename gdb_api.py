@@ -905,6 +905,20 @@ class GoogleDatabaseAPI:
 
             # Return statistics
             return statistics
+    
+    def getleaderboard(self):
+    
+        # Initialse session
+        with self.sessionmanager() as session:
+            #Query returns users and account values for users who own shares
+            leaderboard = session.execute('''select USER.username, USERSHARE.userID, sum(SHARE.currentprice * USERSHARE.quantity) as subtotal, USER.balance, 
+(sum(SHARE.currentprice * USERSHARE.quantity) + USER.balance) as total
+from USERSHARE inner join SHARE on USERSHARE.issuerID = SHARE.issuerID join USER on 
+USERSHARE.userID = USER.userID
+group by USERSHARE.userID order by total desc''')
+            
+        # Return leaderboard
+        return leaderboard
 
 if __name__ == "__main__":
     # Initialize API

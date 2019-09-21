@@ -361,3 +361,11 @@ def sharesupdate():
     gdb.updateshares()
     # Return a success response
     return jsonify(success=True)
+
+@bp.route('/leaderboard', methods=['GET'])
+def leaderboard():
+    
+    leaderboard = gdb.getleaderboard()
+
+    # Render template
+    return render_template('leaderboard.html', leaderboard=leaderboard)
