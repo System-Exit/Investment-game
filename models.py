@@ -110,7 +110,7 @@ if __name__ == "__main__":
     username = Config.GDB_USERNAME
     password = Config.GDB_PASSWORD
     host = Config.GDB_HOST
-    database = Config.GDB_DATABASE
+    database = 'TestDatabase'
     query = Config.GDB_QUERY
     # Create engine
     engine = create_engine("%s://%s:%s@%s/%s%s" % (

@@ -18,7 +18,7 @@ class GoogleDatabaseAPI:
     API class for handling calls to google cloud SQL database.
 
     """
-    def __init__(self, app=None):
+    def __init__(self, app=None, config_class=None):
         """
         Initialise API class.
         If given a flask app, will initialise API for app.
@@ -28,7 +28,23 @@ class GoogleDatabaseAPI:
         if app:
             self.init_app(app)
             return
-        # Return without doing anything
+        # If a config class if passed, initialise with it and return
+        if config_class:
+            # Define SQL connection parameters
+            drivername = 'mysql+pymysql'
+            username = config_class.GDB_USERNAME
+            password = config_class.GDB_PASSWORD
+            host = config_class.GDB_HOST
+            database = config_class.GDB_DATABASE
+            query = config_class.GDB_QUERY
+            # Create engine
+            engine = create_engine("%s://%s:%s@%s/%s%s" % (
+                drivername, username, password, host, database, query))
+            # Define session maker
+            self.Session = sessionmaker(bind=engine)
+            # Return
+            return
+        # Otherwise, return without initialising session maker
         return
 
     def init_app(self, app):
@@ -47,10 +63,10 @@ class GoogleDatabaseAPI:
         database = app.config['GDB_DATABASE']
         query = app.config['GDB_QUERY']
         # Create engine
-        engine = create_engine("%s://%s:%s@%s/%s%s" % (
+        self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
             drivername, username, password, host, database, query))
         # Define session maker
-        self.Session = sessionmaker(bind=engine)
+        self.Session = sessionmaker(bind=self.engine)
 
     @contextmanager
     def sessionmanager(self):
