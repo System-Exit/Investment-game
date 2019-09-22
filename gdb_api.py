@@ -923,7 +923,7 @@ class GoogleDatabaseAPI:
             # Return statistics
             return statistics
 
-    def getleaderboard(self):
+    def getleaderboard(self, current_userID):
         """
         Get users and fields needed for a leaderboard preordered.
 
@@ -956,9 +956,27 @@ class GoogleDatabaseAPI:
             # Order the query by total
             query = query.order_by(desc("totalvalue"))
             # Get the results
-            leaderboard = query.all()
+            result = query.all()
+
+            leaderboard = []
+            rankiterator = 1
+            for row in result:
+                dictionary = {'userID' : row.userID, 
+                'username' : row.username, 
+                'sharesvalue' : row.sharesvalue, 
+                'balance' : row.balance, 
+                'totalvalue' : row.totalvalue,
+                'ranking': rankiterator }
+
+                if row.userID == current_userID:
+                    current_user_info = dictionary
+                
+                leaderboard.append(dictionary)
+
+                rankiterator = rankiterator + 1
+                
         # Return leaderboard
-        return leaderboard
+        return leaderboard, current_user_info
 
 if __name__ == "__main__":
     # Initialize API

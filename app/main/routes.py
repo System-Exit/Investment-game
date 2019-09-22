@@ -365,7 +365,7 @@ def sharesupdate():
 @bp.route('/leaderboard', methods=['GET'])
 def leaderboard():
     
-    leaderboard = gdb.getleaderboard()
+    leaderboard, current_user_info = gdb.getleaderboard(current_user.userID)
 
     # Render template
-    return render_template('leaderboard.html', leaderboard=leaderboard)
+    return render_template('leaderboard.html', leaderboard=leaderboard, current_user_info=current_user_info)

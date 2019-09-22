@@ -3,24 +3,30 @@
 
 <div id="sharelist-body">
     <h1>Leaderboard</h1>
+    <h1>Your current ranking: {{ current_user_info.ranking }}</h1>
     {% include "messageblock.html" %}
     <div class="container">
         <table id="share-table" class="table sortable-table">
             <tbody>
                 <tr>
+                    <th>Ranking</th>
                     <th>Username</th>
                     <th>Portfolio value</th>
                     <th>Account Balance</th>
                     <th>Total value</th>
                 </tr>            
             {% for user in leaderboard %}
-                <tr>
-                    
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.sharesvalue|round(4) }}</td>
-                    <td>{{ user.balance|round(4) }}</td>
-                    <td>{{ user.totalvalue|round(4) }}</td>
-                </tr>
+                {% if user.userID == current_user_info.userID %}
+                    <tr class="info">
+                {% else %}
+                    <tr>
+                {% endif %}
+                        <td>{{ user.ranking }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.sharesvalue|round(4) }}</td>
+                        <td>{{ user.balance|round(4) }}</td>
+                        <td>{{ user.totalvalue|round(4) }}</td>
+                    </tr>
             {% endfor %}
             </tbody>
         </table>

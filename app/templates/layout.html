@@ -2,6 +2,7 @@
     (url_for('main.dashboard'), 'dashboard', 'Dashboard'),
     (url_for('main.sharelist'), 'shares', 'Shares'),
     (url_for('main.portfolio'), 'portfolio', 'Portfolio'),
+    (url_for('main.leaderboard'), 'leaderboard', 'Leaderboard'),
     (url_for('main.logout'), 'logout', 'Sign Out')
 ] -%}
 {% set active_page = active_page|default(None) -%}
@@ -41,7 +42,7 @@
         <p>
         
         <div class="wingdow_h">
-          <h1>$52,000 <i class="fa fa-arrow-down" aria-hidden="true"></i></h1>
+          <!--<h1>$52,000 <i class="fa fa-arrow-down" aria-hidden="true"></i></h1> -->
         <div id="content">
             {% block content %}{% endblock %}
         </div>
