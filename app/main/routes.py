@@ -7,6 +7,7 @@ from app import gdb, login_manager
 from app.main import bp
 from app.main.forms import (UserLoginForm, UserRegistrationForm,
                             BuyShareForm, SellShareForm)
+from datetime import datetime, timedelta
 
 
 def user_login_required(f):
@@ -259,7 +260,10 @@ def share(issuerID):
     if(share is None):
         abort(404)
     # Get share price history
-    sharepricehistory = gdb.getsharepricehistory(issuerID)
+    endtime = datetime.now()
+    starttime = endtime - timedelta(days=1)
+    sharepricehistory = gdb.getsharepricehistory(
+        issuerID, starttime=starttime, endtime=endtime)
 
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):

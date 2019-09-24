@@ -8,6 +8,7 @@ import json
 import requests
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 import math
 
 
@@ -16,7 +17,7 @@ class GoogleDatabaseAPI:
     API class for handling calls to google cloud SQL database.
 
     """
-    def __init__(self, app=None):
+    def __init__(self, app=None, config_class=None):
         """
         Initialise API class.
         If given a flask app, will initialise API for app.
@@ -26,7 +27,23 @@ class GoogleDatabaseAPI:
         if app:
             self.init_app(app)
             return
-        # Return without doing anything
+        # If a config class if passed, initialise with it and return
+        if config_class:
+            # Define SQL connection parameters
+            drivername = 'mysql+pymysql'
+            username = config_class.GDB_USERNAME
+            password = config_class.GDB_PASSWORD
+            host = config_class.GDB_HOST
+            database = config_class.GDB_DATABASE
+            query = config_class.GDB_QUERY
+            # Create engine
+            engine = create_engine("%s://%s:%s@%s/%s%s" % (
+                drivername, username, password, host, database, query))
+            # Define session maker
+            self.Session = sessionmaker(bind=engine)
+            # Return
+            return
+        # Otherwise, return without initialising session maker
         return
 
     def init_app(self, app):
@@ -45,10 +62,10 @@ class GoogleDatabaseAPI:
         database = app.config['GDB_DATABASE']
         query = app.config['GDB_QUERY']
         # Create engine
-        engine = create_engine("%s://%s:%s@%s/%s%s" % (
+        self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
             drivername, username, password, host, database, query))
         # Define session maker
-        self.Session = sessionmaker(bind=engine)
+        self.Session = sessionmaker(bind=self.engine)
 
     @contextmanager
     def sessionmanager(self):
@@ -383,22 +400,34 @@ class GoogleDatabaseAPI:
             session.expunge(share)
         return share
 
-    def getsharepricehistory(self, issuercode):
+    def getsharepricehistory(self, issuercode, starttime=None, endtime=None):
         """
         Returns the price history of a single share based on the share ID.
+        Start time and end time can be specified to get a range of times.
 
         Args:
             issuercode (str): Issuer ID of the share to get price data for.
+            starttime (datetime): Include history after this time.
+            endtime (datetime): Include history before this time.
         Returns:
-            All SharePrice objects for that particular share.
+            All SharePrice objects for that particular share withn
+            specified time.
             None if the share doesn't exist or if the share has no price data.
 
         """
         # Initialse session
         with self.sessionmanager() as session:
             # Get all shares
-            shareprices = session.query(SharePrice).filter(
-                SharePrice.issuerID == issuercode).all()
+            query = session.query(SharePrice).filter(
+                SharePrice.issuerID == issuercode)
+            # Filter times before start time
+            if(isinstance(starttime, datetime)):
+                query = query.filter(SharePrice.recordtime > starttime)
+            # Filter times after end time
+            if(isinstance(endtime, datetime)):
+                query = query.filter(SharePrice.recordtime < endtime)
+            # Get shareprices
+            shareprices = query.all()
             # Detach all share objects from session
             for shareprice in shareprices:
                 session.expunge(shareprice)
@@ -896,11 +925,3 @@ class GoogleDatabaseAPI:
 if __name__ == "__main__":
     # Initialize API
     gdb = GoogleDatabaseAPI()
-    # Add some default stocks
-    # stocks = []
-    # with open("stock_list.txt") as f:
-    #     lines = f.readlines()
-    #     for line in lines:
-    #         stocks.append(line.strip())
-    # for stock in stocks:
-    #     gdb.addshare(stock)
