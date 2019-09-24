@@ -37,10 +37,10 @@ class GoogleDatabaseAPI:
             database = config_class.GDB_DATABASE
             query = config_class.GDB_QUERY
             # Create engine
-            engine = create_engine("%s://%s:%s@%s/%s%s" % (
+            self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
                 drivername, username, password, host, database, query))
             # Define session maker
-            self.Session = sessionmaker(bind=engine)
+            self.Session = sessionmaker(bind=self.engine)
             # Return
             return
         # Otherwise, return without initialising session maker
@@ -219,10 +219,15 @@ class GoogleDatabaseAPI:
         """
         # Initialse session
         with self.sessionmanager() as session:
-            # Check that username is available. If not, return false.
+            # Check that username is available.
             user = session.query(User).filter(
                    User.username == username).first()
-            if(user is not None):
+            if user is not None:
+                return False
+            # Check that email is not already taken.
+            user = session.query(User).filter(
+                   User.email == email).first()
+            if user is not None:
                 return False
             # Hash password
             passhash = PasswordHasher().hash(userpass)
