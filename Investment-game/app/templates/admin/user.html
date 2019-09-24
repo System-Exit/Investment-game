@@ -1,0 +1,24 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+<div id="share-body" class="container">
+    {% include "messageblock.html" %}
+    {# TODO: Format information better #}
+    <h2>User Details</h2>
+    <p>User ID: {{ user.userID }}</p>
+    <p>Username: {{ user.username }}</p>
+    <p>First name: {{ user.firstname }}</p>
+    <p>Last name: {{ user.lastname }}</p>
+    <p>Date of Birth: {{ user.dob }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Gender: {{ user.gender }}</p>
+    <p>Verified: {{ user.verified }}</p>
+    <p>Banned: {{ user.banned }}</p>
+    {% if user.banned == False %}
+        {% set banlink = url_for('admin.banuser', userID=user.userID) %}
+        <button onclick="BanUser('{{ banlink }}')">Ban user</button>
+    {% elif user.banned == True %}
+        {% set unbanlink = url_for('admin.unbanuser', userID=user.userID) %}
+        <button onclick="UnbanUser('{{ unbanlink }}')">Unban user</button>
+    {% endif %}
+</div>
+{% endblock %}

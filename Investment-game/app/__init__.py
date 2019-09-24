@@ -1,0 +1,37 @@
+"""Initialize app."""
+from flask import Flask
+from flask_bootstrap import Bootstrap
+from flask_login import LoginManager, current_user, login_user, logout_user
+from gdb_api import GoogleDatabaseAPI
+from config import Config
+
+
+bootstrap = Bootstrap()
+login_manager = LoginManager()
+gdb = GoogleDatabaseAPI()
+
+
+def create_app(config_class=Config):
+    """
+    Construct the core application.
+
+    """
+    # Load app and config
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    # Initialise plugins
+    bootstrap.init_app(app)
+    login_manager.init_app(app)
+    gdb.init_app(app)
+
+    # Import parts of our application
+    from app.main import bp as main_bp
+    from app.admin import bp as admin_bp
+
+    # Register Blueprints
+    app.register_blueprint(main_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+
+    # Return the app
+    return app

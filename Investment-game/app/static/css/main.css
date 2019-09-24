@@ -1,0 +1,257 @@
+/* All pages */
+body
+{
+    text-align: center;
+    /* background-color: #add8e6; */
+    background-color: whitesmoke;
+}
+
+/* Flash Messages */
+.flash-success
+{
+    color: green;
+    font-weight: bold;
+    padding: 5px;
+}
+.flash-error
+{
+    color: red;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/* Sortable table elements */
+.sortable-table th
+{
+    text-align: center;
+}
+.sortable-table th a
+{
+    font-size: inherit;
+    color: black;
+    text-decoration-line: none;
+}
+.sortable-table th a:hover
+{
+    color: black;
+    text-decoration-line: underline;
+}
+.sortable-table th a:active
+{
+    color: black;
+    text-decoration-line: underline;
+}
+
+/* Pagination for tables */
+.pagination
+{
+    text-align: center;
+    font-size: 24px;
+}
+
+/* Navigation and Layout */
+#top-bar
+{
+    background: lightgray;
+    position: fixed;
+    z-index: 10;
+    width: calc(100% - 150px);
+    height: 100px;
+    top: 0;
+    right: 0;
+    text-align: left;
+    padding-left: 10px;
+}
+#top-bar img
+{
+    height: inherit;
+    z-index: 11;
+}
+#top-left-corner
+{
+    background-color: whitesmoke;
+    position: fixed;
+    z-index: 15;
+    width: 150px;
+    height: 60px;
+    top: 0;
+    left: 0;
+}
+#top-left-corner img
+{
+    height: inherit;
+    z-index: 16;
+}
+#side-bar
+{
+    background-color: lightgray;
+    position: fixed;
+    z-index: 5;
+    width: 150px;
+    height: calc(100% - 60px);
+    left: 0;
+    bottom: 0;
+}
+#side-bar ul
+{
+    width: inherit;
+    text-align: left;
+    list-style-type: none;
+    padding-top: 20px;
+    padding-left: 10px;
+}
+#side-bar ul li
+{
+    width: inherit;
+    padding-bottom: 10px;
+}
+#side-bar ul li a
+{
+    display: block;
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+}
+#side-bar ul li a:hover
+{
+    color: black;
+    text-decoration: underline;
+}
+#side-bar ul li a.active
+{
+    color: black;
+    text-decoration: underline;
+}
+#content
+{
+    position: relative;
+    width: calc(100% - 150px);
+    left: 150px;
+    top: 100px;
+}
+
+
+/* Index page */
+#login
+{
+    font-size: 24;
+}
+#registration
+{
+    font-size: 24;
+}
+
+/* Login page */
+.login-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.login-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.login-form input
+{
+    text-align: center;
+    border-radius: 10px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.login-form table
+{
+    width: 200px;
+}
+.login-form table th
+{
+    text-align: center;
+}
+
+/* Registration page */
+.registration-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.registration-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.registration-form input
+{
+    text-align: center;
+    border-radius: 10px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.registration-form table
+{
+    width: 200px;
+}
+.registration-form table th
+{
+    text-align: center;
+}
+input#bday
+{
+    width: 50px;
+}
+input#bmonth
+{
+    width: 50px;
+}
+input#byear
+{
+    width: 80px;
+}
+
+/* Share listing and portfolio page */
+.share-row:hover
+{
+    background-color: lightgray;
+}
+
+/* Share page */
+.share-form
+{
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+}
+.share-form div
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.share-form input
+{
+    text-align: center;
+    border-radius: 10px;
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* Admin statistics page charts */
+#statsistics-body
+{
+    text-align: center;
+}
+#gender-pie-chart-container
+{
+    display: inline-block;
+    height: 250px;
+    width: 500px;
+}
+#age-pie-chart-container
+{
+    display: inline-block;
+    height: 250px;
+    width: 500px;
+}

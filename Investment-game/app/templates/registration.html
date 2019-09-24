@@ -1,0 +1,66 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Budding Investors{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+{% endblock %}
+{% block content %}
+    <form action="" method="POST" class="registration-form">
+        {{ form.hidden_tag() }}
+        <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+        alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+        {% include "messageblock.html" %}
+        <div>
+            {{ form.username.label }}
+            <br>
+            {{ form.username() }}
+        </div>
+        <div>
+            {{ form.password.label }}
+            <br>
+            {{ form.password() }}
+        </div>
+        <div>
+            {{ form.fname.label }}
+            <br>
+            {{ form.fname() }}
+        </div>
+        <div>
+            {{ form.lname.label }}
+            <br>
+            {{ form.lname() }}
+        </div>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan=3>Date of birth</th>
+                    </tr>
+                    <tr>
+                        <td>Day</td>
+                        <td>Month</td>
+                        <td>Year</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ form.bday() }}</td>
+                        <td>{{ form.bmonth() }}</td>
+                        <td>{{ form.byear() }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            {{ form.email.label }}
+            <br>
+            {{ form.email() }}
+        </div>
+        <div>
+            {{ form.gender.label }}
+            <br>
+            {{ form.gender() }}
+        </div>
+        <div>{{ form.submit() }}</div>
+    </form>
+{% endblock %}

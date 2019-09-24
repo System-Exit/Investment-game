@@ -1,0 +1,11 @@
+{% extends "admin/layout.html" %}
+{% set active_page = "dashboard" %}
+{% block content %}
+<div id="index-body">
+    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
+    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+    {% include "messageblock.html" %}
+    <h1>Budding Investors is currently under construction!</h1>
+    <h2>Welcome to the Admin dashboard!</h2>
+</div>
+{% endblock %}
