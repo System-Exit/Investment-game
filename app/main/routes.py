@@ -53,7 +53,7 @@ def admin_login_required(f):
 
 # Routing for each page
 @bp.route('/')
-@bp.route('/index')
+@bp.route('/')
 def index():
     """
     Handles landing page, which provides users links to register of login.
@@ -200,7 +200,8 @@ def portfolio():
     return render_template('portfolio.html', user=user,
                            usershares=usershares,
                            sharecount=sharecount,
-                           countperpage=limit)
+                           countperpage=limit,
+                           userbalance=current_user.balance)
 
 
 @bp.route('/sharelist', methods=['GET'])
@@ -237,7 +238,8 @@ def sharelist():
     # Render template
     return render_template('sharelist.html', shares=shares,
                            sharecount=sharecount,
-                           countperpage=limit)
+                           countperpage=limit, 
+                           userbalance=current_user.balance)
 
 
 @bp.route('/share/<issuerID>',  methods=['GET'])
@@ -290,7 +292,7 @@ def share(issuerID):
                            sharepricehistory=sharepricehistory,
                            buyform=buyform, sellform=sellform,
                            transactions=transactions, transcount=transcount,
-                           countperpage=limit)
+                           countperpage=limit,userbalance=current_user.balance)
 
 
 @bp.route('/buyshares', methods=['GET', 'POST'])

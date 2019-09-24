@@ -11,15 +11,27 @@
         <title>Budding Investors</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/font-awesome.min.css')}}">
     </head>
     <body>
         <div id="top-left-corner">
             <img src="{{url_for('static', filename='images/user.svg')}}" 
              alt="Placeholder Profile Icon">
         </div>
-        <div id="top-bar">
+        <div id="top-bar" style="display: flex;justify-content: space-between;align-items: center;">
             <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
             alt="Budding Investors">
+            <div class="money" style="margin-right: 20px;font-size: 30px;">
+               <div style="display: flex;justify-content: space-between;align-items: center;">
+                   <div style="text-align: center;">
+                       <i style="font-size: 60px;" class="fa fa-gift" aria-hidden="true"></i>
+                       <p style="font-size: 15px;">LVL2<p>
+                   </div>
+                   <p style="margin: 0px 15px;">${{ userbalance }}</p>
+                   <i style="color:palevioletred;" class="fa fa-arrow-down" aria-hidden="true"></i>
+               </div>
+               
+            </div>
         </div>
         <div id="side-bar">
             <ul>
@@ -34,14 +46,11 @@
             </ul>
         </div>
         <div class="content">
-    <div class="window">
-      <div><i class="fa fa-gift" aria-hidden="true"></i>
-        <p>LVL2
-        
-        <p>
-        
-        <div class="wingdow_h">
-          <h1>$52,000 <i class="fa fa-arrow-down" aria-hidden="true"></i></h1>
+                <div class="window">
+                    </div>
+                        
+                        
+        <div class="content">
         <div id="content">
             {% block content %}{% endblock %}
         </div>
