@@ -12,30 +12,39 @@ class TestConfig(Config):
 
     """
     SECRET_KEY = os.getenv('TEST_SECRET_KEY') or 'PLACEHOLDERSECRETKEY'
+    """
     DB_USERNAME = os.getenv('TEST_DB_USERNAME') or 'root'
     DB_PASSWORD = os.getenv('TEST_DB_PASSWORD') or 'root'
     DB_HOST = os.getenv('TEST_DB_HOST') or '127.0.0.1'
     DB_PORT = os.getenv('TEST_DB_PORT') or '3307'
     DB_DATABASE = os.getenv('TEST_DB_DATABASE') or 'testdatabase'
     DB_QUERY = os.getenv('TEST_DB_QUERY') or ''
+    """
+    DB_USERNAME = os.getenv('TEST_DB_USERNAME') or 'root'
+    DB_PASSWORD = os.getenv('TEST_DB_PASSWORD') or 'RMIT1234!!!'
+    DB_HOST = os.getenv('TEST_DB_HOST') or '127.0.0.1'
+    DB_PORT = os.getenv('TEST_DB_PORT') or '3306'
+    DB_DATABASE = os.getenv('TEST_DB_DATABASE') or 'TestDatabase'
+    DB_QUERY = os.getenv('TEST_DB_QUERY') or ''
 
 
 class TestGoogleDatabaseAPI(unittest.TestCase):
+    @classmethod
     def setUpClass(self):
         # Initialise database interface
         self.gdb = GoogleDatabaseAPI(config_class=TestConfig)
+
+    def setUp(self):
         # Create all tables
         Base.metadata.create_all(self.gdb.engine)
 
-    def setUp(self):
-        pass
-
     def tearDown(self):
-        pass
-
-    def tearDownClass(self):
         # Delete all tables
         Base.metadata.drop_all(self.gdb.engine)
+
+    @classmethod
+    def tearDownClass(self):
+        pass
 
     def test_adduser(self):
         # Add valid users and assert they were added successfully
@@ -70,27 +79,33 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         ) is False
 
     def test_getusers(self):
+        # Create test user
+        user = User(userID=1, firstname="F", lastname="L", email="E1",
+                    dob="2000-01-01", username="U1", userpass="P1",
+                    verified=True, banned=False, balance=100)
+        # Add user to database directly
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+
         # Get all users
         users = self.gdb.getusers()
-        # Assert that all dummy users are present in database
-        for du in self.dummyusers:
-            assert any(du.username == u.username for u in users) is True
+        # Assert that user is present in returned users list
+        assert any(user.username == u.username for u in users) is True
 
         # Get user by ID
-        user = self.gdb.getuserbyid(self.dummyusers[0].userID)
+        user = self.gdb.getuserbyid(user.userID)
         # Assert that returned user is correct
-        assert user.userID == self.dummyusers[0].userID
-        assert user.username == self.dummyusers[0].username
+        assert user.userID == user.userID
+        assert user.username == user.username
 
         # Get user by username
-        user = self.gdb.getuserbyusername(self.dummyusers[0].username)
+        user = self.gdb.getuserbyusername(user.username)
         # Assert that returned user is correct
-        assert user.userID == self.dummyusers[0].userID
-        assert user.username == self.dummyusers[0].username
+        assert user.userID == user.userID
+        assert user.username == user.username
 
         # Get user by email
-        user = self.gdb.getuserbyemail(self.dummyusers[0].email)
+        user = self.gdb.getuserbyemail(user.email)
         # Assert that returned user is correct
-        assert user.userID == self.dummyusers[0].userID
-        assert user.username == self.dummyusers[0].username
-
+        assert user.userID == user.userID
+        assert user.username == user.username
