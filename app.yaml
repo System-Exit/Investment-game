@@ -12,6 +12,7 @@ env_variables:
   DB_DATABASE: "Database"
   DB_QUERY: "?unix_socket=/cloudsql/budding-investors-248807:australia-southeast1:database"
   # Testing database configuration
+  TEST_DB_DRIVER: "mysql+pymysql"
   TEST_DB_USERNAME: "root"
   TEST_DB_PASSWORD: "RMIT1234!!!"
   TEST_DB_HOST: ""

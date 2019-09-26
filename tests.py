@@ -23,6 +23,7 @@ class TestConfig(Config):
     DB_DATABASE = os.getenv('TEST_DB_DATABASE') or 'testdatabase'
     DB_QUERY = os.getenv('TEST_DB_QUERY') or ''
     """
+    DB_DRIVER = os.getenv('TEST_DB_DRIVER') or "mysql+pymysql"
     DB_USERNAME = os.getenv('TEST_DB_USERNAME') or 'root'
     DB_PASSWORD = os.getenv('TEST_DB_PASSWORD') or 'RMIT1234!!!'
     DB_HOST = os.getenv('TEST_DB_HOST') or '127.0.0.1'
