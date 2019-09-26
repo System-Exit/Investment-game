@@ -6,9 +6,11 @@ from gdb_api import GoogleDatabaseAPI
 from config import Config
 
 
+# Initialise flask plugins
 bootstrap = Bootstrap()
 login_manager = LoginManager()
-gdb = GoogleDatabaseAPI()
+# Initialise Database Interface
+gdb = GoogleDatabaseAPI(Config)
 
 
 def create_app(config_class=Config):
@@ -23,7 +25,6 @@ def create_app(config_class=Config):
     # Initialise plugins
     bootstrap.init_app(app)
     login_manager.init_app(app)
-    gdb.init_app(app)
 
     # Import parts of our application
     from app.main import bp as main_bp

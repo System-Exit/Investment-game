@@ -17,53 +17,26 @@ class GoogleDatabaseAPI:
     API class for handling calls to google cloud SQL database.
 
     """
-    def __init__(self, app=None, config_class=None):
+    def __init__(self, config_class):
         """
-        Initialise API class.
-        If given a flask app, will initialise API for app.
+        Initialise databse API class.
 
         """
-        # If an app is passed, initialise with the app and return
-        if app:
-            self.init_app(app)
-            return
-        # If a config class if passed, initialise with it and return
-        if config_class:
-            # Define SQL connection parameters
-            drivername = 'mysql+pymysql'
-            username = config_class.GDB_USERNAME
-            password = config_class.GDB_PASSWORD
-            host = config_class.GDB_HOST
-            database = config_class.GDB_DATABASE
-            query = config_class.GDB_QUERY
-            # Create engine
-            self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
-                drivername, username, password, host, database, query))
-            # Define session maker
-            self.Session = sessionmaker(bind=self.engine)
-            # Return
-            return
-        # Otherwise, return without initialising session maker
-        return
-
-    def init_app(self, app):
-        """
-        Initialises database API for a flask app.
-
-        Args:
-            app: The Flask app to initialise database API for.
-
-        """
-        # Define SQL connection parameters
-        drivername = 'mysql+pymysql'
-        username = app.config['GDB_USERNAME']
-        password = app.config['GDB_PASSWORD']
-        host = app.config['GDB_HOST']
-        database = app.config['GDB_DATABASE']
-        query = app.config['GDB_QUERY']
+        # Get config parameters
+        drivername = config_class.DB_DRIVER
+        username = config_class.DB_USERNAME
+        password = config_class.DB_PASSWORD
+        host = config_class.DB_HOST
+        port = config_class.DB_PORT
+        database = config_class.DB_DATABASE
+        query = config_class.DB_QUERY
         # Create engine
-        self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
-            drivername, username, password, host, database, query))
+        self.engine = create_engine(
+                (f"{drivername}://"
+                 f"{username}:{password}@"
+                 f"{host}:{port}/"
+                 f"{database}{query}")
+        )
         # Define session maker
         self.Session = sessionmaker(bind=self.engine)
 

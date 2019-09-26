@@ -1,6 +1,6 @@
 from gdb_api import GoogleDatabaseAPI
 from config import Config
-from models import Base, User
+from models import Base, User, Share
 import pytest
 import unittest
 import os
@@ -12,92 +12,85 @@ class TestConfig(Config):
 
     """
     SECRET_KEY = os.getenv('TEST_SECRET_KEY') or 'PLACEHOLDERSECRETKEY'
-    GDB_USERNAME = os.getenv('TEST_GDB_USERNAME') or 'root'
-    GDB_PASSWORD = os.getenv('TEST_GDB_PASSWORD') or 'RMIT1234!!!'
-    GDB_HOST = os.getenv('TEST_GDB_HOST') or '127.0.0.1'
-    GDB_DATABASE = os.getenv('TEST_GDB_DATABASE') or 'TestDatabase'
-    GDB_QUERY = os.getenv('TEST_GDB_QUERY') or ''
+    DB_USERNAME = os.getenv('TEST_DB_USERNAME') or 'root'
+    DB_PASSWORD = os.getenv('TEST_DB_PASSWORD') or 'root'
+    DB_HOST = os.getenv('TEST_DB_HOST') or '127.0.0.1'
+    DB_PORT = os.getenv('TEST_DB_PORT') or '3307'
+    DB_DATABASE = os.getenv('TEST_DB_DATABASE') or 'testdatabase'
+    DB_QUERY = os.getenv('TEST_DB_QUERY') or ''
 
 
 class TestGoogleDatabaseAPI(unittest.TestCase):
-    def setUp(self):
+    def setUpClass(self):
         # Initialise database interface
         self.gdb = GoogleDatabaseAPI(config_class=TestConfig)
         # Create all tables
         Base.metadata.create_all(self.gdb.engine)
 
+    def setUp(self):
+        pass
+
     def tearDown(self):
+        pass
+
+    def tearDownClass(self):
         # Delete all tables
         Base.metadata.drop_all(self.gdb.engine)
 
     def test_adduser(self):
-        # Get dummy users
-        users = self.dummyvalidusers()
-        # Iterate over each user
-        for user in users:
-            # Add user
-            userAdded = self.gdb.adduser(
-                user.username,
-                user.userpass,
-                user.firstname,
-                user.lastname,
-                user.email,
-                user.dob,
-                user.gender
-            )
-            # Check that user was successfully added
-            assert userAdded is True
-
+        # Add valid users and assert they were added successfully
+        assert self.gdb.adduser(
+            "user1",
+            "password1",
+            "fname1",
+            "lname1",
+            "email1@test.com",
+            "1950-06-15",
+            "O"
+        ) is True
         # Ensure that we cannot add user with same username
         assert self.gdb.adduser(
-            users[0].username,
-            "password",
-            "fname",
-            "lname",
-            "email@test.com",
+            "user1",
+            "password2",
+            "fname2",
+            "lname2",
+            "email2@test.com",
             "1950-06-15",
             "O"
         ) is False
-
         # Ensure that we cannot add user with same email
         assert self.gdb.adduser(
-            "username",
-            "password",
-            "fname",
-            "lname",
-            users[0].email,
+            "username2",
+            "password2",
+            "fname2",
+            "lname2",
+            "email1@test.com",
             "1950-06-15",
             "O"
         ) is False
 
-    def test_getuser(self):
-        # Get dummy users
-        users = self.dummyvalidusers()
+    def test_getusers(self):
+        # Get all users
+        users = self.gdb.getusers()
+        # Assert that all dummy users are present in database
+        for du in self.dummyusers:
+            assert any(du.username == u.username for u in users) is True
 
-    def dummyvalidusers(self):
-        """
-        Returns dummy users that are valid.
+        # Get user by ID
+        user = self.gdb.getuserbyid(self.dummyusers[0].userID)
+        # Assert that returned user is correct
+        assert user.userID == self.dummyusers[0].userID
+        assert user.username == self.dummyusers[0].username
 
-        """
-        # Define valid users
-        users = list()
-        users.append(User(
-            username='alice123',
-            userpass='Madhatter123',
-            firstname='Alice',
-            lastname='Liddell',
-            dob='1998-06-21',
-            email='alice@wonderland.com',
-            gender='F'
-        ))
-        users.append(User(
-            username='bobby123',
-            userpass='BobbyJenkins123',
-            firstname='Bob',
-            lastname='Jenkins',
-            dob='1976-04-26',
-            email='bob@gmail.com',
-            gender='M'
-        ))
-        # Return users
-        return users
+        # Get user by username
+        user = self.gdb.getuserbyusername(self.dummyusers[0].username)
+        # Assert that returned user is correct
+        assert user.userID == self.dummyusers[0].userID
+        assert user.username == self.dummyusers[0].username
+
+        # Get user by email
+        user = self.gdb.getuserbyemail(self.dummyusers[0].email)
+        # Assert that returned user is correct
+        assert user.userID == self.dummyusers[0].userID
+        assert user.username == self.dummyusers[0].username
+
