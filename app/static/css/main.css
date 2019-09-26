@@ -21,6 +21,10 @@ body
 }
 
 /* Sortable table elements */
+.sortable-table
+{
+    background-color: white;
+}
 .sortable-table th
 {
     text-align: center;
