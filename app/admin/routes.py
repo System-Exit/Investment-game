@@ -45,7 +45,7 @@ def login():
             # Set admin authentication in session
             session['authenticated_admin'] = True
             # Redirect to admin dashboard
-            return redirect(url_for('admin.dashboard'))
+            return redirect(url_for('admin.statistics'))
         else:
             flash("Invalid username or password.", category="error")
             return redirect(url_for('admin.login'))
@@ -65,15 +65,19 @@ def logout():
     return redirect(url_for('admin.login'))
 
 
-@bp.route('/dashboard')
+@bp.route('/statistics')
 @admin_login_required
-def dashboard():
+def statistics():
     """
-    Displays dashboard for administrator.
+    Lists statistics of userbase to admin.
 
     """
-    # Render template
-    return render_template('admin/dashboard.html')
+    # Get all user statistics
+    userstatistics = gdb.getuserstatistics()
+
+    # Render template with statistics
+    return render_template('admin/statistics.html',
+                           userstatistics=userstatistics)
 
 
 @bp.route('/userlist')
@@ -158,18 +162,3 @@ def unbanuser(userID):
 
     # Redirect to reffering page or admin dashboard
     return redirect(request.referrer or url_for('admin.dashboard'))
-
-
-@bp.route('/statistics')
-@admin_login_required
-def statistics():
-    """
-    Lists statistics of userbase to admin.
-
-    """
-    # Get all user statistics
-    userstatistics = gdb.getuserstatistics()
-
-    # Render template with statistics
-    return render_template('admin/statistics.html',
-                           userstatistics=userstatistics)
