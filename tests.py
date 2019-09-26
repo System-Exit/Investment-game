@@ -80,32 +80,34 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
 
     def test_getusers(self):
         # Create test user
-        user = User(userID=1, firstname="F", lastname="L", email="E1",
-                    dob="2000-01-01", username="U1", userpass="P1",
-                    verified=True, banned=False, balance=100)
+        testuserID = 1
+        testusername = "U1"
+        testemail = "E1"
+        testuser = User(userID=testuserID, firstname="F", lastname="L",
+                        email=testemail, dob="2000-01-01",
+                        username=testusername, userpass="P1", gender="O",
+                        verified=True, banned=False, balance=100)
+        assert testuser.userID == 1
         # Add user to database directly
         with self.gdb.sessionmanager() as session:
-            session.add(user)
+            session.add(testuser)
 
         # Get all users
-        users = self.gdb.getusers()
+        users, num = self.gdb.getusers()
         # Assert that user is present in returned users list
-        assert any(user.username == u.username for u in users) is True
+        assert users[0].userID == testuserID
 
         # Get user by ID
-        user = self.gdb.getuserbyid(user.userID)
+        user = self.gdb.getuserbyid(testuserID)
         # Assert that returned user is correct
-        assert user.userID == user.userID
-        assert user.username == user.username
+        assert user.userID == testuserID
 
         # Get user by username
-        user = self.gdb.getuserbyusername(user.username)
+        user = self.gdb.getuserbyusername(testusername)
         # Assert that returned user is correct
-        assert user.userID == user.userID
-        assert user.username == user.username
+        assert user.userID == testuserID
 
         # Get user by email
-        user = self.gdb.getuserbyemail(user.email)
+        user = self.gdb.getuserbyemail(testemail)
         # Assert that returned user is correct
-        assert user.userID == user.userID
-        assert user.username == user.username
+        assert user.userID == testuserID
