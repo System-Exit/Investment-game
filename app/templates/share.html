@@ -106,6 +106,12 @@
         </div>
     {% endif %}
     <canvas id="shareprice-history"></canvas>
+    <div class="container">
+        <button id="price-graph-day" onclick="" type="button">Day</button>
+        <button id="price-graph-week" onclick="" type="button">Week</button>
+        <button id="price-graph-month" onclick="" type="button">Month</button>
+        <button id="price-graph-year" onclick="" type="button">Year</button>
+    </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
@@ -145,9 +151,12 @@
             }]
         }
     };
+    // Define price graph
+    var pricegraph = null;
+    /** Load initial price graph data **/
     window.onload = function() {
         var ctx = document.getElementById("shareprice-history").getContext("2d");
-        var pricegraph = new Chart(ctx, {
+        pricegraph = new Chart(ctx, {
             type: 'line',
             data:  pricegraphdata,
             options: pricegraphoptions,
