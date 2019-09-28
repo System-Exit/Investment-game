@@ -7,7 +7,7 @@ from app import gdb, login_manager
 from app.main import bp
 from app.main.forms import (UserLoginForm, UserRegistrationForm,
                             BuyShareForm, SellShareForm)
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def user_login_required(f):
@@ -239,7 +239,7 @@ def sharelist():
     # Render template
     return render_template('sharelist.html', shares=shares,
                            sharecount=sharecount,
-                           countperpage=limit, 
+                           countperpage=limit,
                            userbalance=current_user.balance)
 
 
@@ -361,9 +361,14 @@ def sharepricehistorydata():
     # Parse results into dictionary
     data = list()
     for shareprice in sharepricehistory:
+        # Change timezone of recording time
+        recordtime = str(shareprice.recordtime.replace(
+            tzinfo=timezone.utc).astimezone(tz=None))
+        # Define price
+        price = shareprice.price
         data.append({
-            "recordtime": str(shareprice.recordtime),
-            "price": shareprice.price
+            "recordtime": recordtime,
+            "price": price
         })
     # Return results as JSON
     return jsonify(data)

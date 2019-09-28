@@ -162,7 +162,6 @@
     /** Update price graph with specfied range **/
     function UpdatePriceGraph(days)
     {
-        var pricegraphdata = new Array();
         $.ajax({
             url: "{{ url_for('main.sharepricehistorydata') }}",
             type: 'POST',
@@ -172,6 +171,8 @@
                 days: days
             })
         }).done(function(data){
+            // Parse data into graph data
+            var pricegraphdata = new Array();
             for(i = 0; i < data.length; i++){
                 pricegraphdata.push({ x: data[i].recordtime, y: data[i].price });
             }
