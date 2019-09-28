@@ -490,7 +490,7 @@ class GoogleDatabaseAPI:
                        "%s?fields=primary_share") % issuerID
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
-            if('code' not in asxdata and asxdata['code'] == issuerID):
+            if asxdata.get('error_code'):
                 # If unsuccessful, skip this share and try the next one
                 # TODO: Rather than skip, maybe throw an exception or make it
                 #       return false after doing everything else, as some

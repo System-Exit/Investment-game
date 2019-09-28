@@ -296,7 +296,8 @@ def share(issuerID):
                            sharepricehistory=sharepricehistory,
                            buyform=buyform, sellform=sellform,
                            transactions=transactions, transcount=transcount,
-                           countperpage=limit,userbalance=current_user.balance)
+                           countperpage=limit, 
+                           userbalance=current_user.balance)
 
 
 @bp.route('/buyshares', methods=['GET', 'POST'])
@@ -351,6 +352,20 @@ def sellshares():
             flash("Share sale unsuccessful!", category="error")
     # Redirect to reffering page or dashboard
     return redirect(request.referrer or url_for('main.dashboard'))
+
+
+@bp.route('/updates/pricegraph', methods=['POST'])
+def updatepricegraph():
+    # Get JSON request data
+    data = request.get_json()
+    issuercode = data.get('issuercode')
+    endtime = datetime.now()
+    starttime = endtime - timedelta(data.get('days'))
+    # Get share price history for given share and period
+    sharepricehistory = gdb.getsharepricehistory(
+        issuercode=issuercode, starttime=starttime, endtime=endtime)
+    # Return results as JSON
+    return jsonify(apple=sharepricehistory[0].price)
 
 
 @bp.route('/tasks/updateshares')
