@@ -107,10 +107,10 @@
     {% endif %}
     <canvas id="shareprice-history"></canvas>
     <div class="container">
-        <button id="price-graph-day" onclick="" type="button">Day</button>
-        <button id="price-graph-week" onclick="" type="button">Week</button>
-        <button id="price-graph-month" onclick="" type="button">Month</button>
-        <button id="price-graph-year" onclick="" type="button">Year</button>
+        <button id="price-graph-day" onclick="UpdatePriceGraph(1)" type="button">Day</button>
+        <button id="price-graph-week" onclick="UpdatePriceGraph(7)" type="button">Week</button>
+        <button id="price-graph-month" onclick="UpdatePriceGraph(31)" type="button">Month</button>
+        <button id="price-graph-year" onclick="UpdatePriceGraph(365)" type="button">Year</button>
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -119,11 +119,7 @@
     var pricegraphdata = {
         datasets: [{
             label: ["{{ share.fullname }}"],
-            data: [
-            {% for shareprice in sharepricehistory %}
-                { x: "{{ shareprice.recordtime }}", y: {{ shareprice.price }}},
-            {% endfor %}
-        ],
+            data: [],
         /*
         backgroundColor: [
             'rgba(255, 255, 255, 0.8)'
@@ -160,6 +156,30 @@
             type: 'line',
             data:  pricegraphdata,
             options: pricegraphoptions,
+        });
+        UpdatePriceGraph(1);
+    }
+    /** Update price graph with specfied range **/
+    function UpdatePriceGraph(days)
+    {
+        var pricegraphdata = new Array();
+        $.ajax({
+            url: "{{ url_for('main.sharepricehistorydata') }}",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                issuerID: "{{ share.issuerID }}",
+                days: days
+            })
+        }).done(function(data){
+            for(i = 0; i < data.length; i++){
+                pricegraphdata.push({ x: data[i].recordtime, y: data[i].price });
+            }
+            // Update price graph data
+            pricegraph.data.datasets[0].data = pricegraphdata;
+            pricegraph.update();
+        }).fail(function(xhr, textStatus, errorThrown){
+            alert("Price graph could not be updated:"+errorThrown)
         });
     }
 </script>

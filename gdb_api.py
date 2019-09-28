@@ -302,12 +302,12 @@ class GoogleDatabaseAPI:
                 # User doesn't exist, return false
                 return False, None
 
-    def addshare(self, issuercode):
+    def addshare(self, issuerID):
         """
         Adds share details of specified share to database to database.
 
         Args:
-            issuercode (str): ASX issued code of share to add.
+            issuerID (str): ASX issued code of share to add.
         Returns:
             bool: True if sucessful, false if share doesn't exist or is
                   already present.
@@ -317,16 +317,16 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Check that share isn't already added to database
             share = session.query(Share).filter(
-                Share.issuerID == issuercode).first()
+                Share.issuerID == issuerID).first()
             if(share is not None):
                 return False
             # Get share data from ASX
             # TODO: Move ASX API call elsewhere
             address = ("https://www.asx.com.au/asx/1/company/"
-                       f"{issuercode}?fields=primary_share")
+                       f"{issuerID}?fields=primary_share")
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
-            if('code' not in asxdata and asxdata['code'] != issuercode):
+            if('code' not in asxdata and asxdata['code'] != issuerID):
                 return False
             # Create new share record
             share = Share(
@@ -359,12 +359,12 @@ class GoogleDatabaseAPI:
             # Return success
             return True
 
-    def getshare(self, issuercode):
+    def getshare(self, issuerID):
         """
         Returns a single share based on the share ID.
 
         Args:
-            issuercode (str): Issuer ID of the share to get.
+            issuerID (str): Issuer ID of the share to get.
         Returns:
             Share object with specified issuer code.
             None if there is no share that matches the issuer code.
@@ -373,18 +373,18 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Get all shares
-            share = session.query(Share).get(issuercode)
+            share = session.query(Share).get(issuerID)
             # Detach share from session
             session.expunge(share)
         return share
 
-    def getsharepricehistory(self, issuercode, starttime=None, endtime=None):
+    def getsharepricehistory(self, issuerID, starttime=None, endtime=None):
         """
         Returns the price history of a single share based on the share ID.
         Start time and end time can be specified to get a range of times.
 
         Args:
-            issuercode (str): Issuer ID of the share to get price data for.
+            issuerID (str): Issuer ID of the share to get price data for.
             starttime (datetime): Include history after this time.
             endtime (datetime): Include history before this time.
         Returns:
@@ -397,7 +397,7 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get all shares
             query = session.query(SharePrice).filter(
-                SharePrice.issuerID == issuercode)
+                SharePrice.issuerID == issuerID)
             # Filter times before start time
             if(isinstance(starttime, datetime)):
                 query = query.filter(SharePrice.recordtime > starttime)

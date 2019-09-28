@@ -259,11 +259,6 @@ def share(issuerID):
     # If the share does not exist, abort with 404 error
     if(share is None):
         abort(404)
-    # Get share price history
-    endtime = datetime.now()
-    starttime = endtime - timedelta(days=1)
-    sharepricehistory = gdb.getsharepricehistory(
-        issuerID, starttime=starttime, endtime=endtime)
 
     # Get field to order by for displaying shares
     if(request.args.get('orderby')):
@@ -293,10 +288,9 @@ def share(issuerID):
 
     # Render template for share page
     return render_template('share.html', share=share,
-                           sharepricehistory=sharepricehistory,
                            buyform=buyform, sellform=sellform,
                            transactions=transactions, transcount=transcount,
-                           countperpage=limit, 
+                           countperpage=limit,
                            userbalance=current_user.balance)
 
 
@@ -355,20 +349,20 @@ def sellshares():
 
 
 @bp.route('/updates/pricegraph', methods=['POST'])
-def updatepricegraph():
+def sharepricehistorydata():
     # Get JSON request data
     data = request.get_json()
-    issuercode = data.get('issuercode')
+    issuerID = data.get('issuerID')
     endtime = datetime.now()
     starttime = endtime - timedelta(data.get('days'))
     # Get share price history for given share and period
     sharepricehistory = gdb.getsharepricehistory(
-        issuercode=issuercode, starttime=starttime, endtime=endtime)
+        issuerID=issuerID, starttime=starttime, endtime=endtime)
     # Parse results into dictionary
     data = list()
     for shareprice in sharepricehistory:
         data.append({
-            "recordtime": shareprice.recordtime,
+            "recordtime": str(shareprice.recordtime),
             "price": shareprice.price
         })
     # Return results as JSON
