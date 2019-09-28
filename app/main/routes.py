@@ -364,8 +364,15 @@ def updatepricegraph():
     # Get share price history for given share and period
     sharepricehistory = gdb.getsharepricehistory(
         issuercode=issuercode, starttime=starttime, endtime=endtime)
+    # Parse results into dictionary
+    data = list()
+    for shareprice in sharepricehistory:
+        data.append({
+            "recordtime": shareprice.recordtime,
+            "price": shareprice.price
+        })
     # Return results as JSON
-    return jsonify(apple=sharepricehistory[0].price)
+    return jsonify(data)
 
 
 @bp.route('/tasks/updateshares')
