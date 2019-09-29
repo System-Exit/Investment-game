@@ -393,12 +393,12 @@ class GoogleDatabaseAPI:
                 return False
             # Record share price history in database
             for sharepricerecord in asxdata:
-                recordtime = datetime.utcfromtimestamp(
+                time = datetime.utcfromtimestamp(
                     sharepricerecord[0]/1000)
                 recordprice = sharepricerecord[4]
                 shareprice = SharePrice(
                     issuerID=issuerID,
-                    time=recordtime,
+                    time=time,
                     price=recordprice
                 )
                 session.add(shareprice)
@@ -446,10 +446,10 @@ class GoogleDatabaseAPI:
                 SharePrice.issuerID == issuerID)
             # Filter times before start time
             if(isinstance(starttime, datetime)):
-                query = query.filter(SharePrice.recordtime > starttime)
+                query = query.filter(SharePrice.time > starttime)
             # Filter times after end time
             if(isinstance(endtime, datetime)):
-                query = query.filter(SharePrice.recordtime < endtime)
+                query = query.filter(SharePrice.time < endtime)
             # Get shareprices
             shareprices = query.all()
             # Detach all share objects from session

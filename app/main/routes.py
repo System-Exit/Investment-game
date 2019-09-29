@@ -362,12 +362,12 @@ def sharepricehistorydata():
     data = list()
     for shareprice in sharepricehistory:
         # Change timezone of recording time
-        recordtime = str(shareprice.recordtime.replace(
+        time = str(shareprice.time.replace(
             tzinfo=timezone.utc).astimezone(tz=None))
         # Define price
         price = shareprice.price
         data.append({
-            "recordtime": recordtime,
+            "time": time,
             "price": price
         })
     # Return results as JSON

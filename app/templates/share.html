@@ -174,7 +174,7 @@
             // Parse data into graph data
             var pricegraphdata = new Array();
             for(i = 0; i < data.length; i++){
-                pricegraphdata.push({ x: data[i].recordtime, y: data[i].price });
+                pricegraphdata.push({ x: data[i].time, y: data[i].price });
             }
             // Update price graph data
             pricegraph.data.datasets[0].data = pricegraphdata;
