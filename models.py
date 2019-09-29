@@ -90,7 +90,7 @@ class SharePrice(Base):
     # Table Columns
     issuerID = Column(String(3), ForeignKey('SHARE.issuerID'),
                       primary_key=True)
-    recordtime = Column(DateTime, primary_key=True)
+    time = Column(DateTime, primary_key=True)
     price = Column(Float, nullable=False, unique=False)
 
 
@@ -106,12 +106,12 @@ class Admin(Base, UserMixin):
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
     # Define SQL connection parameters
-    drivername = 'mysql+pymysql'
-    username = Config.GDB_USERNAME
-    password = Config.GDB_PASSWORD
-    host = Config.GDB_HOST
-    database = 'TestDatabase'
-    query = Config.GDB_QUERY
+    drivername = Config.DB_DRIVER
+    username = Config.DB_USERNAME
+    password = Config.DB_PASSWORD
+    host = Config.DB_HOST
+    database = Config.DB_DATABASE
+    query = Config.DB_QUERY
     # Create engine
     engine = create_engine("%s://%s:%s@%s/%s%s" % (
         drivername, username, password, host, database, query))

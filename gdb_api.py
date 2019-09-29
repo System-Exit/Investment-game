@@ -318,15 +318,14 @@ class GoogleDatabaseAPI:
             # Check that share isn't already added to database
             share = session.query(Share).filter(
                 Share.issuerID == issuerID).first()
-            if(share is not None):
+            if share is not None:
                 return False
             # Get share data from ASX
-            # TODO: Move ASX API call elsewhere
             address = ("https://www.asx.com.au/asx/1/company/"
                        f"{issuerID}?fields=primary_share")
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
-            if('code' not in asxdata and asxdata['code'] != issuerID):
+            if asxdata.get('error_code'):
                 return False
             # Create new share record
             share = Share(
@@ -356,6 +355,53 @@ class GoogleDatabaseAPI:
             )
             # Add share to share table
             session.add(share)
+
+    def generatesharepricehistory(self, issuerID):
+        """
+        Generates share price history for given share, deleting previous
+        history there is any.
+
+        Args:
+            issuerID (str): Issuer ID of share to generate price history for.
+        Returns:
+            True if share price history was generated successfully.
+            False if there were any errors that occured.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that share is present in database
+            share = session.query(Share).filter(
+                Share.issuerID == issuerID).first()
+            if share is None:
+                return False
+            # Deletes existsing share price history for share
+            session.query(SharePrice).filter(
+                SharePrice.issuerID == issuerID).delete()
+            session.commit()
+            # Gets the share issuer code from ASX
+            address = ("https://www.asx.com.au/asx/1/company/"
+                       f"{issuerID}?fields=primary_share")
+            asxdata = requests.get(address).json()
+            code = asxdata['primary_share']['code']
+            # Get share price history
+            address = ("https://www.asx.com.au/asx/1/chart/highcharts?"
+                       f"asx_code={code}&complete=true")
+            asxdata = requests.get(address).json()
+            # Check if share price history was aquired successfully
+            if not isinstance(asxdata, list):
+                return False
+            # Record share price history in database
+            for sharepricerecord in asxdata:
+                recordtime = datetime.utcfromtimestamp(
+                    sharepricerecord[0]/1000)
+                recordprice = sharepricerecord[4]
+                shareprice = SharePrice(
+                    issuerID=issuerID,
+                    time=recordtime,
+                    price=recordprice
+                )
+                session.add(shareprice)
             # Return success
             return True
 
@@ -543,7 +589,7 @@ class GoogleDatabaseAPI:
                 # Create and add new share price record
                 shareprice = SharePrice(
                     issuerID=issuerID,
-                    recordtime=datetime.utcnow(),
+                    time=datetime.utcnow(),
                     price=currentprice
                 )
                 session.add(shareprice)
@@ -901,5 +947,6 @@ class GoogleDatabaseAPI:
             return statistics
 
 if __name__ == "__main__":
+    from config import Config
     # Initialize API
-    gdb = GoogleDatabaseAPI()
+    gdb = GoogleDatabaseAPI(config_class=Config)
