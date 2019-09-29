@@ -120,31 +120,52 @@
         datasets: [{
             label: ["{{ share.fullname }}"],
             data: [],
-        /*
-        backgroundColor: [
-            'rgba(255, 255, 255, 0.8)'
-        ],*/
-        borderColor: [
-            'rgba(255,99,132,1)'
-        ],
-        pointRadius: 5,
-        pointBorderColor: 'rgba(0, 0, 0, 0.8)',
-        pointStyle:'circles'
+            /*
+            backgroundColor: [
+                'rgba(255, 255, 255, 0.8)'
+            ],*/
+            borderColor: [
+                'rgba(255,99,132,1)'
+            ],
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBorderWidth: 5,
+            pointHoverBackgroundColor: 'rgba(255,99,132,1)',
+            pointHoverBorderColor: 'rgba(255,99,132,0.5)',
+            pointHoverStyle:'circles'
         }]
     };
     var pricegraphoptions = {
         scales: {
             xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time'
+                },
                 type: 'time',
                 time: {
                     unit: 'hour',
                     round: 'hour',
                     tooltipFormat: "h:mm:ss a",
                     displayFormats: {
-                        hour: 'MMM D, h:mm A'
+                        hour: 'MMM D, h:mm A',
                     }
                 }
+            }],
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Price (AUD)'
+                }
             }]
+        },
+        tooltips: {
+            mode: 'index',
+            intersect: false
+        },
+        hover: {
+            mode: 'nearest',
+            intersect: false
         }
     };
     // Define price graph
@@ -178,6 +199,27 @@
             }
             // Update price graph data
             pricegraph.data.datasets[0].data = pricegraphdata;
+            // Change X axis display unit depending on setting
+            if(days <= 1){
+                minDate = new Date();
+                minDate.setHours(10, 0, 0);
+                maxDate = new Date();
+                maxDate.setHours(16, 0, 0);
+                pricegraph.options.scales.xAxes[0].time.unit = 'hour';
+                pricegraph.options.scales.xAxes[0].time.min = minDate;
+                pricegraph.options.scales.xAxes[0].time.max = maxDate;
+            }
+            else if(days <= 31){
+                pricegraph.options.scales.xAxes[0].time.unit = 'day';
+                pricegraph.options.scales.xAxes[0].time.min = null;
+                pricegraph.options.scales.xAxes[0].time.max = null;
+            }
+            else if(days <= 365){
+                pricegraph.options.scales.xAxes[0].time.unit = 'month';
+                pricegraph.options.scales.xAxes[0].time.min = null;
+                pricegraph.options.scales.xAxes[0].time.max = null;
+            }
+            // Update price graph
             pricegraph.update();
         }).fail(function(xhr, textStatus, errorThrown){
             alert("Price graph could not be updated:"+errorThrown)
