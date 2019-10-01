@@ -215,7 +215,9 @@ class GoogleDatabaseAPI:
                 userpass=str(passhash),
                 verified=True,
                 banned=False,
-                balance=1000000
+                balance=1000000,
+                overallPerc=0,
+                totalNumSales=0
                 )
             # Add user to database
             session.add(user)
@@ -714,6 +716,19 @@ class GoogleDatabaseAPI:
             usershare.quantity = usershare.quantity - quantity
             # Add to user balance
             user.balance += totalprice
+
+            #
+            # Remember the amount a sale cost
+            soldSharePrice = totalprice/quantity
+            theAveragePurchasePrice = self.averagePurchasedStockPrice(userID, issuerID)
+            if (theAveragePurchasePrice == 0):
+                flash("Stock you want to sell was never purchased.",
+                      category="error")
+            else:
+                percent = ((soldSharePrice/theAveragePurchasePrice)-1)*100
+                user.overallPerc = ((user.overallPerc*user.totalNumSales) +
+                                    percent)/(user.totalNumSales+1)
+                user.totalNumSales += 1
             # Return true for success
             return True
 

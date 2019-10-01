@@ -9,7 +9,16 @@ Base = declarative_base()
 
 
 class User(Base, UserMixin):
+    
     """Model for user accounts."""
+
+    # Defined User Level Ranges
+
+    CONST_LEVEL1 = 5.0
+    CONST_LEVEL2 = 10.0
+    CONST_LEVEL3 = 15.0
+    CONST_LEVEL4 = 20.0
+
     # Table name
     __tablename__ = 'USER'
     # Table Columns
@@ -26,6 +35,40 @@ class User(Base, UserMixin):
     balance = Column(Float, unique=False, nullable=False)
     overallPerc = Column(Float, unique=False, nullable=False)
     totalNumSales = Column(Float, unique=False, nullable=False)
+
+    """
+    The ability to get Star Rating for a User
+
+    Args:
+
+    Returns:
+        A Star rating between 1-5 for the user currently
+    """
+
+
+    def getStarRating(self):
+
+        numStars = 0
+        returnval = ""
+        # The overall percent of a user into a defined set of ratings 1-5
+
+        if ((self.overallPerc > 0) and (self.overallPerc <= self.CONST_LEVEL1)):
+            numStars = 1
+        if ((self.overallPerc > self.CONST_LEVEL1) and
+            (self.overallPerc <= self.CONST_LEVEL2)):
+            numStars = 2
+        if ((self.overallPerc > self.CONST_LEVEL2) and
+            (self.overallPerc <= self.CONST_LEVEL3)):
+            numStars = 3
+        if ((self.overallPerc > self.CONST_LEVEL3) and
+            (self.overallPerc <= self.CONST_LEVEL4)):
+            numStars = 4
+        if (self.overallPerc > self.CONST_LEVEL4):
+            numStars = 5
+        if (numStars > 0):
+            returnval = 'images/awards' + str(numStars)+'.png'
+        return (returnval)
+
 
     def get_id(self):
         return self.userID
