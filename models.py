@@ -24,6 +24,8 @@ class User(Base, UserMixin):
     verified = Column(Boolean, unique=False, nullable=False)
     banned = Column(Boolean, unique=False, nullable=False)
     balance = Column(Float, unique=False, nullable=False)
+    overallPerc = Column(Float, unique=False, nullable=False)
+    totalNumSales = Column(Float, unique=False, nullable=False)
 
     def get_id(self):
         return self.userID
