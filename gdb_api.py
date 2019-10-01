@@ -662,6 +662,20 @@ class GoogleDatabaseAPI:
             user.balance -= totalprice
             # Return true for success
             return True
+            
+    def averagePurchasedStockPrice(self, userID, issuerID):
+        averagePrice = 0
+        totalValue = 0
+        totalQuantity = 0
+        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID = issuerID,orderby=None, order="asc", offset=0, limit= 1000)
+        if (count > 0):
+            for purchase in purchaseTransactions:
+                totalValue += purchase.totaltransval
+                totalQuantity += purchase.quantity
+        
+            averagePrice = totalValue/totalQuantity
+
+        return averagePrice
 
     def sellshare(self, userID, issuerID, quantity):
         """
