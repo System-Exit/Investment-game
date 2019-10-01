@@ -17,6 +17,11 @@
         <div id="top-left-corner">
             <img src="{{url_for('static', filename='images/user.svg')}}" 
              alt="Placeholder Profile Icon">
+             {% if user %}
+                {% if user.getStarRating()!=""%}
+                <img src="{{ url_for('static', filename=user.getStarRating()) }}"/>
+                {% endif %}   
+             {% endif %}
         </div>
         <div id="top-bar" style="display: flex;justify-content: space-between;align-items: center;">
             <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
