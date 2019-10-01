@@ -593,6 +593,7 @@ class GoogleDatabaseAPI:
                     price=currentprice
                 )
                 session.add(shareprice)
+                session.commit()
         # Return true as update was successful
         return True
 
