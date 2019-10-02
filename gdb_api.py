@@ -1,6 +1,7 @@
 from models import User, Share, SharePrice, Usershare, Transaction, Admin
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import OperationalError
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
@@ -47,7 +48,23 @@ class GoogleDatabaseAPI:
         Can often used
 
         """
-        session = self.Session()
+        # Check that database connection is valid
+        connected = False
+        error_count = 0
+        while not connected:
+            try:
+                # Create session
+                session = self.Session()
+                # Check if session has valid connection
+                session.connection()
+                connected = True
+            except:
+                # Increase error count
+                error_count += 1
+                # If error count is at limit, raise error
+                if error_count >= 5:
+                    raise
+        # Handle session activities
         try:
             yield session
             session.commit()
