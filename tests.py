@@ -1,6 +1,6 @@
 from gdb_api import GoogleDatabaseAPI
 from config import Config
-from models import Base, User, Share
+from models import Base, User, Share, Admin
 from argon2 import PasswordHasher
 import pytest
 import unittest
@@ -117,14 +117,107 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         username = "TestUser"
         userpass = "TestPass123"
         wrongpass = "NotTestPass123"
-        testuser = User(username=username, userpass=userpass)
+        testuser = self.generatetestuser(username=username, userpass=userpass)
         # Add user to database directly
         with self.gdb.sessionmanager() as session:
             session.add(testuser)
         # Assert that user is verified with correct password
-        assert self.gdb.verifyuser(username, userpass) is True
+        verified, userID = self.gdb.verifyuser(username, userpass)
+        assert verified is True
         # Assert that user is not verified with incorrect password
-        assert self.gdb.verifyuser(username, wrongpass) is False
+        verified, userID = self.gdb.verifyuser(username, wrongpass)
+        assert verified is False
+
+    def test_verifyadmin(self):
+        # Create admin
+        username = "testmin"
+        rightpass = "testpass"
+        wrongpass = "untestpass"
+        admin = Admin(
+            username=username,
+            passhash=PasswordHasher().hash(rightpass)
+        )
+        # Add admin to database directly
+        with self.gdb.sessionmanager() as session:
+            session.add(admin)
+        # Assert that user is verified with correct password
+        verified, userID = self.gdb.verifyadmin(username, rightpass)
+        assert verified is True
+        # Assert that user is not verified with incorrect password
+        verified, userID = self.gdb.verifyadmin(username, wrongpass)
+        assert verified is False
+
+    def test_addshare(self):
+        # TODO
+        pass
+
+    def test_getshare(self):
+        # TODO
+        pass
+
+    def test_getshares(self):
+        # TODO
+        pass
+
+    def test_getsharepricehistory(self):
+        # TODO
+        pass
+
+    def test_updateshares(self):
+        # TODO
+        pass
+
+    def test_buyshare(self):
+        # TODO
+        pass
+
+    def test_sellshare(self):
+        # TODO
+        pass
+
+    def test_getusershareinfo(self):
+        # TODO
+        pass
+
+    def test_gettransactions(self):
+        # TODO
+        pass
+
+    def test_banuser(self):
+        # Create unbanned user
+        userID = 1
+        banned = False
+        user = self.generatetestuser(userID=userID, banned=banned)
+        # Add user to database directly
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+        # Ban the user
+        self.gdb.banuser(userID=userID)
+        # Assert that the user is banned
+        with self.gdb.sessionmanager() as session:
+            user = session.query(User).get(userID)
+            banned = user.banned
+        assert banned is True
+
+    def test_unbanuser(self):
+        # Create unbanned user
+        userID = 1
+        banned = True
+        user = self.generatetestuser(userID=userID, banned=banned)
+        # Add user to database directly
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+        # Ban the user
+        self.gdb.unbanuser(userID=userID)
+        # Assert that the user is banned
+        with self.gdb.sessionmanager() as session:
+            user = session.query(User).get(userID)
+            banned = user.banned
+            assert banned is False
+
+    def test_getuserstatistics(self):
+        # TODO
+        pass
 
     def generatetestuser(self, userID=None, firstname=None, lastname=None,
                          email=None, dob=None, gender=None, username=None,
@@ -173,7 +266,7 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         if not balance:
             balance = random.randint(1000, 10000000)
         # If hash pass is set, hash the userpass
-        if hashpass:
+        if hashpassword:
             userpass = PasswordHasher().hash(userpass)
         # Create user
         generateduser = User(
