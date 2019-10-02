@@ -103,6 +103,17 @@ class Admin(Base, UserMixin):
     username = Column(String(64), index=True, unique=True)
     passhash = Column(String(200), unique=False, nullable=False)
 
+class Leaderboard(Base):
+    """Model for historical user ranking and value"""
+    # Table name
+    __tablename__ = 'LEADERBOARD'
+    # Table Columns
+    userID = Column(Integer, ForeignKey('USER.userID'),
+                      primary_key=True)
+    recordtime = Column(DateTime, primary_key=True)
+    ranking = Column(Integer, nullable=False, unique=False)
+    totalvalue = Column(Float, unique=False, nullable=False)
+
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
     # Define SQL connection parameters
@@ -110,7 +121,7 @@ if __name__ == "__main__":
     username = Config.GDB_USERNAME
     password = Config.GDB_PASSWORD
     host = Config.GDB_HOST
-    database = 'TestDatabase'
+    database = "TestDatabase"
     query = Config.GDB_QUERY
     # Create engine
     engine = create_engine("%s://%s:%s@%s/%s%s" % (

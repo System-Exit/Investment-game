@@ -1,4 +1,4 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin
+from models import User, Share, SharePrice, Usershare, Transaction, Admin, Leaderboard
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
@@ -11,6 +11,7 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import math
+import operator
 
 
 class GoogleDatabaseAPI:
@@ -928,13 +929,14 @@ class GoogleDatabaseAPI:
         Get users and fields needed for a leaderboard preordered.
 
         Returns:
-            A list of results for the leaderboard ordered by total.
+            A list of dictionary results for the leaderboard ordered by total.
             The returned format is:
                 result.userID: ID of the user.
                 result.username: Username of the user.
                 result.sharesvalue: Total value of shares user has.
                 result.balance: Current balance for user.
                 result.totalvalue: Total shares values and user balance.
+                result.ranking: Ranking of the user by totalvalue,
 
         """
         # Initialse session
@@ -977,6 +979,89 @@ class GoogleDatabaseAPI:
                 
         # Return leaderboard
         return leaderboard, current_user_info
+    
+    def updateleaderboard(self):
+        #TODO Remove magic number
+        leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+        with self.sessionmanager() as session:
+
+            recordtime=datetime.utcnow() - timedelta(days=30)
+
+            for row in leaderboard:
+                user = Leaderboard(
+                userID=row['userID'],
+                recordtime=recordtime,
+                ranking=row['ranking'],
+                totalvalue=row['totalvalue']
+                )
+                session.add(user)
+            # Create leaderboard entry
+            
+            # Add user to database
+            
+        # Return success'''
+        return True
+    
+    def gethistoricalleaderboard(self):
+        #TODO Remove magic number
+        currentleaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+
+        with self.sessionmanager() as session:
+
+            currentdate = datetime.utcnow()
+            lowertdelta = timedelta(days=7)
+            uppertdelta = timedelta(days=8)
+
+            # Creates a date a week prior to current time
+            lowerdatelimit = currentdate - lowertdelta
+            #Creates a date a week + 1 day prior to currrent time
+            upperdatelimit = currentdate - uppertdelta
+
+            weekleaderboard = []
+            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            for row in currentleaderboard:
+                result = query.filter(Leaderboard.userID == row['userID']).first()
+
+                if result is not None:
+                    dictionary = { 
+                    'username' : row['username'], 
+                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
+                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
+                    'currentvalue' : row['totalvalue'],
+                    'previousvalue': result.totalvalue}
+                    weekleaderboard.append(dictionary)
+            
+            weekleaderboard.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+
+            currentdate = datetime.utcnow()
+            lowertdelta = timedelta(days=30)
+            uppertdelta = timedelta(days=31)
+
+            # Creates a date a month prior to current time
+            lowerdatelimit = currentdate - lowertdelta
+            #Creates a date a month + 1 day prior to currrent time
+            upperdatelimit = currentdate - uppertdelta
+
+            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            monthleaderboard = []
+            
+            for row in currentleaderboard:
+                result = query.filter(Leaderboard.userID == row['userID']).first()
+
+                if result is not None:
+                    dictionary = { 
+                    'username' : row['username'], 
+                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
+                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
+                    'currentvalue' : row['totalvalue'],
+                    'previousvalue': result.totalvalue}
+                    monthleaderboard.append(dictionary)
+            
+            monthleaderboard.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+            session.expunge_all()
+            
+            return weekleaderboard, monthleaderboard
+            
 
 if __name__ == "__main__":
     # Initialize API
