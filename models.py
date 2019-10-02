@@ -77,7 +77,7 @@ class User(Base, UserMixin):
     def getStarRating(self):
 
         returnval = ""
-        numStars = getRating()
+        numStars = self.getRating()
 
         if (numStars > 0):
             returnval = 'images/awards' + str(numStars)+'.png'

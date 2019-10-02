@@ -1,10 +1,35 @@
 {% extends "layout.html" %}
 {% set active_page = "dashboard" %}
 {% block content %}
-            <div class="money" style="background: #34ebb1;/* height: 400px; */padding: 20px;width: 400px;margin-left: 30px;padding left: 5;text-align: left;">
-               <h1>Welcome {{ user.firstname }}!</h1>
-               <h3>Your last trade of Woolworths Inc has increased by %5</h3>
-               <h3>You are in the top %5 of users currently</h3>
-               <h3>You are currently a Level 4 user, your so close to your next level! Keep trading</h3>                 
-            </div>        
+<div class="wrapper" style="display:grid;
+  grid-template-columns: 60% 40%;
+  text-align: left;
+  margin: 20px;">
+    <div>
+     <h1>Welcome <strong>{{ user.firstname }}!</strong></h1>
+   
+     <h3>You are currently a <strong>Level {{ user.getRating() }} </strong> user, your so close to your next level, keep making smart trades!</h3> 
+    </div>
+    <div style="background: lightgrey;
+  padding: 1em;">
+     <h1>Welcome Melina!</h1>
+     <h3>Your last trade of Woolworths Inc has increased by %5</h3>
+     <h3>You are in the top %5 of users currently</h3>
+     <h3>You are currently a Level 4 user, your so close to your next level! Keep trading</h3> 
+    </div>
+  </div> 
+  <div class="wrapper" style="display:grid;
+  grid-template-columns: 40% 60%;
+  background: #00ffaa;
+   text-align: left;
+  margin: 20px;">
+    <div>
+     <h1 style="padding: 20px;">Your Portfolio Value is:</h1>
+     <p style="font-size: 75px; padding: 20px;">${{ userbalance }}</p>
+    </div>
+    <div style="background: lightgrey;
+  padding: 1em;">
+ 
+    </div>
+  </div>         
 {% endblock %}
