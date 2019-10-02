@@ -676,7 +676,7 @@ class GoogleDatabaseAPI:
         averagePrice = 0
         totalValue = 0
         totalQuantity = 0
-        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID = issuerID,orderby=None, order="asc", offset=0, limit= 1000,transtype="B")
+        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID=issuerID, orderby=None, order="asc", offset=0, limit= 1000,transtype="B")
         if (count > 0):
             for purchase in purchaseTransactions:
                 totalValue += purchase.totaltransval
@@ -830,7 +830,8 @@ class GoogleDatabaseAPI:
         return usershares, count
 
     def gettransactions(self, userID=None, issuerID=None,
-                        orderby=None, order="asc", offset=0, limit=1000,transtype=None):
+                        orderby=None, order="asc", offset=0, limit=1000,
+                        transtype=None):
         """
         Get all transactions for a given user and/or share.
 
@@ -847,7 +848,7 @@ class GoogleDatabaseAPI:
                 Defaults to 0.
             limit (int): How many rows to return of query.
                 Defaults to 1000.
-            transtype (str): Restricts sell("S") or buy("B"). 
+            transtype (str): Restricts sell("S") or buy("B").
                 Defaults to None.
 
         Returns:
