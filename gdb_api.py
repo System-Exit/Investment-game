@@ -19,53 +19,26 @@ class GoogleDatabaseAPI:
     API class for handling calls to google cloud SQL database.
 
     """
-    def __init__(self, app=None, config_class=None):
+    def __init__(self, config_class):
         """
-        Initialise API class.
-        If given a flask app, will initialise API for app.
+        Initialise databse API class.
 
         """
-        # If an app is passed, initialise with the app and return
-        if app:
-            self.init_app(app)
-            return
-        # If a config class if passed, initialise with it and return
-        if config_class:
-            # Define SQL connection parameters
-            drivername = 'mysql+pymysql'
-            username = config_class.GDB_USERNAME
-            password = config_class.GDB_PASSWORD
-            host = config_class.GDB_HOST
-            database = config_class.GDB_DATABASE
-            query = config_class.GDB_QUERY
-            # Create engine
-            engine = create_engine("%s://%s:%s@%s/%s%s" % (
-                drivername, username, password, host, database, query))
-            # Define session maker
-            self.Session = sessionmaker(bind=engine)
-            # Return
-            return
-        # Otherwise, return without initialising session maker
-        return
-
-    def init_app(self, app):
-        """
-        Initialises database API for a flask app.
-
-        Args:
-            app: The Flask app to initialise database API for.
-
-        """
-        # Define SQL connection parameters
-        drivername = 'mysql+pymysql'
-        username = app.config['GDB_USERNAME']
-        password = app.config['GDB_PASSWORD']
-        host = app.config['GDB_HOST']
-        database = app.config['GDB_DATABASE']
-        query = app.config['GDB_QUERY']
+        # Get config parameters
+        drivername = config_class.DB_DRIVER
+        username = config_class.DB_USERNAME
+        password = config_class.DB_PASSWORD
+        host = config_class.DB_HOST
+        port = config_class.DB_PORT
+        database = config_class.DB_DATABASE
+        query = config_class.DB_QUERY
         # Create engine
-        self.engine = create_engine("%s://%s:%s@%s/%s%s" % (
-            drivername, username, password, host, database, query))
+        self.engine = create_engine(
+                (f"{drivername}://"
+                 f"{username}:{password}@"
+                 f"{host}:{port}/"
+                 f"{database}{query}")
+        )
         # Define session maker
         self.Session = sessionmaker(bind=self.engine)
 
@@ -221,10 +194,15 @@ class GoogleDatabaseAPI:
         """
         # Initialse session
         with self.sessionmanager() as session:
-            # Check that username is available. If not, return false.
+            # Check that username is available.
             user = session.query(User).filter(
                    User.username == username).first()
-            if(user is not None):
+            if user is not None:
+                return False
+            # Check that email is not already taken.
+            user = session.query(User).filter(
+                   User.email == email).first()
+            if user is not None:
                 return False
             # Hash password
             passhash = PasswordHasher().hash(userpass)
@@ -326,12 +304,12 @@ class GoogleDatabaseAPI:
                 # User doesn't exist, return false
                 return False, None
 
-    def addshare(self, issuercode):
+    def addshare(self, issuerID):
         """
         Adds share details of specified share to database to database.
 
         Args:
-            issuercode (str): ASX issued code of share to add.
+            issuerID (str): ASX issued code of share to add.
         Returns:
             bool: True if sucessful, false if share doesn't exist or is
                   already present.
@@ -341,16 +319,15 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Check that share isn't already added to database
             share = session.query(Share).filter(
-                Share.issuerID == issuercode).first()
-            if(share is not None):
+                Share.issuerID == issuerID).first()
+            if share is not None:
                 return False
             # Get share data from ASX
-            # TODO: Move ASX API call elsewhere
             address = ("https://www.asx.com.au/asx/1/company/"
-                       f"{issuercode}?fields=primary_share")
+                       f"{issuerID}?fields=primary_share")
             asxdata = requests.get(address).json()
             # Check if share data was not retrieved successfully
-            if('code' not in asxdata and asxdata['code'] != issuercode):
+            if asxdata.get('error_code'):
                 return False
             # Create new share record
             share = Share(
@@ -380,15 +357,62 @@ class GoogleDatabaseAPI:
             )
             # Add share to share table
             session.add(share)
+
+    def generatesharepricehistory(self, issuerID):
+        """
+        Generates share price history for given share, deleting previous
+        history there is any.
+
+        Args:
+            issuerID (str): Issuer ID of share to generate price history for.
+        Returns:
+            True if share price history was generated successfully.
+            False if there were any errors that occured.
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Check that share is present in database
+            share = session.query(Share).filter(
+                Share.issuerID == issuerID).first()
+            if share is None:
+                return False
+            # Deletes existsing share price history for share
+            session.query(SharePrice).filter(
+                SharePrice.issuerID == issuerID).delete()
+            session.commit()
+            # Gets the share issuer code from ASX
+            address = ("https://www.asx.com.au/asx/1/company/"
+                       f"{issuerID}?fields=primary_share")
+            asxdata = requests.get(address).json()
+            code = asxdata['primary_share']['code']
+            # Get share price history
+            address = ("https://www.asx.com.au/asx/1/chart/highcharts?"
+                       f"asx_code={code}&complete=true")
+            asxdata = requests.get(address).json()
+            # Check if share price history was aquired successfully
+            if not isinstance(asxdata, list):
+                return False
+            # Record share price history in database
+            for sharepricerecord in asxdata:
+                time = datetime.utcfromtimestamp(
+                    sharepricerecord[0]/1000)
+                recordprice = sharepricerecord[4]
+                shareprice = SharePrice(
+                    issuerID=issuerID,
+                    time=time,
+                    price=recordprice
+                )
+                session.add(shareprice)
             # Return success
             return True
 
-    def getshare(self, issuercode):
+    def getshare(self, issuerID):
         """
         Returns a single share based on the share ID.
 
         Args:
-            issuercode (str): Issuer ID of the share to get.
+            issuerID (str): Issuer ID of the share to get.
         Returns:
             Share object with specified issuer code.
             None if there is no share that matches the issuer code.
@@ -397,18 +421,18 @@ class GoogleDatabaseAPI:
         # Initialse session
         with self.sessionmanager() as session:
             # Get all shares
-            share = session.query(Share).get(issuercode)
+            share = session.query(Share).get(issuerID)
             # Detach share from session
             session.expunge(share)
         return share
 
-    def getsharepricehistory(self, issuercode, starttime=None, endtime=None):
+    def getsharepricehistory(self, issuerID, starttime=None, endtime=None):
         """
         Returns the price history of a single share based on the share ID.
         Start time and end time can be specified to get a range of times.
 
         Args:
-            issuercode (str): Issuer ID of the share to get price data for.
+            issuerID (str): Issuer ID of the share to get price data for.
             starttime (datetime): Include history after this time.
             endtime (datetime): Include history before this time.
         Returns:
@@ -421,13 +445,13 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get all shares
             query = session.query(SharePrice).filter(
-                SharePrice.issuerID == issuercode)
+                SharePrice.issuerID == issuerID)
             # Filter times before start time
             if(isinstance(starttime, datetime)):
-                query = query.filter(SharePrice.recordtime > starttime)
+                query = query.filter(SharePrice.time > starttime)
             # Filter times after end time
             if(isinstance(endtime, datetime)):
-                query = query.filter(SharePrice.recordtime < endtime)
+                query = query.filter(SharePrice.time < endtime)
             # Get shareprices
             shareprices = query.all()
             # Detach all share objects from session
@@ -514,7 +538,7 @@ class GoogleDatabaseAPI:
                        "%s?fields=primary_share") % issuerID
             asxdata = requests.get(address).json()
             # Check that the data was successfully retreived
-            if('code' not in asxdata and asxdata['code'] == issuerID):
+            if asxdata.get('error_code'):
                 # If unsuccessful, skip this share and try the next one
                 # TODO: Rather than skip, maybe throw an exception or make it
                 #       return false after doing everything else, as some
@@ -567,10 +591,11 @@ class GoogleDatabaseAPI:
                 # Create and add new share price record
                 shareprice = SharePrice(
                     issuerID=issuerID,
-                    recordtime=datetime.utcnow(),
+                    time=datetime.utcnow(),
                     price=currentprice
                 )
                 session.add(shareprice)
+                session.commit()
         # Return true as update was successful
         return True
 
@@ -1064,10 +1089,6 @@ class GoogleDatabaseAPI:
             
 
 if __name__ == "__main__":
-    # Initialize API
     from config import Config
+    # Initialize API
     gdb = GoogleDatabaseAPI(config_class=Config)
-    # Test leaderboard
-    lead = gdb.getleaderboard()
-    for userlead in lead:
-        print(userlead.total)

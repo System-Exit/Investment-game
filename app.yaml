@@ -1,9 +1,21 @@
 runtime: python37
 
 env_variables:
+  # Flask secret key
   SECERT_KEY: "71eb7c87-d957-4882-bb82-27b3b76cf781"
-  GDB_USERNAME: "root"
-  GDB_PASSWORD: "RMIT1234!!!"
-  GDB_HOST: ""
-  GDB_DATABASE: "Database"
-  GDB_QUERY: "?unix_socket=/cloudsql/budding-investors-248807:australia-southeast1:database"
+  # Main database configuration
+  DB_DRIVER: "mysql+pymysql"
+  DB_USERNAME: "root"
+  DB_PASSWORD: "RMIT1234!!!"
+  DB_HOST: ""
+  DB_PORT: ""
+  DB_DATABASE: "Database"
+  DB_QUERY: "?unix_socket=/cloudsql/budding-investors-248807:australia-southeast1:database"
+  # Testing database configuration
+  TEST_DB_DRIVER: "mysql+pymysql"
+  TEST_DB_USERNAME: "root"
+  TEST_DB_PASSWORD: "RMIT1234!!!"
+  TEST_DB_HOST: ""
+  TEST_DB_PORT: ""
+  TEST_DB_DATABASE: "TestDatabase"
+  TEST_DB_QUERY: "?unix_socket=/cloudsql/budding-investors-248807:australia-southeast1:database"

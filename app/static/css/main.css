@@ -21,6 +21,10 @@ body
 }
 
 /* Sortable table elements */
+.sortable-table
+{
+    background-color: white;
+}
 .sortable-table th
 {
     text-align: center;
@@ -127,7 +131,7 @@ body
     position: relative;
     width: calc(100% - 150px);
     left: 150px;
-    top: 60px;
+    top: 100px;
 }
 
 

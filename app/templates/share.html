@@ -106,9 +106,12 @@
         </div>
     {% endif %}
     <canvas id="shareprice-history"></canvas>
-    {% for shareprice in sharepricehistory %}
-        <p>{{ shareprice.recordtime }}</p>
-    {% endfor %}
+    <div class="container">
+        <button id="price-graph-day" onclick="UpdatePriceGraph(1)" type="button">Day</button>
+        <button id="price-graph-week" onclick="UpdatePriceGraph(7)" type="button">Week</button>
+        <button id="price-graph-month" onclick="UpdatePriceGraph(31)" type="button">Month</button>
+        <button id="price-graph-year" onclick="UpdatePriceGraph(365)" type="button">Year</button>
+    </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
@@ -116,44 +119,110 @@
     var pricegraphdata = {
         datasets: [{
             label: ["{{ share.fullname }}"],
-            data: [
-            {% for shareprice in sharepricehistory %}
-                { x: "{{ shareprice.recordtime }}", y: {{ shareprice.price }}},
-            {% endfor %}
-        ],
-        /*
-        backgroundColor: [
-            'rgba(255, 255, 255, 0.8)'
-        ],*/
-        borderColor: [
-            'rgba(255,99,132,1)'
-        ],
-        pointRadius: 5,
-        pointBorderColor: 'rgba(0, 0, 0, 0.8)',
-        pointStyle:'circles'
+            data: [],
+            /*
+            backgroundColor: [
+                'rgba(255, 255, 255, 0.8)'
+            ],*/
+            borderColor: [
+                'rgba(255,99,132,1)'
+            ],
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBorderWidth: 5,
+            pointHoverBackgroundColor: 'rgba(255,99,132,1)',
+            pointHoverBorderColor: 'rgba(255,99,132,0.5)',
+            pointHoverStyle:'circles'
         }]
     };
     var pricegraphoptions = {
         scales: {
             xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time'
+                },
                 type: 'time',
                 time: {
                     unit: 'hour',
                     round: 'hour',
                     tooltipFormat: "h:mm:ss a",
                     displayFormats: {
-                        hour: 'MMM D, h:mm A'
+                        hour: 'MMM D, h:mm A',
                     }
                 }
+            }],
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Price (AUD)'
+                }
             }]
+        },
+        tooltips: {
+            mode: 'index',
+            intersect: false
+        },
+        hover: {
+            mode: 'nearest',
+            intersect: false
         }
     };
+    // Define price graph
+    var pricegraph = null;
+    /** Load initial price graph data **/
     window.onload = function() {
         var ctx = document.getElementById("shareprice-history").getContext("2d");
-        var pricegraph = new Chart(ctx, {
+        pricegraph = new Chart(ctx, {
             type: 'line',
             data:  pricegraphdata,
             options: pricegraphoptions,
+        });
+        UpdatePriceGraph(1);
+    }
+    /** Update price graph with specfied range **/
+    function UpdatePriceGraph(days)
+    {
+        $.ajax({
+            url: "{{ url_for('main.sharepricehistorydata') }}",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                issuerID: "{{ share.issuerID }}",
+                days: days
+            })
+        }).done(function(data){
+            // Parse data into graph data
+            var pricegraphdata = new Array();
+            for(i = 0; i < data.length; i++){
+                pricegraphdata.push({ x: data[i].time, y: data[i].price });
+            }
+            // Update price graph data
+            pricegraph.data.datasets[0].data = pricegraphdata;
+            // Change X axis display unit depending on setting
+            if(days <= 1){
+                minDate = new Date();
+                minDate.setHours(10, 0, 0);
+                maxDate = new Date();
+                maxDate.setHours(16, 0, 0);
+                pricegraph.options.scales.xAxes[0].time.unit = 'hour';
+                pricegraph.options.scales.xAxes[0].time.min = minDate;
+                pricegraph.options.scales.xAxes[0].time.max = maxDate;
+            }
+            else if(days <= 31){
+                pricegraph.options.scales.xAxes[0].time.unit = 'day';
+                pricegraph.options.scales.xAxes[0].time.min = null;
+                pricegraph.options.scales.xAxes[0].time.max = null;
+            }
+            else if(days <= 365){
+                pricegraph.options.scales.xAxes[0].time.unit = 'month';
+                pricegraph.options.scales.xAxes[0].time.min = null;
+                pricegraph.options.scales.xAxes[0].time.max = null;
+            }
+            // Update price graph
+            pricegraph.update();
+        }).fail(function(xhr, textStatus, errorThrown){
+            alert("Price graph could not be updated:"+errorThrown)
         });
     }
 </script>
