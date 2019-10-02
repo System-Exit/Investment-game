@@ -1010,7 +1010,7 @@ class GoogleDatabaseAPI:
         leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
         with self.sessionmanager() as session:
 
-            recordtime=datetime.utcnow() - timedelta(days=30)
+            recordtime=datetime.utcnow()
 
             for row in leaderboard:
                 user = Leaderboard(
