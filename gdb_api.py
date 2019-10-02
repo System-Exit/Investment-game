@@ -664,10 +664,19 @@ class GoogleDatabaseAPI:
             return True
             
     def averagePurchasedStockPrice(self, userID, issuerID):
+        """
+        Calculates the average purchase price for a given stock(issuer ID)
+
+        Args:
+            userID (str): ID of user that is making the sale.
+            issuerID (str): ID of share that is being sold.
+
+
+        """
         averagePrice = 0
         totalValue = 0
         totalQuantity = 0
-        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID = issuerID,orderby=None, order="asc", offset=0, limit= 1000)
+        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID = issuerID,orderby=None, order="asc", offset=0, limit= 1000,transtype="B")
         if (count > 0):
             for purchase in purchaseTransactions:
                 totalValue += purchase.totaltransval
@@ -821,7 +830,7 @@ class GoogleDatabaseAPI:
         return usershares, count
 
     def gettransactions(self, userID=None, issuerID=None,
-                        orderby=None, order="asc", offset=0, limit=1000):
+                        orderby=None, order="asc", offset=0, limit=1000,transtype=None):
         """
         Get all transactions for a given user and/or share.
 
@@ -838,6 +847,9 @@ class GoogleDatabaseAPI:
                 Defaults to 0.
             limit (int): How many rows to return of query.
                 Defaults to 1000.
+            transtype (str): Restricts sell("S") or buy("B"). 
+                Defaults to None.
+
         Returns:
             List of transaction objects that match filter criteria.
             Total number of results that match criteria.
@@ -853,6 +865,9 @@ class GoogleDatabaseAPI:
             # If issuer ID for share is specified, filter by share
             if(issuerID):
                 query = query.filter(Transaction.issuerID == issuerID)
+            # If transtype is specified, filter by transtype
+            if(transtype):
+                query = query.filter(Transaction.transtype == transtype)
             # Order query depending on order parameters
             if(orderby and hasattr(Transaction, orderby) and
                order == "asc"):

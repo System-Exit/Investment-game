@@ -37,19 +37,17 @@ class User(Base, UserMixin):
     totalNumSales = Column(Float, unique=False, nullable=False)
 
     """
-    The ability to get Star Rating for a User
+    Returns an overall rating between 1-5 based on Users overall proft/loss percentage 
 
-    Args:
+    Args: None 
 
     Returns:
         A Star rating between 1-5 for the user currently
     """
 
-
-    def getStarRating(self):
+    def getRating(self):
 
         numStars = 0
-        returnval = ""
         # The overall percent of a user into a defined set of ratings 1-5
 
         if ((self.overallPerc > 0) and (self.overallPerc <= self.CONST_LEVEL1)):
@@ -65,6 +63,22 @@ class User(Base, UserMixin):
             numStars = 4
         if (self.overallPerc > self.CONST_LEVEL4):
             numStars = 5
+        return (numStars)
+
+    """
+    Returns the name of the png file to display the correct star rating image 
+
+    Args: None 
+
+    Returns:
+        Returns a png link address
+    """
+
+    def getStarRating(self):
+
+        returnval = ""
+        numStars = getRating()
+
         if (numStars > 0):
             returnval = 'images/awards' + str(numStars)+'.png'
         return (returnval)
