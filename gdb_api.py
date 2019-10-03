@@ -646,9 +646,9 @@ class GoogleDatabaseAPI:
             if(share is None):
                 return False
             # Calculate costs for purchase including fee
-            sharesprice = float(share.currentprice * quantity)
-            feesprice = float(50 + (sharesprice * 0.01))
-            totalprice = float(sharesprice + feesprice)
+            sharesprice = (share.currentprice * quantity)
+            feesprice = 50 + (sharesprice * 0.01)
+            totalprice = (sharesprice + feesprice)
             # Check that user can purchase share
             if(user.balance < totalprice):
                 return False
@@ -681,10 +681,10 @@ class GoogleDatabaseAPI:
                 session.add(usershare)
             # Otherwise, update existing usershare record
             else:
-                usershare.loss = usershare.loss + sharesprice
-                usershare.quantity = usershare.quantity + quantity
+                usershare.loss = (usershare.loss + sharesprice)
+                usershare.quantity = (usershare.quantity + quantity)
             # Subtract from user balance
-            user.balance -= totalprice
+            user.balance = float(user.balance) - totalprice
             # Return true for success
             return True
 
@@ -737,10 +737,10 @@ class GoogleDatabaseAPI:
             )
             session.add(transaction)
             # Update user shares table
-            usershare.profit = usershare.profit + totalprice
-            usershare.quantity = usershare.quantity - quantity
+            usershare.profit = (usershare.profit + totalprice)
+            usershare.quantity = (usershare.quantity - quantity)
             # Add to user balance
-            user.balance += totalprice
+            user.balance = float(user.balance) + totalprice
             # Return true for success
             return True
 
