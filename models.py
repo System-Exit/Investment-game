@@ -9,7 +9,16 @@ Base = declarative_base()
 
 
 class User(Base, UserMixin):
+    
     """Model for user accounts."""
+
+    # Defined User Level Ranges
+
+    CONST_LEVEL1 = 5.0
+    CONST_LEVEL2 = 10.0
+    CONST_LEVEL3 = 15.0
+    CONST_LEVEL4 = 20.0
+
     # Table name
     __tablename__ = 'USER'
     # Table Columns
@@ -24,6 +33,53 @@ class User(Base, UserMixin):
     verified = Column(Boolean, unique=False, nullable=False)
     banned = Column(Boolean, unique=False, nullable=False)
     balance = Column(DECIMAL(20, 2), unique=False, nullable=False)
+    overallPerc = Column(Float, unique=False, nullable=False)
+    totalNumSales = Column(Integer, unique=False, nullable=False)
+
+    def getRating(self):
+
+        """
+        Returns overall rating between 1-5 based on Users overall proft/loss perct
+
+        Args: None
+
+        Returns:
+            A Star rating between 1-5 for the user currently
+        """
+
+        numStars = 0
+        # The overall percent of a user into a defined set of ratings 1-5
+
+        if ((self.overallPerc > 0)and(self.overallPerc <= self.CONST_LEVEL1)):
+            numStars = 1
+        if ((self.overallPerc > self.CONST_LEVEL1) and
+                (self.overallPerc <= self.CONST_LEVEL2)):
+            numStars = 2
+        if ((self.overallPerc > self.CONST_LEVEL2) and
+                (self.overallPerc <= self.CONST_LEVEL3)):
+            numStars = 3
+        if ((self.overallPerc > self.CONST_LEVEL3) and
+                (self.overallPerc <= self.CONST_LEVEL4)):
+            numStars = 4
+        if (self.overallPerc > self.CONST_LEVEL4):
+            numStars = 5
+        return (numStars)
+
+    def getStarRating(self):
+        """
+        Returns the name of the png file to display the correct star rating img
+
+        Args: None
+
+        Returns:
+            Returns a png link address
+        """
+        returnval = ""
+        numStars = self.getRating()
+
+        if (numStars > 0):
+            returnval = 'images/awards' + str(numStars)+'.png'
+        return (returnval)
 
     def get_id(self):
         return self.userID
@@ -81,6 +137,15 @@ class Share(Base):
     daypricehigh = Column(Float, nullable=False, unique=False)
     daypricelow = Column(Float, nullable=False, unique=False)
     dayvolume = Column(BigInteger, nullable=False, unique=False)
+
+
+class Tips(Base):
+    """Model to access database tips."""
+    # Table name
+    __tablename__ = 'TIPS'
+    # Table Columns
+    tipID = Column(DateTime, primary_key=True)
+    data = Column(Float, nullable=False, unique=False)
 
 
 class SharePrice(Base):
