@@ -991,6 +991,22 @@ class GoogleDatabaseAPI:
             # Return statistics
             return statistics
 
+    def gettip(self):
+            """
+            NA
+            TODO: 
+
+            Returns:
+            
+
+            """
+            # Initialse session
+            with self.sessionmanager() as session:
+                # Query all users
+                tip = "this is a tip demo"
+                # Return statistics
+                return tip
+
 if __name__ == "__main__":
     from config import Config
     # Initialize API

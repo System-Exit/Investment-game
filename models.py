@@ -141,6 +141,15 @@ class Share(Base):
     dayvolume = Column(BigInteger, nullable=False, unique=False)
 
 
+class Tips(Base):
+    """Model to access database tips."""
+    # Table name
+    __tablename__ = 'TIPS'
+    # Table Columns
+    tipID = Column(DateTime, primary_key=True)
+    data = Column(Float, nullable=False, unique=False)
+
+
 class SharePrice(Base):
     """Model for share price record."""
     # Table name
