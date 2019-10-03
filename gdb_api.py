@@ -130,7 +130,7 @@ class GoogleDatabaseAPI:
         Gets and returns a detached user object based on given ID.
 
         Args:
-            userID (str): The ID of the user to get.
+            userID (int): The ID of the user to get.
         Returns:
             The user model object for that user.
             None if the user doesn't exist.
