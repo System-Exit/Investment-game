@@ -698,7 +698,6 @@ class GoogleDatabaseAPI:
             userID (str): ID of user that is making the sale.
             issuerID (str): ID of share that is being sold.
 
-
         """
         averagePrice = 0
         totalValue = 0
@@ -708,10 +707,10 @@ class GoogleDatabaseAPI:
             for purchase in purchaseTransactions:
                 totalValue += purchase.totaltransval
                 totalQuantity += purchase.quantity
-        
+
             averagePrice = totalValue/totalQuantity
 
-        return averagePrice
+        return float(averagePrice)
 
     def sellshare(self, userID, issuerID, quantity):
         """
@@ -762,7 +761,7 @@ class GoogleDatabaseAPI:
             )
             session.add(transaction)
             # Update user shares table
-            usershare.profit = (usershare.profit + totalprice)
+            usershare.profit = (float(usershare.profit)+ totalprice)
             usershare.quantity = (usershare.quantity - quantity)
             # Add to user balance
             user.balance = float(user.balance) + totalprice
@@ -775,8 +774,7 @@ class GoogleDatabaseAPI:
                       category="error")
             else:
                 percent = ((soldSharePrice/theAveragePurchasePrice)-1)*100
-                user.overallPerc = ((user.overallPerc*user.totalNumSales) +
-                                    percent)/(user.totalNumSales+1)
+                user.overallPerc = ((user.overallPerc*user.totalNumSales) + percent)/(user.totalNumSales+1)
                 user.totalNumSales += 1
             # Return true for success
             return True
