@@ -381,6 +381,8 @@ class GoogleDatabaseAPI:
             )
             # Add share to share table
             session.add(share)
+        # Return true for success
+        return True
 
     def generatesharepricehistory(self, issuerID):
         """
@@ -446,6 +448,9 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get all shares
             share = session.query(Share).get(issuerID)
+            # Return None if share doesn't exist
+            if share is None:
+                return None
             # Detach share from session
             session.expunge(share)
         return share

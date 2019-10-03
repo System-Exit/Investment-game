@@ -148,12 +148,42 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         assert verified is False
 
     def test_addshare(self):
-        # TODO
-        pass
+        # Attempt to add valid ASX share and assert true
+        issuerID = "ASX"
+        success = self.gdb.addshare(issuerID)
+        assert success is True
+        # Attempt to add already added share and assert false
+        success = self.gdb.addshare(issuerID)
+        assert success is False
+        # Attempt to add invalid share to database and assert false
+        notissuerID = "000"
+        success = self.gdb.addshare(notissuerID)
+        assert success is False
+        # Get shares from database directly
+        with self.gdb.sessionmanager() as session:
+            # Assert that share exists with correct issuer ID
+            share = session.query(Share).get(issuerID)
+            assert share.issuerID == issuerID
+            # Assert that share with incorrect issuer ID doesn't exist
+            share = session.query(Share).get(notissuerID)
+            assert share is None
 
     def test_getshare(self):
-        # TODO
-        pass
+        # Create share
+        issuerID = "TRU"
+        notissuerID = "FAL"
+        share = self.generatetestshare(issuerID=issuerID)
+        # Add share directly to database
+        with self.gdb.sessionmanager() as session:
+            session.add(share)
+        # Get share
+        share = self.gdb.getshare(issuerID)
+        # Assert that share was returned with correct ID
+        assert share.issuerID == issuerID
+        # Attempt to get non-existant share
+        share = self.gdb.getshare(notissuerID)
+        # Assert that None was returned
+        assert share is None
 
     def test_getshares(self):
         # TODO
@@ -283,3 +313,72 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             balance=balance)
         # Return generated user
         return generateduser
+
+    def generatetestshare(self, issuerID=None, fullname=None, shortname=None,
+                          abbrevname=None, description=None,
+                          industrysector=None, currentprice=None,
+                          marketcapitalisation=None, sharecount=None,
+                          daychangepercent=None, daychangeprice=None,
+                          daypricehigh=None, daypricelow=None, dayvolume=None):
+        """
+        Helper method for creating a test share with specified attributes.
+        If a share attribute is not defined, a random value will be generated
+        and assigned instead.
+
+        Args:
+            All attributes of Share object, all default to none and will
+                be generated for the user unless assigned a value. Unless
+                one is specified, the userID will not be generated here.
+        Returns:
+            A user object with the given and generated attributes.
+
+        """
+        # Generate values for each attribute if one is not assigned.
+        if not issuerID:
+            issuerID = ''.join(random.choices(string.ascii_uppercase, k=3))
+        if not fullname:
+            fullname = ''.join(random.choices(string.ascii_lowercase, k=10))
+        if not shortname:
+            shortname = ''.join(random.choices(string.ascii_lowercase, k=10))
+        if not abbrevname:
+            abbrevname = ''.join(random.choices(string.ascii_lowercase, k=10))
+        if not description:
+            description = ''.join(random.choices(string.ascii_lowercase, k=50))
+        if not industrysector:
+            industrysector = ''.join(random.choices(
+                string.ascii_lowercase, k=10))
+        if not currentprice:
+            currentprice = round(random.uniform(1.0, 1000.0), 2)
+        if not marketcapitalisation:
+            marketcapitalisation = random.randint(1000000, 1000000000)
+        if not sharecount:
+            sharecount = random.randint(1000000, 1000000000)
+        if not daychangepercent:
+            daychangepercent = round(random.uniform(-1.0, 1.0), 2)
+        if not daychangeprice:
+            daychangeprice = round(random.uniform(1.0, 100.0), 2)
+        if not daypricehigh:
+            daypricehigh = round(random.uniform(currentprice, 1000.0), 2)
+        if not daypricelow:
+            daypricelow = round(random.uniform(1.0, currentprice), 2)
+        if not dayvolume:
+            dayvolume = random.randint(1000, 10000000)
+        # Create share
+        share = Share(
+            issuerID=issuerID,
+            fullname=fullname,
+            abbrevname=abbrevname,
+            shortname=shortname,
+            description=description,
+            industrysector=industrysector,
+            currentprice=currentprice,
+            marketcapitalisation=marketcapitalisation,
+            sharecount=sharecount,
+            daychangepercent=daychangepercent,
+            daychangeprice=daychangeprice,
+            daypricehigh=daypricehigh,
+            daypricelow=daypricelow,
+            dayvolume=dayvolume
+        )
+        # Return generated share
+        return share
