@@ -31,12 +31,13 @@ class GoogleDatabaseAPI:
         port = config_class.DB_PORT
         database = config_class.DB_DATABASE
         query = config_class.DB_QUERY
-        # Create engine
+        # Create engine with pool pre pinging
         self.engine = create_engine(
-                (f"{drivername}://"
-                 f"{username}:{password}@"
-                 f"{host}:{port}/"
-                 f"{database}{query}")
+            (f"{drivername}://"
+             f"{username}:{password}@"
+             f"{host}:{port}/"
+             f"{database}{query}"),
+            pool_pre_ping=True
         )
         # Define session maker
         self.Session = sessionmaker(bind=self.engine)
@@ -48,22 +49,8 @@ class GoogleDatabaseAPI:
         Can often used
 
         """
-        # Check that database connection is valid
-        connected = False
-        error_count = 0
-        while not connected:
-            try:
-                # Create session
-                session = self.Session()
-                # Check if session has valid connection
-                session.connection()
-                connected = True
-            except:
-                # Increase error count
-                error_count += 1
-                # If error count is at limit, raise error
-                if error_count >= 5:
-                    raise
+        # Create session
+        session = self.Session()
         # Handle session activities
         try:
             yield session
