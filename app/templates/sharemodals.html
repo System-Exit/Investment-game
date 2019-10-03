@@ -24,7 +24,7 @@
                     </div>
                     <div>{{ buyform.buysubmit() }}</div>
                     <p>Current price: {{ share.currentprice }}</p>
-                    Total : $<span id="Total">0.00</span>   
+                    Total : $<span id="buy-total">0.00</span>   
                 </form>
             </div>
             <div class="modal-footer">
@@ -33,19 +33,6 @@
         </div>
     </div>
 </div>
-
-<script type="text/javascript">
-document.getElementById("buyquantity").onchange = function() {
-    var shareprice = {{ share.currentprice }};
-    var quantity = document.getElementById("buyquantity").value;
-    var subtotal = shareprice * quantity;
-    var fee = (subtotal * 0.01) + 50;
-    var total = subtotal + fee
-    document.getElementById("Total").textContent = total.toFixed(2);
-};
-
-</script>
-
 <!-- Modal for selling shares -->
 <div class="modal fade" id="sell-modal" role="dialog">
     <div class="modal-dialog">
@@ -71,6 +58,8 @@ document.getElementById("buyquantity").onchange = function() {
                         {{ sellform.sellquantity() }}
                     </div>
                     <div>{{ sellform.sellsubmit() }}</div>
+                    <p>Current price: {{ share.currentprice }}</p>
+                    Total : $<span id="sell-total">0.00</span>
                 </form>
             </div>
             <div class="modal-footer">
@@ -80,9 +69,20 @@ document.getElementById("buyquantity").onchange = function() {
     </div>
 </div>
 <script>
-var calculatePrice = function(event) {
+document.getElementById("buyquantity").onchange = function() {
+    var shareprice = {{ share.currentprice }};
+    var quantity = document.getElementById("buyquantity").value;
+    var subtotal = shareprice * quantity;
+    var fee = (subtotal * 0.01) + 50;
+    var total = subtotal + fee
+    document.getElementById("buy-total").textContent = total.toFixed(2);
+};
+document.getElementById("sellquantity").onchange = function() {
     var price = {{ share.currentprice }};
     var quantity = document.getElementById("sellquantity").value;
-    document.getElementById("Total").value = price * quantity
+    var subtotal = shareprice * quantity;
+    var fee = (subtotal * 0.0025) + 50;
+    var total = subtotal - fee;
+    document.getElementById("sell-total").textContent = total.toFixed(2);
 }
 </script>
