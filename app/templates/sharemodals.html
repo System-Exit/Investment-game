@@ -78,7 +78,7 @@ document.getElementById("buyquantity").onchange = function() {
     document.getElementById("buy-total").textContent = total.toFixed(2);
 };
 document.getElementById("sellquantity").onchange = function() {
-    var price = {{ share.currentprice }};
+    var shareprice = {{ share.currentprice }};
     var quantity = document.getElementById("sellquantity").value;
     var subtotal = shareprice * quantity;
     var fee = (subtotal * 0.0025) + 50;
