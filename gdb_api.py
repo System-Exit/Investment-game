@@ -683,13 +683,13 @@ class GoogleDatabaseAPI:
                 session.add(usershare)
             # Otherwise, update existing usershare record
             else:
-                usershare.loss = (usershare.loss + sharesprice)
+                usershare.loss = (float(usershare.loss) + sharesprice)
                 usershare.quantity = (usershare.quantity + quantity)
             # Subtract from user balance
             user.balance = float(user.balance) - totalprice
             # Return true for success
             return True
-            
+
     def averagePurchasedStockPrice(self, userID, issuerID):
         """
         Calculates the average purchase price for a given stock(issuer ID)
@@ -702,7 +702,9 @@ class GoogleDatabaseAPI:
         averagePrice = 0
         totalValue = 0
         totalQuantity = 0
-        purchaseTransactions, count = self.gettransactions(userID=userID, issuerID=issuerID, orderby=None, order="asc", offset=0, limit= 1000,transtype="B")
+        purchaseTransactions, count = self.gettransactions(
+            userID=userID, issuerID=issuerID, orderby=None,
+            order="asc", offset=0, limit=1000, transtype="B")
         if (count > 0):
             for purchase in purchaseTransactions:
                 totalValue += purchase.totaltransval
@@ -761,20 +763,23 @@ class GoogleDatabaseAPI:
             )
             session.add(transaction)
             # Update user shares table
-            usershare.profit = (float(usershare.profit)+ totalprice)
+            usershare.profit = (float(usershare.profit) + totalprice)
             usershare.quantity = (usershare.quantity - quantity)
             # Add to user balance
             user.balance = float(user.balance) + totalprice
 
             # Remember the amount a sale cost
             soldSharePrice = totalprice/quantity
-            theAveragePurchasePrice = self.averagePurchasedStockPrice(userID, issuerID)
+            theAveragePurchasePrice = self.averagePurchasedStockPrice(
+                userID, issuerID)
             if (theAveragePurchasePrice == 0):
                 flash("Stock you want to sell was never purchased.",
                       category="error")
             else:
                 percent = ((soldSharePrice/theAveragePurchasePrice)-1)*100
-                user.overallPerc = ((user.overallPerc*user.totalNumSales) + percent)/(user.totalNumSales+1)
+                user.overallPerc = ((
+                    user.overallPerc*user.totalNumSales) + percent)/(
+                        user.totalNumSales+1)
                 user.totalNumSales += 1
             # Return true for success
             return True
