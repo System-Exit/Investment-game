@@ -1,4 +1,4 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin
+from models import User, Share, SharePrice, Usershare, Transaction, Admin, Base
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
@@ -21,6 +21,9 @@ class GoogleDatabaseAPI:
     def __init__(self, config_class):
         """
         Initialise databse API class.
+
+        Args:
+            config_class: Python class containing config variables.
 
         """
         # Get config parameters
@@ -46,7 +49,6 @@ class GoogleDatabaseAPI:
     def sessionmanager(self):
         """
         Context manager for handling sessions.
-        Can often used
 
         """
         # Create session
@@ -60,6 +62,26 @@ class GoogleDatabaseAPI:
             raise
         finally:
             session.close()
+
+    def createtables(self):
+        """
+        Create all the tables defined in models, if not already present
+        in connected database.
+
+        """
+        # Create all tables from models base metadata
+        Base.metadata.create_all(self.engine)
+
+    def deletetables(self):
+        """
+        Drop all the tables defined in models, given they are present
+        in the connected database.
+
+        WARNING: DO NOT USE LIGHTLY AS THIS WILL DELETE ALL DATA.
+
+        """
+        # Create all tables from models base metadata
+        Base.metadata.drop_all(self.engine)
 
     def getusers(self, orderby=None, order="asc", offset=0, limit=1000):
         """
@@ -624,9 +646,9 @@ class GoogleDatabaseAPI:
             if(share is None):
                 return False
             # Calculate costs for purchase including fee
-            sharesprice = (share.currentprice * quantity)
-            feesprice = 50 + (sharesprice * 0.01)
-            totalprice = (sharesprice + feesprice)
+            sharesprice = float(share.currentprice * quantity)
+            feesprice = float(50 + (sharesprice * 0.01))
+            totalprice = float(sharesprice + feesprice)
             # Check that user can purchase share
             if(user.balance < totalprice):
                 return False
@@ -950,8 +972,3 @@ class GoogleDatabaseAPI:
 
             # Return statistics
             return statistics
-
-if __name__ == "__main__":
-    from config import Config
-    # Initialize API
-    gdb = GoogleDatabaseAPI(config_class=Config)

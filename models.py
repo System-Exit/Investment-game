@@ -105,15 +105,7 @@ class Admin(Base, UserMixin):
 
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
-    # Define SQL connection parameters
-    drivername = Config.DB_DRIVER
-    username = Config.DB_USERNAME
-    password = Config.DB_PASSWORD
-    host = Config.DB_HOST
-    database = Config.DB_DATABASE
-    query = Config.DB_QUERY
-    # Create engine
-    engine = create_engine("%s://%s:%s@%s/%s%s" % (
-        drivername, username, password, host, database, query))
+    # Define database API
+    gdb = GoogleDatabaseAPI(Config)
     # Create tables
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(gdb.engine)
