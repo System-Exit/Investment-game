@@ -5,21 +5,38 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
 {% endblock %}
 {% block content %}
-    <form action="" method="POST" class="login-form">
-        {{ form.hidden_tag() }}
-        <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-        alt="Budding Investors" height="auto" width="auto" class="reg-logo">
-        {% include "messageblock.html" %}
-        <div>
-            {{ form.username.label }}
-            <br>
-            {{ form.username() }}
-        </div>
-        <div>
-            {{ form.password.label }}
-            <br>
-            {{ form.password() }}
-        </div>
-        <div>{{ form.submit() }}</div>
-    </form>
+<div class="container" id="login-container">
+    <div class="row" id="background">
+            <div class="col-xs-12">
+
+            </div>
+    </div>
+    <div class="row">
+            <div id="login-left-panel" class="col-xs-5">
+                <div id="left-side">
+                    <img id ="logo-img" src="{{url_for('static', filename='images/tmplogo.png')}}" 
+                    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+            </div>
+            </div>
+            <div class="col-xs-7">
+                <form action="" method="POST" class="login-form">
+                        <h1>Login to your account</h1>
+                        {{ form.hidden_tag() }}
+                        
+                        {% include "messageblock.html" %}
+                        <div>
+                            {{ form.username.label }}
+                            <br>
+                            {{ form.username() }}
+                        </div>
+                        <div>
+                            {{ form.password.label }}
+                            <br>
+                            {{ form.password() }}
+                        </div>
+                        <div>{{ form.submit() }}</div>
+                </form>
+            </div>
+    </div>
+</div>
 {% endblock %}

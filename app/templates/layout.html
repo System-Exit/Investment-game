@@ -18,13 +18,18 @@
         <div id="top-left-corner">
             <img src="{{url_for('static', filename='images/user.svg')}}" 
              alt="Placeholder Profile Icon">
+             {% if user %}
+                {% if user.getStarRating()!=""%}
+                <img src="{{ url_for('static', filename=user.getStarRating()) }}"/>
+                {% endif %}   
+             {% endif %}
         </div>
         <div id="top-bar" style="display: flex;justify-content: space-between;align-items: center;">
             <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
             alt="Budding Investors">
             <div class="money" style="margin-right: 20px;font-size: 30px;">
-               <div style="display: flex;justify-content: space-between;align-items: center;">
-                   <p style="margin: 0px 15px;">${{ userbalance }}</p>
+               <div style="display: flex;justify-content: space-between;align-items: center; background: white;">
+                   <p style="margin: 0px 15px;">${{ '%0.2f' % userbalance|round(2) }}</p>
                    <i style="color:palevioletred;" class="fa fa-arrow-down" aria-hidden="true"></i>
                </div>
                

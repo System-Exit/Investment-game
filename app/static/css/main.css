@@ -149,21 +149,41 @@ body
 .login-form
 {
     display: inline-block;
-    text-align: center;
+    text-align: left;
     vertical-align: middle;
+    width: 80%;
+    height: 500px;
+    background-color: white;
+    padding-top: 70px;
+    margin-top: 15%;
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-bottom: 30px;
 }
 .login-form div
 {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+.login-form #submit
+{
+    background-color: #8ff5d9;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0px;
+    text-align: center;
+    font-size: 24pt;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: bold;
+}
 .login-form input
 {
-    text-align: center;
-    border-radius: 10px;
-    width: 180px;
+    text-align: left;
+    width: px;
     padding-left: 10px;
     padding-right: 10px;
+    border-style: none;
+    background-color: #f8f6f6;
 }
 .login-form table
 {
@@ -172,6 +192,48 @@ body
 .login-form table th
 {
     text-align: center;
+}
+
+#login-module
+{
+    background-color: white;
+}
+
+
+#login-left-panel.col-xs-5
+{
+    background-color: white;
+    padding-bottom: 25%;
+    margin-bottom: -25%;
+}
+
+#login-container.container
+{   
+    padding: 0%;
+    margin: 0%;
+    height: 100%;
+}
+
+#logo-img
+{
+    padding-top: 50%;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+.login-form h1 {
+    text-align: left;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+}
+
+.login-form label {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 /* Registration page */
@@ -189,7 +251,6 @@ body
 .registration-form input
 {
     text-align: center;
-    border-radius: 10px;
     width: 180px;
     padding-left: 10px;
     padding-right: 10px;
@@ -258,4 +319,20 @@ input#byear
     display: inline-block;
     height: 250px;
     width: 500px;
+}
+.wrapper
+{
+  display:grid;
+  grid-template-columns: 70% 30%;
+  grid-gap:1em;
+}
+
+.wrapper> div
+{
+  background: lightgrey;
+  padding: 1em;
+}
+.wrapper> div:nth-child(even)
+{
+  background:#ddd
 }
