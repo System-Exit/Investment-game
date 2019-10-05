@@ -1035,6 +1035,7 @@ class GoogleDatabaseAPI:
                 result.balance: Current balance for user.
                 result.totalvalue: Total shares values and user balance.
                 result.ranking: Ranking of the user by totalvalue,
+            A dictionary of results for the current user
 
         """
         # Initialse session
@@ -1079,6 +1080,9 @@ class GoogleDatabaseAPI:
         return leaderboard, current_user_info
     
     def updateleaderboard(self):
+        """
+        Update leaderboard table with current totalvalues and rankings
+        """
         #TODO Remove magic number
         leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
         with self.sessionmanager() as session:
@@ -1095,12 +1099,24 @@ class GoogleDatabaseAPI:
                 session.add(user)
             # Create leaderboard entry
             
-            # Add user to database
-            
         # Return success'''
         return True
     
-    def gethistoricalleaderboard(self):
+    def gettopgainers(self):
+        """
+        Get users and fields needed for topgainers leaderboard preordered by totalvalue.
+
+        Returns:
+            A list of dictionary results for the topgainers over a week ordered by changeinvalue.
+            A list of dictionary results for the topgainers over a month ordered by changeinvalue.
+            The returned format is:
+                result.username: Username of the user.
+                result.changeinvalue: Total value changed over time period.
+                result.changepercentage: Percentage total value changed over time period.
+                result.currentvalue: Current value of user's account
+                result.previousvalue: Value of user's account at the time period
+
+        """
         #TODO Remove magic number
         currentleaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
 
@@ -1114,8 +1130,9 @@ class GoogleDatabaseAPI:
             lowerdatelimit = currentdate - lowertdelta
             #Creates a date a week + 1 day prior to currrent time
             upperdatelimit = currentdate - uppertdelta
+            
 
-            weekleaderboard = []
+            weektopgainers = []
             query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
             for row in currentleaderboard:
                 result = query.filter(Leaderboard.userID == row['userID']).first()
@@ -1127,9 +1144,9 @@ class GoogleDatabaseAPI:
                     'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
                     'currentvalue' : row['totalvalue'],
                     'previousvalue': result.totalvalue}
-                    weekleaderboard.append(dictionary)
+                    weektopgainers.append(dictionary)
             
-            weekleaderboard.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+            weektopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
 
             currentdate = datetime.utcnow()
             lowertdelta = timedelta(days=30)
@@ -1141,7 +1158,7 @@ class GoogleDatabaseAPI:
             upperdatelimit = currentdate - uppertdelta
 
             query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
-            monthleaderboard = []
+            monthtopgainers = []
             
             for row in currentleaderboard:
                 result = query.filter(Leaderboard.userID == row['userID']).first()
@@ -1153,9 +1170,9 @@ class GoogleDatabaseAPI:
                     'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
                     'currentvalue' : row['totalvalue'],
                     'previousvalue': result.totalvalue}
-                    monthleaderboard.append(dictionary)
+                    monthtopgainers.append(dictionary)
             
-            monthleaderboard.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+            monthtopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
             session.expunge_all()
             
-            return weekleaderboard, monthleaderboard
+            return weektopgainers, monthtopgainers

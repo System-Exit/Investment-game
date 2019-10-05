@@ -177,7 +177,7 @@ class Leaderboard(Base):
                       primary_key=True)
     recordtime = Column(DateTime, primary_key=True)
     ranking = Column(Integer, nullable=False, unique=False)
-    totalvalue = Column(Float, unique=False, nullable=False)
+    totalvalue = Column(DECIMAL(20, 2), unique=False, nullable=False)
 
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
