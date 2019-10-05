@@ -1086,9 +1086,3 @@ class GoogleDatabaseAPI:
             session.expunge_all()
             
             return weekleaderboard, monthleaderboard
-            
-
-if __name__ == "__main__":
-    from config import Config
-    # Initialize API
-    gdb = GoogleDatabaseAPI(config_class=Config)
