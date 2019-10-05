@@ -1,11 +1,32 @@
 {% extends "layout.html" %}
 {% set active_page = "dashboard" %}
 {% block content %}
-<div id="index-body">
-    <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
-    {% include "messageblock.html" %}
-    <h1>Budding Investors is currently under construction!</h1>
-    <h2>You are currently logged in as {{ user.username }}.</h2>
-</div>
+<div class="wrapper" style="display:grid;
+  grid-template-columns: 60% 40%;
+  text-align: left;
+  margin: 20px;">
+    <div>
+     <h1>Welcome <strong>{{ user.firstname }}!</strong></h1>
+     <h3>Your last trade of <strong>Woolworths Inc</strong> has <strong>decreased</strong> in value since purchase</h3>
+     <h3>You are currently a <strong>Level {{ user.getRating() }} </strong> user, your so close to your next level, keep making smart trades!</h3>
+     <h3>Your are currently in <strong>2nd </strong> place on the Budding Traders Leaderboard!</h3> 
+    </div>
+    <div style="background: #6ce6bf;
+  padding: 1em;">   
+    </div>
+  </div> 
+  <div class="wrapper" style="display:grid;
+  grid-template-columns: 40% 60%;
+   text-align: left;
+  margin: 20px;">
+    <div style="background: #00ffaa;">
+     <h1 style="padding: 5px;">Your Portfolio Value is:</h1>
+     <p style="font-size: 50px;">${{ userbalance }}</p>
+    </div>
+    <div style="background: #6cd5e0;
+  padding: 1em;">
+      <h1>Tip of the Day</h1>
+      <h3 style="font-style: italic;"><strong>Can’t decide which of the companies in a particular industry will be the long-term winner? Buy ’em all! Buying a basket of stocks takes the pressure off picking “the one.” Having a stake in all the players that pass muster in your analysis means you won’t miss out if one takes off</strong></h3>
+    </div>
+  </div>         
 {% endblock %}

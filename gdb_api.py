@@ -1,4 +1,4 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin
+from models import User, Share, SharePrice, Usershare, Transaction, Admin, Base
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
@@ -22,6 +22,9 @@ class GoogleDatabaseAPI:
         """
         Initialise databse API class.
 
+        Args:
+            config_class: Python class containing config variables.
+
         """
         # Get config parameters
         drivername = config_class.DB_DRIVER
@@ -31,12 +34,13 @@ class GoogleDatabaseAPI:
         port = config_class.DB_PORT
         database = config_class.DB_DATABASE
         query = config_class.DB_QUERY
-        # Create engine
+        # Create engine with pool pre pinging
         self.engine = create_engine(
-                (f"{drivername}://"
-                 f"{username}:{password}@"
-                 f"{host}:{port}/"
-                 f"{database}{query}")
+            (f"{drivername}://"
+             f"{username}:{password}@"
+             f"{host}:{port}/"
+             f"{database}{query}"),
+            pool_pre_ping=True
         )
         # Define session maker
         self.Session = sessionmaker(bind=self.engine)
@@ -45,25 +49,10 @@ class GoogleDatabaseAPI:
     def sessionmanager(self):
         """
         Context manager for handling sessions.
-        Can often used
 
         """
-        # Check that database connection is valid
-        connected = False
-        error_count = 0
-        while not connected:
-            try:
-                # Create session
-                session = self.Session()
-                # Check if session has valid connection
-                session.connection()
-                connected = True
-            except:
-                # Increase error count
-                error_count += 1
-                # If error count is at limit, raise error
-                if error_count >= 5:
-                    raise
+        # Create session
+        session = self.Session()
         # Handle session activities
         try:
             yield session
@@ -73,6 +62,26 @@ class GoogleDatabaseAPI:
             raise
         finally:
             session.close()
+
+    def createtables(self):
+        """
+        Create all the tables defined in models, if not already present
+        in connected database.
+
+        """
+        # Create all tables from models base metadata
+        Base.metadata.create_all(self.engine)
+
+    def deletetables(self):
+        """
+        Drop all the tables defined in models, given they are present
+        in the connected database.
+
+        WARNING: DO NOT USE LIGHTLY AS THIS WILL DELETE ALL DATA.
+
+        """
+        # Create all tables from models base metadata
+        Base.metadata.drop_all(self.engine)
 
     def getusers(self, orderby=None, order="asc", offset=0, limit=1000):
         """
@@ -121,7 +130,7 @@ class GoogleDatabaseAPI:
         Gets and returns a detached user object based on given ID.
 
         Args:
-            userID (str): The ID of the user to get.
+            userID (int): The ID of the user to get.
         Returns:
             The user model object for that user.
             None if the user doesn't exist.
@@ -232,7 +241,9 @@ class GoogleDatabaseAPI:
                 userpass=str(passhash),
                 verified=True,
                 banned=False,
-                balance=1000000
+                balance=1000000,
+                overallPerc=0,
+                totalNumSales=0
                 )
             # Add user to database
             session.add(user)
@@ -672,12 +683,36 @@ class GoogleDatabaseAPI:
                 session.add(usershare)
             # Otherwise, update existing usershare record
             else:
-                usershare.loss = usershare.loss + sharesprice
-                usershare.quantity = usershare.quantity + quantity
+                usershare.loss = (float(usershare.loss) + sharesprice)
+                usershare.quantity = (usershare.quantity + quantity)
             # Subtract from user balance
-            user.balance -= totalprice
+            user.balance = float(user.balance) - totalprice
             # Return true for success
             return True
+
+    def averagePurchasedStockPrice(self, userID, issuerID):
+        """
+        Calculates the average purchase price for a given stock(issuer ID)
+
+        Args:
+            userID (str): ID of user that is making the sale.
+            issuerID (str): ID of share that is being sold.
+
+        """
+        averagePrice = 0
+        totalValue = 0
+        totalQuantity = 0
+        purchaseTransactions, count = self.gettransactions(
+            userID=userID, issuerID=issuerID, orderby=None,
+            order="asc", offset=0, limit=1000, transtype="B")
+        if (count > 0):
+            for purchase in purchaseTransactions:
+                totalValue += purchase.totaltransval
+                totalQuantity += purchase.quantity
+
+            averagePrice = totalValue/totalQuantity
+
+        return float(averagePrice)
 
     def sellshare(self, userID, issuerID, quantity):
         """
@@ -728,10 +763,24 @@ class GoogleDatabaseAPI:
             )
             session.add(transaction)
             # Update user shares table
-            usershare.profit = usershare.profit + totalprice
-            usershare.quantity = usershare.quantity - quantity
+            usershare.profit = (float(usershare.profit) + totalprice)
+            usershare.quantity = (usershare.quantity - quantity)
             # Add to user balance
-            user.balance += totalprice
+            user.balance = float(user.balance) + totalprice
+
+            # Remember the amount a sale cost
+            soldSharePrice = totalprice/quantity
+            theAveragePurchasePrice = self.averagePurchasedStockPrice(
+                userID, issuerID)
+            if (theAveragePurchasePrice == 0):
+                flash("Stock you want to sell was never purchased.",
+                      category="error")
+            else:
+                percent = ((soldSharePrice/theAveragePurchasePrice)-1)*100
+                user.overallPerc = ((
+                    user.overallPerc*user.totalNumSales) + percent)/(
+                        user.totalNumSales+1)
+                user.totalNumSales += 1
             # Return true for success
             return True
 
@@ -810,7 +859,8 @@ class GoogleDatabaseAPI:
         return usershares, count
 
     def gettransactions(self, userID=None, issuerID=None,
-                        orderby=None, order="asc", offset=0, limit=1000):
+                        orderby=None, order="asc", offset=0, limit=1000,
+                        transtype=None):
         """
         Get all transactions for a given user and/or share.
 
@@ -827,6 +877,9 @@ class GoogleDatabaseAPI:
                 Defaults to 0.
             limit (int): How many rows to return of query.
                 Defaults to 1000.
+            transtype (str): Restricts sell("S") or buy("B").
+                Defaults to None.
+
         Returns:
             List of transaction objects that match filter criteria.
             Total number of results that match criteria.
@@ -842,6 +895,9 @@ class GoogleDatabaseAPI:
             # If issuer ID for share is specified, filter by share
             if(issuerID):
                 query = query.filter(Transaction.issuerID == issuerID)
+            # If transtype is specified, filter by transtype
+            if(transtype):
+                query = query.filter(Transaction.transtype == transtype)
             # Order query depending on order parameters
             if(orderby and hasattr(Transaction, orderby) and
                order == "asc"):
@@ -963,8 +1019,3 @@ class GoogleDatabaseAPI:
 
             # Return statistics
             return statistics
-
-if __name__ == "__main__":
-    from config import Config
-    # Initialize API
-    gdb = GoogleDatabaseAPI(config_class=Config)

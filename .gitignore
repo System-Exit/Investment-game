@@ -2,3 +2,5 @@
 .vscode
 # Ignore cache
 __pycache__
+# Ignore virtual environment
+venv
