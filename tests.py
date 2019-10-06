@@ -245,6 +245,7 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             # Assert user balance has been updated correctly
             assert user.balance == balance - totalval
             # Assert transaction prices are correct
+            assert transaction.transtype == 'B'
             assert transaction.stocktransval == shareval
             assert transaction.feeval == feeval
             assert transaction.totaltransval == totalval
@@ -253,8 +254,57 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             assert usershare.quantity == 10
 
     def test_sellshare(self):
-        # TODO
-        pass
+        # Generate user with predefined balance
+        userID = 1
+        balance = 5000
+        user = self.generatetestuser(userID=userID, balance=balance)
+        # Generate share with predefined price
+        issuerID = "TST"
+        currentprice = 100
+        share = self.generatetestshare(issuerID=issuerID,
+                                       currentprice=currentprice)
+        # Generate usershare with predefined fields
+        profit = 200
+        loss = 1200
+        quantity = 100
+        usershare = Usershare(issuerID=issuerID, userID=userID, profit=profit,
+                              loss=loss, quantity=quantity)
+        # Add user and share directly into database
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+            session.add(share)
+            session.commit()
+            session.add(usershare)
+        # Attempt to sell held number or shares and assert true
+        assert self.gdb.sellshare(userID, issuerID, 10) is True
+        # Attempt to sell unheld number or shares and assert false
+        assert self.gdb.sellshare(userID, issuerID, 1000) is False
+        # Start session
+        with self.gdb.sessionmanager() as session:
+            # Calculate transaction values
+            shareval = currentprice * 10
+            feeval = 50 + (shareval * 0.0025)
+            totalval = shareval - feeval
+            # Get user firm database directly
+            user = session.query(User).get(userID)
+            # Get transaction from database directly
+            transaction = session.query(Transaction).filter(
+                Transaction.issuerID == issuerID).filter(
+                Transaction.userID == userID).first()
+            # Get usershare from database directly
+            usershare = session.query(Usershare).filter(
+                Usershare.issuerID == issuerID).filter(
+                Usershare.userID == userID).first()
+            # Assert user balance has been updated correctly
+            assert user.balance == balance + totalval
+            # Assert transaction prices are correct
+            assert transaction.transtype == 'S'
+            assert transaction.stocktransval == shareval
+            assert transaction.feeval == feeval
+            assert transaction.totaltransval == totalval
+            # Assert usershare was created with correct values
+            assert usershare.profit == profit + totalval
+            assert usershare.quantity == quantity - 10
 
     def test_getusershareinfo(self):
         # TODO
