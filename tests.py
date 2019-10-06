@@ -38,18 +38,24 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
     def setUpClass(self):
         # Initialise database interface
         self.gdb = GoogleDatabaseAPI(config_class=TestConfig)
-
-    def setUp(self):
         # Create all tables
         Base.metadata.create_all(self.gdb.engine)
+        Base.metadata.reflect(bind=self.gdb.engine)
+
+    def setUp(self):
+        # Do nothing
+        pass
 
     def tearDown(self):
-        # Delete all tables
-        Base.metadata.drop_all(self.gdb.engine)
+        # Delete all tables data
+        with self.gdb.sessionmanager() as session:
+            for table in reversed(Base.metadata.sorted_tables):
+                session.execute(table.delete())
 
     @classmethod
     def tearDownClass(self):
-        pass
+        # Delete all tables
+        Base.metadata.drop_all(self.gdb.engine)
 
     def test_adduser(self):
         # Add valid users and assert they were added successfully
@@ -205,7 +211,7 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         pass
 
     def test_updateshares(self):
-        # TODO
+        # TODO: Potentially ignore due to reliance on ASX API
         pass
 
     def test_buyshare(self):
@@ -269,7 +275,7 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         quantity = 100
         usershare = Usershare(issuerID=issuerID, userID=userID, profit=profit,
                               loss=loss, quantity=quantity)
-        # Add user and share directly into database
+        # Add user, usershare and share directly into database
         with self.gdb.sessionmanager() as session:
             session.add(user)
             session.add(share)
@@ -307,12 +313,60 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             assert usershare.quantity == quantity - 10
 
     def test_getusershareinfo(self):
-        # TODO
-        pass
+        # TODO: Test sorting and test more fields
+        # Generate user
+        userID = 1
+        user = self.generatetestuser(userID=userID)
+        # Generate share
+        share = self.generatetestshare()
+        issuerID = share.issuerID
+        currentprice = share.currentprice
+        # Generate usershare
+        profit = 1000
+        loss = 850
+        quantity = 20
+        usershare = Usershare(issuerID=issuerID, userID=userID, profit=profit,
+                              loss=loss, quantity=quantity)
+        # Add user, usershare and share directly into database
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+            session.add(share)
+            session.commit()
+            session.add(usershare)
+        # Get usershare info
+        shareinfos, count = self.gdb.getusersharesinfo(userID=userID)
+        shareinfo = shareinfos[0]
+        # Assert that usershare fields are mostly correct
+        assert shareinfo['issuerID'] == issuerID
+        assert shareinfo['userID'] == userID
+        assert shareinfo['quantity'] == quantity
+        assert shareinfo['currentprice'] == currentprice
 
     def test_gettransactions(self):
-        # TODO
-        pass
+        # TODO: Test sorting
+        # Generate user
+        userID = 1
+        user = self.generatetestuser(userID=userID)
+        # Generate share
+        share = self.generatetestshare()
+        issuerID = share.issuerID
+        currentprice = share.currentprice
+        # Generate transactions
+        transactions = [self.generatetesttransaction(
+            userID=userID, issuerID=issuerID) for i in range(5)]
+        transactiontotalvals = [t.totaltransval for t in transactions]
+        # Add user, share and transactions directly into database
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+            session.add(share)
+            session.commit()
+            for transaction in transactions:
+                session.add(transaction)
+        # Get transactions for user
+        transactions, count = self.gdb.gettransactions(userID=userID)
+        # Assert that each transaction is present in the returned transactions
+        assert all(
+            t.totaltransval in transactiontotalvals for t in transactions)
 
     def test_banuser(self):
         # Create unbanned user
@@ -465,10 +519,9 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
 
         Args:
             All attributes of Share object, all default to none and will
-                be generated for the user unless assigned a value. Unless
-                one is specified, the userID will not be generated here.
+                be generated for the Share unless assigned a value.
         Returns:
-            A user object with the given and generated attributes.
+            A Share object with the given and generated attributes.
 
         """
         # Generate values for each attribute if one is not assigned.
@@ -520,3 +573,65 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         )
         # Return generated share
         return share
+
+    def generatetesttransaction(self, transID=None, issuerID=None, userID=None,
+                                time=None, transtype=None, feeval=None,
+                                stocktransval=None, totaltransval=None,
+                                quantity=None, status=None):
+        """
+        Helper method for creating a test transaction with specified
+        attributes. If a share transaction is not defined, a random value will
+        be generated and assigned instead. User ID and IssuerID are required.
+
+        Args:
+            All attributes of transaction object, all default to none and will
+                be generated for the transaction unless assigned a value.
+                Unless one is specified, the transID will not be generated
+                here.
+        Returns:
+            A transaction object with the given and generated attributes.
+            None if required attributes are not specified.
+
+        """
+        # Ensure required fields are specified
+        if issuerID is None or userID is None:
+            return None
+        # Generate values for each attribute if one is not assigned.
+        if not time:
+            year = random.randint(1900, 2015)
+            month = random.randint(1, 12)
+            day = random.randint(1, 28)
+            hour = random.randint(0, 23)
+            minute = random.randint(0, 59)
+            second = random.randint(0, 59)
+            time = datetime(year, month, day, hour, minute, second)
+        if not transtype:
+            transtype = ''.join(random.choices(["B", "S"], k=1))
+        if not stocktransval:
+            stocktransval = round(random.uniform(1.0, 1000000.0), 2)
+        if not feeval:
+            feeval = round(50 + (stocktransval * 0.01))
+        if not totaltransval:
+            if transtype == "B":
+                totaltransval = stocktransval + feeval
+            elif transtype == "S":
+                totaltransval = stocktransval - feeval
+        if not quantity:
+            quantity = random.randint(1, 100000)
+        if not status:
+            status = 'Valid'
+        # Create transaction
+        transaction = Transaction(
+            transID=transID,
+            issuerID=issuerID,
+            userID=userID,
+            datetime=time,
+            transtype=transtype,
+            feeval=feeval,
+            stocktransval=stocktransval,
+            totaltransval=totaltransval,
+            quantity=quantity,
+            status=status
+        )
+        # Return generated transaction
+        return transaction
