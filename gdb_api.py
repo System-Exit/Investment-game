@@ -385,6 +385,8 @@ class GoogleDatabaseAPI:
             )
             # Add share to share table
             session.add(share)
+        # Return true for success
+        return True
 
     def generatesharepricehistory(self, issuerID):
         """
@@ -450,6 +452,9 @@ class GoogleDatabaseAPI:
         with self.sessionmanager() as session:
             # Get all shares
             share = session.query(Share).get(issuerID)
+            # Return None if share doesn't exist
+            if share is None:
+                return None
             # Detach share from session
             session.expunge(share)
         return share
@@ -1001,21 +1006,31 @@ class GoogleDatabaseAPI:
             }
             # Get age group distribution
             statistics['agegroupcounts'] = {
-                '0to12': userquery.filter(
-                        User.dob > date.today() - relativedelta(years=13)
+                'post-mil': userquery.filter(
+                        User.dob >= datetime(1997, 1, 1)
                     ).count(),
-                '13to17': userquery.filter(
-                        User.dob <= date.today() - relativedelta(years=13)
+                'mil': userquery.filter(
+                        User.dob < datetime(1997, 1, 1)
                     ).filter(
-                        User.dob > date.today() - relativedelta(years=18)
+                        User.dob >= datetime(1981, 1, 1)
                     ).count(),
-                '18to25': userquery.filter(
-                        User.dob <= date.today() - relativedelta(years=18)
+                'gen-x': userquery.filter(
+                        User.dob < datetime(1981, 1, 1)
                     ).filter(
-                        User.dob > date.today() - relativedelta(years=26)
+                        User.dob >= datetime(1965, 1, 1)
                     ).count(),
-                '26toinf': userquery.filter(
-                        User.dob <= date.today() - relativedelta(years=26)
+                'baby-boom': userquery.filter(
+                        User.dob < datetime(1965, 1, 1)
+                    ).filter(
+                        User.dob >= datetime(1946, 1, 1)
+                    ).count(),
+                'silent-gen': userquery.filter(
+                        User.dob < datetime(1946, 1, 1)
+                    ).filter(
+                        User.dob >= datetime(1928, 1, 1)
+                    ).count(),
+                'greatest-gen': userquery.filter(
+                        User.dob < datetime(1928, 1, 1)
                     ).count()
             }
 

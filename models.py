@@ -32,7 +32,8 @@ class User(Base, UserMixin):
     userpass = Column(String(200), unique=False, nullable=False)
     verified = Column(Boolean, unique=False, nullable=False)
     banned = Column(Boolean, unique=False, nullable=False)
-    balance = Column(DECIMAL(20, 2), unique=False, nullable=False)
+    balance = Column(DECIMAL(20, 2, asdecimal=False), unique=False,
+                     nullable=False)
     overallPerc = Column(Float, unique=False, nullable=False)
     totalNumSales = Column(Integer, unique=False, nullable=False)
 
@@ -95,8 +96,10 @@ class Usershare(Base):
                     primary_key=True)
     issuerID = Column(String(3), ForeignKey('SHARE.issuerID'),
                       primary_key=True)
-    profit = Column(DECIMAL(20, 2), nullable=False, unique=False)
-    loss = Column(DECIMAL(20, 2), nullable=False, unique=False)
+    profit = Column(DECIMAL(20, 2, asdecimal=False), nullable=False,
+                    unique=False)
+    loss = Column(DECIMAL(20, 2, asdecimal=False), nullable=False,
+                  unique=False)
     quantity = Column(BigInteger, nullable=False, unique=False)
 
 
@@ -111,9 +114,12 @@ class Transaction(Base):
     userID = Column(Integer, ForeignKey('USER.userID'), primary_key=False)
     datetime = Column(DateTime, nullable=False, unique=False)
     transtype = Column(String(1), nullable=False, unique=False)
-    feeval = Column(DECIMAL(20, 2), nullable=False, unique=False)
-    stocktransval = Column(DECIMAL(20, 2), nullable=False, unique=False)
-    totaltransval = Column(DECIMAL(20, 2), nullable=False, unique=False)
+    feeval = Column(DECIMAL(20, 2, asdecimal=False), nullable=False,
+                    unique=False)
+    stocktransval = Column(DECIMAL(20, 2, asdecimal=False), nullable=False,
+                           unique=False)
+    totaltransval = Column(DECIMAL(20, 2, asdecimal=False), nullable=False,
+                           unique=False)
     quantity = Column(BigInteger, nullable=False, unique=False)
     status = Column(String(20), nullable=False)
 
