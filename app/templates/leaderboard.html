@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="sharelist-body">
+    <h1>Leaderboard</h1>
+    <h1>Your current ranking: {{ current_user_info.ranking }}</h1>
+    {% include "messageblock.html" %}
+    <div class="container">
+        <!--TO DO CHANGE ID AND CLASS-->
+        <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#leaderboard">Overall Leaderboard</a></li>
+                <li><a data-toggle="tab" href="#weekgainers">Top Gainers Week</a></li>
+                <li><a data-toggle="tab" href="#monthgainers">Top Gainers Month</a></li>
+              </ul>
+            
+              <div class="tab-content">
+                <div id="leaderboard" class="tab-pane fade in active">
+                        <table id="leaderboard-table" class="table sortable-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Ranking</th>
+                                        <th>Username</th>
+                                        <th>Portfolio value</th>
+                                        <th>Account Balance</th>
+                                        <th>Total value</th>
+                                    </tr>            
+                                {% for user in leaderboard %}
+                                    {% if user.userID == current_user_info.userID %}
+                                        <tr class="info">
+                                    {% else %}
+                                        <tr>
+                                    {% endif %}
+                                            <td>{{ user.ranking }}</td>
+                                            <td>{{ user.username }}</td>
+                                            <td>{{ user.sharesvalue|round(4) }}</td>
+                                            <td>{{ user.balance|round(4) }}</td>
+                                            <td>{{ user.totalvalue|round(4) }}</td>
+                                        </tr>
+                                {% endfor %}
+                                </tbody>
+                        </table>
+                </div>
+                <div id="weekgainers" class="tab-pane fade">
+                        <table id="weekgained-table" class="table sortable-table">
+                                <tbody>
+                                        <tr>
+                                            <th>Ranking</th>
+                                            <th>Username</th>
+                                            <th>Value gained</th>
+                                            <th>Percent gained</th>
+                                        </tr>            
+                                    {% for user in weektopgainers %}
+                                        {% if user.username == current_user_info.username %}
+                                            <tr class="info">
+                                        {% else %}
+                                            <tr>
+                                        {% endif %}                       
+                                        
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ user.username }}</td>
+                                                {% if user.changeinvalue >= 0 %}
+                                                <td class="text-success">{{ user.changeinvalue }}</td>
+                                                <td class ="text-success">{{ user.changepercentage }}</td>
+                                                {% else %}
+                                                <td class="text-danger">{{ user.changeinvalue }}</td>
+                                                <td class ="text-danger">{{ user.changepercentage }}</td>
+                                                {% endif %}
+                                            </tr>
+                                    {% endfor %}
+                                </tbody>
+                        </table>
+                </div>
+                <div id="monthgainers" class="tab-pane fade">
+                        <table id="monthgained-table" class="table sortable-table">
+                                <tbody>
+                                        <tr>
+                                            <th>Ranking</th>
+                                            <th>Username</th>
+                                            <th>Value gained $</th>
+                                            <th>Percent gained %</th>
+                                        </tr>           
+                                    {% for user in monthtopgainers %}
+                        
+                                            {% if user.username == current_user_info.username %}
+                                                <tr class="info">
+                                            {% else %}
+                                                <tr>
+                                            {% endif %} 
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ user.username }}</td>
+                                                {% if user.changeinvalue >= 0 %}
+                                                <td class="text-success">{{ user.changeinvalue }}</td>
+                                                <td class ="text-success">{{ user.changepercentage }}</td>
+                                                {% else %}
+                                                <td class="text-danger">{{ user.changeinvalue }}</td>
+                                                <td class ="text-danger">{{ user.changepercentage }}</td>
+                                                {% endif %}
+                                            </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                </div>
+                <div id="menu3" class="tab-pane fade">
+                  <h3>Menu 3</h3>
+                  <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+            </div>
+    </div>
+        
+
+       
+        </div>
+
+    </div>
+</div>
+{% endblock %}

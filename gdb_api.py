@@ -1,7 +1,8 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin, Base
+from models import User, Share, SharePrice, Usershare, Transaction, Admin, Leaderboard, Base
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.sql import func
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from contextlib import contextmanager
@@ -11,6 +12,7 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import math
+import operator
 
 
 class GoogleDatabaseAPI:
@@ -1019,3 +1021,158 @@ class GoogleDatabaseAPI:
 
             # Return statistics
             return statistics
+
+    def getleaderboard(self, current_userID):
+        """
+        Get users and fields needed for a leaderboard preordered.
+
+        Returns:
+            A list of dictionary results for the leaderboard ordered by total.
+            The returned format is:
+                result.userID: ID of the user.
+                result.username: Username of the user.
+                result.sharesvalue: Total value of shares user has.
+                result.balance: Current balance for user.
+                result.totalvalue: Total shares values and user balance.
+                result.ranking: Ranking of the user by totalvalue,
+            A dictionary of results for the current user
+
+        """
+        # Initialse session
+        with self.sessionmanager() as session:
+            # Query all the shares and user shares
+            query = session.query(
+                User.userID,
+                User.username,
+                func.ifnull(func.sum(Usershare.quantity * Share.currentprice),
+                            0).label("sharesvalue"),
+                User.balance,
+                func.ifnull(func.sum(Usershare.quantity * Share.currentprice) +
+                            User.balance, User.balance).label("totalvalue")
+            )
+            # Outer join query with usershare and share tables
+            query = query.outerjoin(Usershare).outerjoin(Share)
+            # Group the query by user ID
+            query = query.group_by(User.userID)
+            # Order the query by total
+            query = query.order_by(desc("totalvalue"))
+            # Get the results
+            result = query.all()
+
+            leaderboard = []
+            rankiterator = 1
+            for row in result:
+                dictionary = {'userID' : row.userID, 
+                'username' : row.username, 
+                'sharesvalue' : row.sharesvalue, 
+                'balance' : row.balance, 
+                'totalvalue' : row.totalvalue,
+                'ranking': rankiterator }
+
+                if row.userID == current_userID:
+                    current_user_info = dictionary
+                
+                leaderboard.append(dictionary)
+
+                rankiterator = rankiterator + 1
+                
+        # Return leaderboard
+        return leaderboard, current_user_info
+    
+    def updateleaderboard(self):
+        """
+        Update leaderboard table with current totalvalues and rankings
+        """
+        #TODO Remove magic number
+        leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+        with self.sessionmanager() as session:
+
+            recordtime=datetime.utcnow()
+
+            for row in leaderboard:
+                user = Leaderboard(
+                userID=row['userID'],
+                recordtime=recordtime,
+                ranking=row['ranking'],
+                totalvalue=row['totalvalue']
+                )
+                session.add(user)
+            # Create leaderboard entry
+            
+        # Return success'''
+        return True
+    
+    def gettopgainers(self):
+        """
+        Get users and fields needed for topgainers leaderboard preordered by totalvalue.
+
+        Returns:
+            A list of dictionary results for the topgainers over a week ordered by changeinvalue.
+            A list of dictionary results for the topgainers over a month ordered by changeinvalue.
+            The returned format is:
+                result.username: Username of the user.
+                result.changeinvalue: Total value changed over time period.
+                result.changepercentage: Percentage total value changed over time period.
+                result.currentvalue: Current value of user's account
+                result.previousvalue: Value of user's account at the time period
+
+        """
+        #TODO Remove magic number
+        currentleaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+
+        with self.sessionmanager() as session:
+
+            currentdate = datetime.utcnow()
+            lowertdelta = timedelta(days=7)
+            uppertdelta = timedelta(days=8)
+
+            # Creates a date a week prior to current time
+            lowerdatelimit = currentdate - lowertdelta
+            #Creates a date a week + 1 day prior to currrent time
+            upperdatelimit = currentdate - uppertdelta
+            
+
+            weektopgainers = []
+            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            for row in currentleaderboard:
+                result = query.filter(Leaderboard.userID == row['userID']).first()
+
+                if result is not None:
+                    dictionary = { 
+                    'username' : row['username'], 
+                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
+                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
+                    'currentvalue' : row['totalvalue'],
+                    'previousvalue': result.totalvalue}
+                    weektopgainers.append(dictionary)
+            
+            weektopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+
+            currentdate = datetime.utcnow()
+            lowertdelta = timedelta(days=30)
+            uppertdelta = timedelta(days=31)
+
+            # Creates a date a month prior to current time
+            lowerdatelimit = currentdate - lowertdelta
+            #Creates a date a month + 1 day prior to currrent time
+            upperdatelimit = currentdate - uppertdelta
+
+            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            monthtopgainers = []
+            
+            for row in currentleaderboard:
+                result = query.filter(Leaderboard.userID == row['userID']).first()
+
+                if result is not None:
+                    dictionary = { 
+                    'username' : row['username'], 
+                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
+                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
+                    'currentvalue' : row['totalvalue'],
+                    'previousvalue': result.totalvalue}
+                    monthtopgainers.append(dictionary)
+            
+            monthtopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+            session.expunge_all()
+            
+            return weektopgainers, monthtopgainers
