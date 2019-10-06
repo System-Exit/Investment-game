@@ -44,18 +44,22 @@
     var agePieChartData = {
         datasets: [{
             data: [
-                {{ userstatistics.agegroupcounts['0to12'] }},
-                {{ userstatistics.agegroupcounts['13to17'] }},
-                {{ userstatistics.agegroupcounts['18to25'] }},
-                {{ userstatistics.agegroupcounts['26toinf'] }}
+                {{ userstatistics.agegroupcounts['post-mil'] }},
+                {{ userstatistics.agegroupcounts['mil'] }},
+                {{ userstatistics.agegroupcounts['gen-x'] }},
+                {{ userstatistics.agegroupcounts['baby-boom'] }},
+                {{ userstatistics.agegroupcounts['silent-gen'] }},
+                {{ userstatistics.agegroupcounts['greatest-gen'] }},
             ],
             backgroundColor: "rgba(0, 0, 255, 1)",
         }],
         labels: [
-            '0 - 12',
-            '13 - 17',
-            '18 - 25',
-            '26+'
+            'Post Millennials(1997-present)',
+            'Millennials(1981-1996)',
+            'Generation X(1965-1980)',
+            'Baby Boomers(1946-1965)',
+            'Silent Generation(1928-1945)',
+            'Greatest Generation(1910-1927)'
         ]
     }
     // Age pie chart options

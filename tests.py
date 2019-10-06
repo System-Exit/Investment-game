@@ -1,7 +1,8 @@
 from gdb_api import GoogleDatabaseAPI
 from config import Config
-from models import Base, User, Share, Admin
+from models import Base, User, Share, Admin, Transaction, Usershare
 from argon2 import PasswordHasher
+from datetime import datetime, date
 import pytest
 import unittest
 import os
@@ -186,8 +187,18 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         assert share is None
 
     def test_getshares(self):
-        # TODO
-        pass
+        # TODO: Test sorting
+        # Generate random shares and get their codes
+        shares = [self.generatetestshare() for i in range(5)]
+        issuerIDs = [share.issuerID for share in shares]
+        # Add shares directly to database
+        with self.gdb.sessionmanager() as session:
+            for share in shares:
+                session.add(share)
+        # Get shares
+        shares, count = self.gdb.getshares()
+        # Assert all shares were returned
+        assert all(share.issuerID in issuerIDs for share in shares)
 
     def test_getsharepricehistory(self):
         # TODO
@@ -198,8 +209,48 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
         pass
 
     def test_buyshare(self):
-        # TODO
-        pass
+        # Generate user with predefined balance
+        userID = 1
+        balance = 5000
+        user = self.generatetestuser(userID=userID, balance=balance)
+        # Generate share with predefined price
+        issuerID = "TST"
+        currentprice = 100
+        share = self.generatetestshare(issuerID=issuerID,
+                                       currentprice=currentprice)
+        # Add user and share directly into database
+        with self.gdb.sessionmanager() as session:
+            session.add(user)
+            session.add(share)
+        # Attempt to purchase affordable number or shares and assert true
+        assert self.gdb.buyshare(userID, issuerID, 10) is True
+        # Attempt to purchase unaffordable number or shares and assert false
+        assert self.gdb.buyshare(userID, issuerID, 1000) is False
+        # Start session
+        with self.gdb.sessionmanager() as session:
+            # Calculate transaction values
+            shareval = currentprice * 10
+            feeval = 50 + (shareval * 0.01)
+            totalval = shareval + feeval
+            # Get user firm database directly
+            user = session.query(User).get(userID)
+            # Get transaction from database directly
+            transaction = session.query(Transaction).filter(
+                Transaction.issuerID == issuerID).filter(
+                Transaction.userID == userID).first()
+            # Get usershare from database directly
+            usershare = session.query(Usershare).filter(
+                Usershare.issuerID == issuerID).filter(
+                Usershare.userID == userID).first()
+            # Assert user balance has been updated correctly
+            assert user.balance == balance - totalval
+            # Assert transaction prices are correct
+            assert transaction.stocktransval == shareval
+            assert transaction.feeval == feeval
+            assert transaction.totaltransval == totalval
+            # Assert usershare was created with correct values
+            assert usershare.loss == totalval
+            assert usershare.quantity == 10
 
     def test_sellshare(self):
         # TODO
@@ -246,8 +297,45 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             assert banned is False
 
     def test_getuserstatistics(self):
-        # TODO
-        pass
+        # Generate users with random stats
+        users = list()
+        gender_dist = {'male': 0, 'female': 0, 'other': 0}
+        agegroup_dist = {'post-mil': 0, 'mil': 0, 'gen-x': 0,
+                         'baby-boom': 0, 'silent-gen': 0, 'greatest-gen': 0}
+        for i in range(20):
+            user = self.generatetestuser()
+            users.append(user)
+            # Get gender
+            if user.gender == 'M':
+                gender_dist['male'] += 1
+            elif user.gender == 'F':
+                gender_dist['female'] += 1
+            elif user.gender == 'O':
+                gender_dist['other'] += 1
+            # Get age group
+            if user.dob > date(1997, 1, 1):
+                agegroup_dist['post-mil'] += 1
+            elif user.dob > date(1981, 1, 1):
+                agegroup_dist['mil'] += 1
+            elif user.dob > date(1965, 1, 1):
+                agegroup_dist['gen-x'] += 1
+            elif user.dob > date(1946, 1, 1):
+                agegroup_dist['baby-boom'] += 1
+            elif user.dob > date(1928, 1, 1):
+                agegroup_dist['silent-gen'] += 1
+            else:
+                agegroup_dist['greatest-gen'] += 1
+        # Add users directly into database
+        with self.gdb.sessionmanager() as session:
+            for user in users:
+                session.add(user)
+        # Get statistics
+        stats = self.gdb.getuserstatistics()
+        # Assert that statistics are accurate
+        for key in stats['gendercounts']:
+            assert stats['gendercounts'][key] == gender_dist[key]
+        for key in stats['agegroupcounts']:
+            assert stats['agegroupcounts'][key] == agegroup_dist[key]
 
     def generatetestuser(self, userID=None, firstname=None, lastname=None,
                          email=None, dob=None, gender=None, username=None,
@@ -281,7 +369,7 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             year = random.randint(1900, 2015)
             month = random.randint(1, 12)
             day = random.randint(1, 28)
-            dob = f"{year}-{month}-{day}"
+            dob = date(year, month, day)
         if not gender:
             gender = ''.join(random.choices(["M", "F", "O"], k=1))
         if not username:
