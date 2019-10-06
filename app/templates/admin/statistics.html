@@ -12,8 +12,8 @@
     </div>
     <div>
         <h3>Age distribution</h3>
-        <div id="age-pie-chart-container">
-            <canvas id="age-pie-chart"></canvas>
+        <div id="age-bar-chart-container">
+            <canvas id="age-bar-chart"></canvas>
         </div>
     </div>
 </div>
@@ -41,7 +41,7 @@
         ]
     }
     // Generate age data for pie chart
-    var agePieChartData = {
+    var ageBarChartData = {
         datasets: [{
             data: [
                 {{ userstatistics.agegroupcounts['post-mil'] }},
@@ -54,16 +54,24 @@
             backgroundColor: "rgba(0, 0, 255, 1)",
         }],
         labels: [
-            'Post Millennials(1997-present)',
-            'Millennials(1981-1996)',
-            'Generation X(1965-1980)',
-            'Baby Boomers(1946-1965)',
-            'Silent Generation(1928-1945)',
-            'Greatest Generation(1910-1927)'
+            '1997+',
+            '1981-1996',
+            '1965-1980',
+            '1946-1965',
+            '1928-1945',
+            '1900-1927'
+        ],
+        afterLabels: [
+            'Post Millenials',
+            'Millennials',
+            'Generation X',
+            'Baby Boomers',
+            'Silent Gen',
+            'Greatest Gen and Before'
         ]
     }
-    // Age pie chart options
-    var agePieChartOptions = {
+    // Age bar chart options
+    var ageBarChartOptions = {
         legend: {
             display: false
         },
@@ -71,6 +79,9 @@
             callbacks: {
                 label: function(tooltipItem) {
                     return tooltipItem.yLabel;
+                },
+                afterLabel: function(tooltipItem) {
+                    return ageBarChartData['afterLabels'][tooltipItem['index']];
                 }
             }
         },
@@ -99,11 +110,11 @@
             type: 'pie',
             data: genderPieChartData
         });
-        var ctx = document.getElementById("age-pie-chart").getContext("2d");
-        var agePieChart = new Chart(ctx, {
+        var ctx = document.getElementById("age-bar-chart").getContext("2d");
+        var ageBarChart = new Chart(ctx, {
             type: 'bar',
-            data: agePieChartData,
-            options: agePieChartOptions
+            data: ageBarChartData,
+            options: ageBarChartOptions
         });
     }
 </script>
