@@ -8,27 +8,38 @@
     <h3>{{ share.industrysector }}</h3>
     </div>
 <div class="wrapper" style="display:grid;
-  grid-template-columns: 20% 80%;
+  grid-template-columns: 30% 70%;
   text-align: left;
+  font-size: large;
   margin: 20px;">
   <div>
-     <p>Current price: {{ share.currentprice }}</p>
-     <p>Change $: ${{ share.daychangeprice }}</p>
-     <p>Change %: {{ share.daychangepercent }}%</p>
+     <p>Current price:${{ share.currentprice }}</p>
+     {% if share.daychangepercent >= 0 %}
+        <p class=text-success>DayPriceChange $:+{{ share.daychangeprice }}</p>
+        <p class=text-success>DayPercentChange %:+{{ share.daychangepercent }}%</p>
+     {% else %}
+        <p class=text-danger>DayPriceChange $:{{ share.daychangeprice }}</p>
+        <p class=text-danger>DayPercentChange %:{{ share.daychangepercent }}%</p>
+     {% endif %}
   </div>
   <div style="background: #6ce6bf;
-    padding: 1em;">
+    padding: 1em;
+    font-size: large;">
     <p>{{ share.description }}</p>   
   </div>
 </div>
   <div class="wrapper" style="display:grid;
-  grid-template-columns: 20% 80%;
-   text-align: left;
+  grid-template-columns: 30% 70%;
+  text-align: left;
+  font-size: large;
   margin: 20px;">
     <div style="background: #00ffaa;">
      <p>Day High: {{ share.daypricehigh }}</p>
      <p>Day Low: {{ share.daypricelow }}</p>
      <p>Day Volume: {{ share.dayvolume }}</p>
+     
+    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" style="width:150px;height:75px;" data-toggle="modal" data-target="#buy-modal">Buy</button>
+    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" style="width:150px;height:75px;" data-toggle="modal" data-target="#sell-modal">Sell</button>
     </div>
     <div style="background: #6cd5e0;
   padding: 1em;">
@@ -41,8 +52,6 @@
     </div>
   </div>
 </div>
-    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" style="width:100px;height:50px;" data-toggle="modal" data-target="#buy-modal">Buy</button>
-    <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'sellsharecode')" type="button" class="btn btn-danger" style="width:100px;height:50px;" data-toggle="modal" data-target="#sell-modal">Sell</button>
     {% if transactions %}
         <h2>Your transactions</h2>
         <table id="transaction-table" class="table sortable-table">
