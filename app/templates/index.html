@@ -7,13 +7,24 @@
 {% block content %}
 <div id="index-body">
     <img src="{{url_for('static', filename='images/tmplogo.png')}}" 
-    alt="Budding Investors" height="auto" width="auto" class="reg-logo">
+    alt="Budding Investors" height="auto" width="auto" class="index-logo">
     {% include "messageblock.html" %}
-    <h1>Budding Investors is currently under construction!</h1>
-    <a id="login" href="{{ url_for('main.login') }}">Log in!</a>
     <br>
-    <a id="registration" href="{{ url_for('main.registration') }}">Sign up!</a>
-    <br>
-    <a id="adminlogin" href="{{ url_for('admin.login') }}">Admin login.</a>
+    <div id="index-description">
+        {% set login_url = url_for('main.login') %}
+        {% set registration_url = url_for('main.registration') %}
+        {% set admin_login_url = url_for('admin.login') %}
+        <h1>Welcome To Budding Investors!</h1>
+        <p>
+            This website is dedicated to helping you learn how to trade stocks by 
+            providing a risk free, realistic and rewarding environment to practice 
+            your stock trading skills, with no real investment required!
+        </p>
+        <h3>Want to get started?</h3>
+        <button id="registration" class="button" onclick="window.location.href='{{ registration_url }}';">Sign Up Now!</button>
+        <h3>Already a member?</h3>
+        <button id="login" class="button" onclick="window.location.href='{{ login_url }}';">Log In!</button>
+        <a id="admin-login" href="{{ admin_login_url }}">Admin login</a>
+    </div>
 </div>
 {% endblock %}

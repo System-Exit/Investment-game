@@ -136,13 +136,46 @@ body
 
 
 /* Index page */
-#login
+#index-body
 {
-    font-size: 24;
+    text-align: center;
+    flex-direction: column;
 }
-#registration
+#index-logo
 {
-    font-size: 24;
+    display: inline-block;
+}
+#index-description
+{
+    width: 50%;
+    font-size: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: white;
+    padding: 20px;
+}
+#index-description h1
+{
+    padding: 10px;
+    margin: 0;
+}
+#index-body .button
+{
+    display: inline-block;
+    background-color: #8ff5d9;
+    border: 0;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 24pt;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: bold;
+}
+#admin-login
+{
+    position: fixed;
+    left: 5px;
+    bottom: 5px;
+    color: black;
 }
 
 /* Login page */
@@ -193,13 +226,10 @@ body
 {
     text-align: center;
 }
-
 #login-module
 {
     background-color: white;
 }
-
-
 #login-left-panel.col-xs-5
 {
     background-color: white;
@@ -207,32 +237,28 @@ body
     margin-bottom: -25%;
     height: 100vh;
 }
-
 #login-container.container
 {   
     padding: 0%;
     margin: 0%;
     height: 100%;
 }
-
 #logo-img
 {
     padding-top: 50%;
 }
-
 .login-form input {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
-  }
+}
 .login-form h1 {
     text-align: left;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin-bottom: 25px;
     padding-bottom: 25px;
 }
-
 .login-form label {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
@@ -244,7 +270,6 @@ body
     margin: 0%;
     min-height: 100vh;
 }
-
 #registration-header
 {
     background-color: white;
@@ -255,7 +280,6 @@ body
     background-color: white;
     min-height: 8vh;
 }
-
 #registration-content-logo
 {
     height: 84vh;
@@ -271,7 +295,6 @@ body
     height: 84vh;
     background-color: #e3e7e8;
 }
-
 .registration-form
 {
     background: white;
@@ -282,7 +305,6 @@ body
     margin-left: 10%;
     margin-right: 3%;
 }
-
 .registration-form div
 {
     padding-top: 5px;
@@ -295,7 +317,6 @@ body
     padding-left: 10px;
     padding-right: 10px;
 }
-
 .registration-form table
 {
     width: 100%;
@@ -318,9 +339,8 @@ input#byear
 {
     width: 0.4fr;
 }
-
 .registration-form input
- {
+{
     width: 100%;
     padding: 8px 8px;
     margin: 8px 0;
@@ -331,9 +351,9 @@ input#byear
     padding-right: 10px;
     border-style: none;
     background-color: #f8f6f6;
-  }
-  .registration-form select
- {
+}
+.registration-form select
+{
     width: 100%;
     padding: 8px 8px;
     margin: 8px 0;
@@ -344,9 +364,9 @@ input#byear
     padding-right: 10px;
     border-style: none;
     background-color: #f8f6f6;
-  }
+}
 .registration-form h1
- {
+{
     text-align: left;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin-bottom: 15px;
@@ -357,7 +377,6 @@ input#byear
 {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
-
 .registration-form #submit{
     width: 70%;
     background-color: #8ff5d9;
@@ -418,13 +437,13 @@ input#byear
     height: 250px;
     width: 500px;
 }
+
 .wrapper
 {
   display:grid;
   grid-template-columns: 70% 30%;
   grid-gap:1em;
 }
-
 .wrapper> div
 {
   background: lightgrey;
