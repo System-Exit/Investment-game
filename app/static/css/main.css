@@ -440,3 +440,10 @@ input#byear
     font-size:12pt;
     color: rgb(187, 123, 4)
 }
+
+/* Leaderboard */
+#tab-overall, #tab-weekgain, #tab-monthgain
+{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color:black;
+}
