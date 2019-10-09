@@ -150,8 +150,8 @@ class Tips(Base):
     # Table name
     __tablename__ = 'TIPS'
     # Table Columns
-    tipID = Column(DateTime, primary_key=True)
-    data = Column(Float, nullable=False, unique=False)
+    tipID = Column(Integer, primary_key=True)
+    data = Column(String(100), nullable=False, unique=False)
 
 
 class SharePrice(Base):
