@@ -141,6 +141,26 @@ body
     color: black;
     text-decoration: underline;
 }
+#loading-overlay
+{
+    position: fixed;
+    width: calc(100% - 150px);
+    height: calc(100% - 60px);
+    background-color: lightgray;
+    left: 150px;
+    top: 60px;
+    z-index: 100;
+}
+#loading-overlay span
+{
+    font-size: 32px;
+    font-weight: 700;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
 #content
 {
     position: relative;

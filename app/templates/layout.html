@@ -45,16 +45,24 @@
             </ul>
         </div>
         <div class="content">
-                <div class="window">
-                    </div>
-                        
-                        
+            <div class="window"></div>
         <div class="content">
+        <div id="loading-overlay"><span>Loading...</span></div>
         <div id="content">
             {% block content %}{% endblock %}
         </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="{{url_for('static', filename='scripts/script.js')}}"></script>
+        <script>
+        // Remove overlay once everything is loaded
+        $(window).on('load', function(){
+            $('#loading-overlay').fadeOut('fast');
+        });
+        // Add overlay when changing page
+        $(window).on('beforeunload', function(){
+            $('#loading-overlay').fadeIn('fast');
+        })
+        </script>
     </body>
 </html>
