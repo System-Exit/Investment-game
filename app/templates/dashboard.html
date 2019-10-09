@@ -7,9 +7,8 @@
   margin: 20px;">
     <div>
      <h1>Welcome <strong>{{ user.firstname }}!</strong></h1>
-     <h3>Your last trade of <strong>Woolworths Inc</strong> has <strong>decreased</strong> in value since purchase</h3>
      <h3>You are currently a <strong>Level {{ user.getRating() }} </strong> user, your so close to your next level, keep making smart trades!</h3>
-     <h3>Your are currently in <strong>2nd </strong> place on the Budding Traders Leaderboard!</h3> 
+     <h3>You are currently ranked in spot <strong>{{ current_user_info.ranking}} </strong> on the Budding Traders Leaderboard!</h3> 
     </div>
     <div style="background: #6ce6bf;
   padding: 1em;">   
@@ -21,7 +20,12 @@
   margin: 20px;">
     <div style="background: #00ffaa;">
      <h1 style="padding: 5px;">Your Portfolio Value is:</h1>
-     <p style="font-size: 50px;">${{ userbalance }}</p>
+                                {% for user in leaderboard %}
+                                    {% if user.userID == current_user_info.userID %}
+                                            <h1>$ {{ user.sharesvalue|round(4) }}</h1>                                    
+                                    {% else %}
+                                    {% endif %}
+                                {% endfor %}     
     </div>
     <div style="background: #6cd5e0;
   padding: 1em;">

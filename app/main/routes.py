@@ -164,9 +164,14 @@ def dashboard():
     user = current_user
     # Get tip of the day
     tip = gdb.gettipofday()
+    # Get current user Leaderboard Status
+    leaderboard, current_user_info = gdb.getleaderboard(current_user.userID)
+    weektopgainers, monthtopgainers = gdb.gettopgainers()
     # Render template
     return render_template('dashboard.html', user=user,
-                           userbalance=current_user.balance, tip=tip)
+                           leaderboard=leaderboard,
+                           userbalance=current_user.balance, tip=tip,
+                           current_user_info=current_user_info)
 
 
 @bp.route('/portfolio', methods=['GET'])
