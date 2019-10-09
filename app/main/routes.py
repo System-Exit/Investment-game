@@ -162,9 +162,11 @@ def dashboard():
     """
     # Get current user
     user = current_user
+    # Get tip of the day
+    tip = gdb.gettipofday()
     # Render template
     return render_template('dashboard.html', user=user,
-                           userbalance=current_user.balance)
+                           userbalance=current_user.balance, tip=tip)
 
 
 @bp.route('/portfolio', methods=['GET'])

@@ -1,4 +1,4 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin, Leaderboard, Base
+from models import User, Share, SharePrice, Usershare, Transaction, Admin, Leaderboard, Tips, Base
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import math
 import operator
+import random
 
 
 class GoogleDatabaseAPI:
@@ -1191,3 +1192,26 @@ class GoogleDatabaseAPI:
             session.expunge_all()
             
             return weektopgainers, monthtopgainers
+
+    def gettipofday(self):
+        """
+        Returns a single tip .
+
+        Returns:
+            tip for the day or empty string if none
+        """
+        tip = ""
+        # Initialse session
+        with self.sessionmanager() as session:
+            query = session.query(Tips)
+
+            # Get all tips for that day
+            alltipsforday = query.all()
+            for tip in alltipsforday:
+                session.expunge(tip)
+
+            if len(alltipsforday) > 0:
+                tipNum = random.randint(0, len(alltipsforday)-1)
+                tip = alltipsforday[tipNum].data
+
+        return tip
