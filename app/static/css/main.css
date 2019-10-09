@@ -205,6 +205,7 @@ body
     background-color: white;
     padding-bottom: 25%;
     margin-bottom: -25%;
+    height: 100vh;
 }
 
 #login-container.container
@@ -432,4 +433,10 @@ input#byear
 .wrapper> div:nth-child(even)
 {
   background:#ddd
+}
+
+#popover
+{
+    font-size:12pt;
+    color: rgb(187, 123, 4)
 }

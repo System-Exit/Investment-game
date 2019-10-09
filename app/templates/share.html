@@ -34,8 +34,15 @@
   font-size: large;
   margin: 20px;">
     <div style="background: #00ffaa;">
-     <p>Day High: {{ share.daypricehigh }}</p>
-     <p>Day Low: {{ share.daypricelow }}</p>
+     <p>Day High: {{ share.daypricehigh }} 
+         <a id="popover" href="#" data-toggle="popover" title="Day high" data-content="The highest price this company has been traded for today">
+             <span class="glyphicon glyphicon-question-sign"></span>
+        </a>
+    </p>
+     <p>Day Low: {{ share.daypricelow }}<a id="popover" href="#" data-toggle="popover" title="Day low" data-content="The lowest price this company has been traded for today">
+            <span class="glyphicon glyphicon-question-sign"></span>
+       </a>
+    </p>
      <p>Day Volume: {{ share.dayvolume }}</p>
      
     <button name="{{ share.issuerID }}" onclick="SetCompanyValue(this.name, 'buysharecode')" type="button" class="btn btn-success" style="width:150px;height:75px;" data-toggle="modal" data-target="#buy-modal">Buy</button>
@@ -258,7 +265,13 @@
         });
     }
 </script>
-
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+        $(document).ready(function(){
+            $('[data-toggle="popover"]').popover();   
+        });
+</script>
 
 {% include "sharemodals.html" %}
 {% endblock %}

@@ -2,7 +2,7 @@
 {% set active_page = "shares" %}
 {% block content %}
 <div id="sharelist-body">
-    <h1>All Shares</h1>
+    <h1>All Shares <a id="popover" href="#" data-toggle="popover" title="All shares" data-content="This is a list of companies which you can buy shares in. Click on a company to learn more about them"><span class="glyphicon glyphicon-question-sign"></span></a></h1>
     {% include "messageblock.html" %}
     <div class="container">
         <table id="share-table" class="table sortable-table">
@@ -101,4 +101,11 @@
         </div>
     </div>
 </div>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+        $(document).ready(function(){
+            $('[data-toggle="popover"]').popover();   
+        });
+</script>
 {% endblock %}
