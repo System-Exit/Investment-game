@@ -11,6 +11,6 @@ class Config(object):
     DB_USERNAME = os.getenv('DB_USERNAME') or 'root'
     DB_PASSWORD = os.getenv('DB_PASSWORD') or 'RMIT1234!!!'
     DB_HOST = os.getenv('DB_HOST') or '127.0.0.1'
-    DB_PORT = os.getenv('DB_PORT') or '3309'
+    DB_PORT = os.getenv('DB_PORT') or '3306'
     DB_DATABASE = os.getenv('DB_DATABASE') or 'Database'
     DB_QUERY = os.getenv('DB_QUERY') or ""

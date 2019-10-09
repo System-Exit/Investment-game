@@ -392,22 +392,23 @@ def sharesupdate():
     # Return a success response
     return jsonify(success=True)
 
+
 @bp.route('/leaderboard', methods=['GET'])
 @user_login_required
 def leaderboard():
     """Displays overall leaderboard and top gainer leaderboards """
-    
+    # Get leaderboard and user information
     leaderboard, current_user_info = gdb.getleaderboard(current_user.userID)
-
+    # Get top gainer leaderboards
     weektopgainers, monthtopgainers = gdb.gettopgainers()
-
     # Render template
-    return render_template('leaderboard.html', 
-                            leaderboard=leaderboard,
-                            current_user_info=current_user_info,
-                            weektopgainers = weektopgainers,
-                            monthtopgainers = monthtopgainers,
-                            userbalance=current_user.balance)
+    return render_template('leaderboard.html',
+                           leaderboard=leaderboard,
+                           current_user_info=current_user_info,
+                           weektopgainers=weektopgainers,
+                           monthtopgainers=monthtopgainers,
+                           userbalance=current_user.balance)
+
 
 @bp.route('/updateleaderboard')
 def updateleaderboard():
