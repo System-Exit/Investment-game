@@ -65,11 +65,26 @@ body
     right: 0;
     text-align: left;
     padding-left: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 #top-bar img
 {
     height: inherit;
     z-index: 11;
+}
+#top-bar .money
+{
+    position: relative;
+    background-color: whitesmoke;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 15px;
+    margin-right: 5px;
+    font-size: 30px;
+    height: 50px;
 }
 #top-left-corner
 {
