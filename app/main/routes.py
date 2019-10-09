@@ -417,10 +417,3 @@ def updateleaderboard():
     gdb.updateleaderboard()
 
     return jsonify(success=True)
-
-@bp.route('/introduction')
-def introduction():
-    """
-    Displays Introduction Video
-    """
-    return render_template('introduction.html')
