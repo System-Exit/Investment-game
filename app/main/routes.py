@@ -410,11 +410,12 @@ def leaderboard():
                            userbalance=current_user.balance)
 
 
-@bp.route('/updateleaderboard')
+@bp.route('/tasks/updateleaderboard')
 def updateleaderboard():
     """
     Update leaderboard
     """
+    # Update leaderboard
     gdb.updateleaderboard()
-
+    # Return success
     return jsonify(success=True)

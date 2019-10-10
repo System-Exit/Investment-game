@@ -1,5 +1,9 @@
 cron:
-- description: "Update SHARE and SHAREPRICE tables"
+- description: "Update and record share prices"
   url: /tasks/updateshares
   schedule: every 1 hours from 10:00 to 16:00
   timezone: Australia/Sydney
+- description: "Update leaderboards"
+  url: /tasks/updateleaderboard
+  schedule: every 1 hours from 0:00 to 23:00
+  timeone: Australia/Sydney
