@@ -6,4 +6,4 @@ cron:
 - description: "Update leaderboards"
   url: /tasks/updateleaderboard
   schedule: every 1 hours from 0:00 to 23:00
-  timeone: Australia/Sydney
+  timezone: Australia/Sydney

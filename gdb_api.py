@@ -776,13 +776,12 @@ class GoogleDatabaseAPI:
             # Add to user balance
             user.balance = float(user.balance) + totalprice
 
-            # Remember the amount a sale cost
+            # Remember the amount a sale cost TODO: Handle error better
             soldSharePrice = totalprice/quantity
             theAveragePurchasePrice = self.averagePurchasedStockPrice(
                 userID, issuerID)
             if (theAveragePurchasePrice == 0):
-                flash("Stock you want to sell was never purchased.",
-                      category="error")
+                pass
             else:
                 percent = ((soldSharePrice/theAveragePurchasePrice)-1)*100
                 user.overallPerc = ((

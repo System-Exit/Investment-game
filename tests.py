@@ -444,7 +444,8 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
     def generatetestuser(self, userID=None, firstname=None, lastname=None,
                          email=None, dob=None, gender=None, username=None,
                          userpass=None, verified=None, banned=None,
-                         balance=None, hashpassword=True):
+                         balance=None, overallPerc=None, totalNumSales=None,
+                         hashpassword=True):
         """
         Helper method for creating a test user that with specified
         attributes. If a user attribute is not defined, a random value will
@@ -487,6 +488,10 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             banned = random.choices([True, False])[0]
         if not balance:
             balance = random.randint(1000, 10000000)
+        if not overallPerc:
+            overallPerc = random.uniform(-100.0, 100.0)
+        if not totalNumSales:
+            totalNumSales = random.randint(0, 100)
         # If hash pass is set, hash the userpass
         if hashpassword:
             userpass = PasswordHasher().hash(userpass)
@@ -502,7 +507,9 @@ class TestGoogleDatabaseAPI(unittest.TestCase):
             gender=gender,
             verified=verified,
             banned=banned,
-            balance=balance)
+            balance=balance,
+            overallPerc=overallPerc,
+            totalNumSales=totalNumSales)
         # Return generated user
         return generateduser
 
