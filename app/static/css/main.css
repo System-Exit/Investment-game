@@ -45,7 +45,7 @@ body
     color: black;
     text-decoration-line: underline;
 }
-.sortable-table .table-row:hover
+.sortable-table tr.table-row:hover
 {
     background-color: lightgray;
 }
