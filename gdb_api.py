@@ -1,4 +1,5 @@
-from models import User, Share, SharePrice, Usershare, Transaction, Admin, Leaderboard, Tips, Base
+from models import (User, Share, SharePrice, Usershare, Transaction, Admin,
+                    Leaderboard, Tips, Base)
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
@@ -165,11 +166,11 @@ class GoogleDatabaseAPI:
         """
         # Initialse session
         with self.sessionmanager() as session:
-            # Check that username is available. If not, return false.
+            # Get user based on given username
             user = session.query(User).filter(
                    User.username == username).first()
             # Check if a user was returned
-            if(user is None):
+            if user is None:
                 return None
             # Deteach user from session
             session.expunge(user)
@@ -1077,62 +1078,68 @@ class GoogleDatabaseAPI:
             leaderboard = []
             rankiterator = 1
             for row in result:
-                dictionary = {'userID' : row.userID, 
-                'username' : row.username, 
-                'sharesvalue' : row.sharesvalue, 
-                'balance' : row.balance, 
-                'totalvalue' : row.totalvalue,
-                'ranking': rankiterator }
+                dictionary = {
+                    'userID': row.userID,
+                    'username': row.username,
+                    'sharesvalue': row.sharesvalue,
+                    'balance': row.balance,
+                    'totalvalue': row.totalvalue,
+                    'ranking': rankiterator}
 
                 if row.userID == current_userID:
                     current_user_info = dictionary
-                
+
                 leaderboard.append(dictionary)
 
                 rankiterator = rankiterator + 1
-                
+
         # Return leaderboard
         return leaderboard, current_user_info
-    
+
     def updateleaderboard(self):
         """
         Update leaderboard table with current totalvalues and rankings
         """
-        #TODO Remove magic number
+        # TODO Remove magic number
         leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
         with self.sessionmanager() as session:
 
-            recordtime=datetime.utcnow()
+            recordtime = datetime.utcnow()
 
             for row in leaderboard:
                 user = Leaderboard(
-                userID=row['userID'],
-                recordtime=recordtime,
-                ranking=row['ranking'],
-                totalvalue=row['totalvalue']
+                    userID=row['userID'],
+                    recordtime=recordtime,
+                    ranking=row['ranking'],
+                    totalvalue=row['totalvalue']
                 )
                 session.add(user)
             # Create leaderboard entry
-            
-        # Return success'''
+
+        # Return success
         return True
-    
+
     def gettopgainers(self):
         """
-        Get users and fields needed for topgainers leaderboard preordered by totalvalue.
+        Get users and fields needed for topgainers leaderboard preordered
+        by totalvalue.
 
         Returns:
-            A list of dictionary results for the topgainers over a week ordered by changeinvalue.
-            A list of dictionary results for the topgainers over a month ordered by changeinvalue.
+            A list of dictionary results for the topgainers over a week
+            ordered by changeinvalue.
+            A list of dictionary results for the topgainers over a month
+            ordered by changeinvalue.
             The returned format is:
                 result.username: Username of the user.
                 result.changeinvalue: Total value changed over time period.
-                result.changepercentage: Percentage total value changed over time period.
+                result.changepercentage: Percentage total value changed over
+                    time period.
                 result.currentvalue: Current value of user's account
-                result.previousvalue: Value of user's account at the time period
+                result.previousvalue: Value of user's account at the
+                    time period
 
         """
-        #TODO Remove magic number
+        # TODO Remove magic number
         currentleaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
 
         with self.sessionmanager() as session:
@@ -1145,23 +1152,27 @@ class GoogleDatabaseAPI:
             lowerdatelimit = currentdate - lowertdelta
             #Creates a date a week + 1 day prior to currrent time
             upperdatelimit = currentdate - uppertdelta
-            
-
+            # Get week top gainers
             weektopgainers = []
-            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            query = session.query(Leaderboard).filter(
+                Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
             for row in currentleaderboard:
-                result = query.filter(Leaderboard.userID == row['userID']).first()
-
+                result = query.filter(
+                    Leaderboard.userID == row['userID']).first()
                 if result is not None:
-                    dictionary = { 
-                    'username' : row['username'], 
-                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
-                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
-                    'currentvalue' : row['totalvalue'],
-                    'previousvalue': result.totalvalue}
+                    dictionary = {
+                        'username': row['username'],
+                        'changeinvalue': round((
+                            row['totalvalue'] - result.totalvalue), 4),
+                        'changepercentage': round(((
+                            row['totalvalue'] - result.totalvalue
+                            )/result.totalvalue) * 100, 4),
+                        'currentvalue': row['totalvalue'],
+                        'previousvalue': result.totalvalue}
                     weektopgainers.append(dictionary)
-            
-            weektopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+
+            weektopgainers.sort(
+                key=operator.itemgetter('changeinvalue'), reverse=True)
 
             currentdate = datetime.utcnow()
             lowertdelta = timedelta(days=30)
@@ -1169,27 +1180,33 @@ class GoogleDatabaseAPI:
 
             # Creates a date a month prior to current time
             lowerdatelimit = currentdate - lowertdelta
-            #Creates a date a month + 1 day prior to currrent time
+            # Creates a date a month + 1 day prior to currrent time
             upperdatelimit = currentdate - uppertdelta
 
-            query = session.query(Leaderboard).filter(Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
+            query = session.query(Leaderboard).filter(
+                Leaderboard.recordtime.between(upperdatelimit, lowerdatelimit))
             monthtopgainers = []
-            
+
             for row in currentleaderboard:
-                result = query.filter(Leaderboard.userID == row['userID']).first()
+                result = query.filter(
+                    Leaderboard.userID == row['userID']).first()
 
                 if result is not None:
-                    dictionary = { 
-                    'username' : row['username'], 
-                    'changeinvalue' : round((row['totalvalue'] - result.totalvalue), 4),
-                    'changepercentage': round(((row['totalvalue'] - result.totalvalue)/result.totalvalue) * 100, 4),
-                    'currentvalue' : row['totalvalue'],
-                    'previousvalue': result.totalvalue}
+                    dictionary = {
+                        'username': row['username'],
+                        'changeinvalue': round(
+                            (row['totalvalue'] - result.totalvalue), 4),
+                        'changepercentage': round(((
+                            row['totalvalue'] - result.totalvalue
+                            )/result.totalvalue) * 100, 4),
+                        'currentvalue': row['totalvalue'],
+                        'previousvalue': result.totalvalue}
                     monthtopgainers.append(dictionary)
-            
-            monthtopgainers.sort(key=operator.itemgetter('changeinvalue'), reverse=True)
+
+            monthtopgainers.sort(
+                key=operator.itemgetter('changeinvalue'), reverse=True)
             session.expunge_all()
-            
+
             return weektopgainers, monthtopgainers
 
     def gettipofday(self):

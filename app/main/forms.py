@@ -64,16 +64,19 @@ class UserRegistrationForm(FlaskForm):
     def validate(self):
         # Do initial validations
         validation = super(UserRegistrationForm, self).validate()
-        # Return false if validations fail
-        if(validation is False):
-            return False
         # Check if username is already used
-        if(gdb.getuserbyusername(self.username.data) is not None):
+        user = None
+        if self.username.data:
+            user = gdb.getuserbyusername(self.username.data)
+        if user is not None:
             self.username.errors.append(
                 "Username is already used by another account")
             validation = False
         # Check if email is already used
-        if(gdb.getuserbyemail(self.email.data) is not None):
+        user = None
+        if self.email.data:
+            user = gdb.getuserbyemail(self.email.data)
+        if user is not None:
             self.email.errors.append(
                 "Email is already used by another account")
             validation = False
