@@ -45,7 +45,7 @@
             <tbody>
             {% for user in users %}
                 {% set userlink = url_for('admin.user', userID=user.userID) %}
-                <tr class="user-row" onclick="location.href='{{ userlink }}'">
+                <tr class="table-row" onclick="location.href='{{ userlink }}'">
                     <th scope="row">{{ user.userID }}</th>
                     <td>{{ user.username }}</td>
                     <td>{{ user.firstname }} {{ user.lastname }}</td>

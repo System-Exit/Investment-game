@@ -45,6 +45,10 @@ body
     color: black;
     text-decoration-line: underline;
 }
+.sortable-table .table-row:hover
+{
+    background-color: lightgray;
+}
 
 /* Pagination for tables */
 .pagination
@@ -317,7 +321,7 @@ body
 }
 #registration-content-logo
 {
-    height: 84vh;
+    height: 100vh;
     background-color: white;
 }
 #registration-content-logo img
@@ -327,7 +331,7 @@ body
 }
 #registration-content-form
 {
-    height: 84vh;
+    height: 100vh;
     background-color: #e3e7e8;
 }
 .registration-form
@@ -425,13 +429,6 @@ input#byear
 }
 .registration-form #submit:hover{
     background-color: #86e6cc;
-}
-
-
-/* Share listing and portfolio page */
-.share-row:hover
-{
-    background-color: lightgray;
 }
 
 /* Share page */
