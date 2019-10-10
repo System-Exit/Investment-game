@@ -53,6 +53,14 @@
             ],
             backgroundColor: "rgba(0, 0, 255, 1)",
         }],
+        titles: [
+            'Post Millenials',
+            'Millennials',
+            'Generation X',
+            'Baby Boomers',
+            'Silent Gen',
+            'Greatest Gen and Before'
+        ],
         labels: [
             '1997+',
             '1996-1981',
@@ -60,14 +68,6 @@
             '1965-1946',
             '1945-1928',
             '1927-1900'
-        ],
-        afterLabels: [
-            'Post Millenials',
-            'Millennials',
-            'Generation X',
-            'Baby Boomers',
-            'Silent Gen',
-            'Greatest Gen and Before'
         ]
     }
     // Age bar chart options
@@ -76,12 +76,18 @@
             display: false
         },
         tooltips: {
+            titleFontSize: 14,
+            titleFontStyle: 'bold',
+            titleFontColor: "rgba(255, 255, 255, 1)",
             callbacks: {
-                label: function(tooltipItem) {
-                    return tooltipItem.yLabel;
+                title: function(tooltipItems, data) {
+                    return ageBarChartData['titles'][tooltipItems[0].index];
                 },
-                afterLabel: function(tooltipItem) {
-                    return ageBarChartData['afterLabels'][tooltipItem['index']];
+                afterTitle: function(tooltipItems, data) {
+                    return tooltipItems[0].xLabel;
+                },
+                label: function(tooltipItem, data) {
+                    return tooltipItem.yLabel + " users";
                 }
             }
         },
