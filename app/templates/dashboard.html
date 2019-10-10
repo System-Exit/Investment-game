@@ -22,7 +22,7 @@
      <h1 style="padding: 5px;">Your Portfolio Value is:</h1>
                                 {% for user in leaderboard %}
                                     {% if user.userID == current_user_info.userID %}
-                                            <h1>$ {{ user.sharesvalue|round(4) }}</h1>                                    
+                                            <h1>$ {{ user.sharesvalue|round(2) }} AUD</h1>                                    
                                     {% else %}
                                     {% endif %}
                                 {% endfor %}     
