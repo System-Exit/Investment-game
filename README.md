@@ -19,7 +19,7 @@ Prerequisites
 This application requires the following set up in order to be used:
 1. A MySQL Database Server: This can either be hosted on your own device/server or on the cloud.
 2. A Google cloud project(Optional): If you plan to deploy the application to google cloud, you will need to [set up a new project or use an existsing one here.](https://console.cloud.google.com/project)
-2. Google Cloud SDK(Optional): This is required for cloud deployment. [Quickstart guides here.](https://cloud.google.com/sdk/docs/quickstarts)
+3. Google Cloud SDK(Optional): This is required for cloud deployment. [Quickstart guides here.](https://cloud.google.com/sdk/docs/quickstarts)
 
 
 Configuration
@@ -46,12 +46,19 @@ Configuration values for cloud deployments are located in `app.yaml`. If you pla
 Cloud Deployment
 ----------------
 In order to deploy this application to Google Cloud with full functionality, you will need to do the following:
-1. Ensure your Google Cloud SDK project has been set to the one you want to deploy the application to.
-2. Execute the following command in the application directory: `gcloud app deploy app.yaml cron.yaml`. Go through the prompts and wait for the application to successfully deploy.
+1. Ensure the `app.yaml` has been configured correctly with the database connection parameters.
+2. Ensure your Google Cloud SDK project has been set to the one you want to deploy the application to.
+3. Execute the following command in the application directory: `gcloud app deploy app.yaml cron.yaml`. Go through the prompts and wait for the application to successfully deploy. This command will deploy the application and start the share updating cron job.
 
-Once deployed, the application to be ready to use immediately.
+Once deployed, the application to be ready to use immediately using the link to your Google App Engine appspot.
 
 
 Local/Server Deployment
 -----------------------
-TODO: Will be available soon!
+For local or server deployment, you will need to satisfy a couple more prerequisites:
+1. Python: You will need to download and install python 3.7.3 or later.
+2. Python modules: You will need to install the necessary requirements for the application. This can easily be done by executing the following command in the project directory: `pip install -r requirements.txt`.
+
+In order to run the application locally for testing, you will need to do the execute the following command in the project directory: `flask run`. This will run the application at localhost on port 5000.
+
+If you want to run the application on a server using a service such as gunicorn, you should do so using the command: `gunicorn -b :80 main:app`, which will run the application at localhost on port 80.
