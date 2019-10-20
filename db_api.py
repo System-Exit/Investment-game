@@ -61,7 +61,7 @@ class DatabaseAPI:
         try:
             yield session
             session.commit()
-        except:
+        except:  # nopep8 TODO: Handle each possible exception separately
             session.rollback()
             raise
         finally:
@@ -857,12 +857,12 @@ class DatabaseAPI:
         # Process results into list of combined objects
         usershares = list()
         for result in results:
-                # Remove unecessary variables from result dictionaries
-                # and combine result dictionaries into one.
-                result[0].__dict__.pop('_sa_instance_state', None)
-                result[1].__dict__.pop('_sa_instance_state', None)
-                combinedres = {**result[0].__dict__, **result[1].__dict__}
-                usershares.append(combinedres)
+            # Remove unecessary variables from result dictionaries
+            # and combine result dictionaries into one.
+            result[0].__dict__.pop('_sa_instance_state', None)
+            result[1].__dict__.pop('_sa_instance_state', None)
+            combinedres = {**result[0].__dict__, **result[1].__dict__}
+            usershares.append(combinedres)
         # Return processed usershares
         return usershares, count
 
@@ -1150,7 +1150,7 @@ class DatabaseAPI:
 
             # Creates a date a week prior to current time
             lowerdatelimit = currentdate - lowertdelta
-            #Creates a date a week + 1 day prior to currrent time
+            # Creates a date a week + 1 day prior to currrent time
             upperdatelimit = currentdate - uppertdelta
             # Get week top gainers
             weektopgainers = []

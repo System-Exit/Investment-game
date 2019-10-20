@@ -41,7 +41,7 @@ class UserRegistrationForm(FlaskForm):
                message="Password must contain an upper case letter"),
         Regexp(regex="(?=.*[a-z]).",
                message="Password must contain a lower case letter"),
-        Regexp(regex="(?=.*\d).",
+        Regexp(regex="(?=.*\d).",  # nopep8 Since this is regex, not an escape char
                message="Password must contain a number")
         ])
     fname = StringField('First Name', validators=[
