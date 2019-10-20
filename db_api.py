@@ -1042,6 +1042,8 @@ class DatabaseAPI:
         """
         Get users and fields needed for a leaderboard preordered.
 
+        Args:
+            current_userID (str): The ID of the logged in user.
         Returns:
             A list of dictionary results for the leaderboard ordered by total.
             The returned format is:

@@ -1,6 +1,6 @@
 from db_api import DatabaseAPI
 from config import Config
-from models import Base, User, Share, Admin, Transaction, Usershare
+from models import Base, User, Share, Admin, Transaction, Usershare, Tips
 from argon2 import PasswordHasher
 from datetime import datetime, date
 import pytest
@@ -440,6 +440,80 @@ class TestDatabaseAPI(unittest.TestCase):
             assert stats['gendercounts'][key] == gender_dist[key]
         for key in stats['agegroupcounts']:
             assert stats['agegroupcounts'][key] == agegroup_dist[key]
+
+    def test_getleaderboard(self):
+        users = list()
+        usershares = list()
+        # Generate share
+        issuerID = "TST"
+        currentprice = 100
+        share = self.generatetestshare(issuerID=issuerID,
+                                       currentprice=currentprice)
+        # Generate top user with usershare
+        userID = 1
+        balance = 10000
+        users.append(self.generatetestuser(userID=userID, balance=balance))
+        profit = 1000
+        loss = 850
+        quantity = 20
+        usershares.append(Usershare(issuerID=issuerID, userID=userID,
+                          profit=profit, loss=loss, quantity=quantity))
+        # Generate bottom user with usershare
+        userID = 2
+        balance = 2000
+        users.append(self.generatetestuser(userID=userID, balance=balance))
+        profit = 1000
+        loss = 850
+        quantity = 20
+        usershares.append(Usershare(issuerID=issuerID, userID=userID,
+                          profit=profit, loss=loss, quantity=quantity))
+        # Generate user without usershare
+        userID = 3
+        balance = 5000
+        users.append(self.generatetestuser(userID=userID, balance=balance))
+        # Add users, share and usershares directly to database
+        with self.gdb.sessionmanager() as session:
+            session.add(share)
+            session.commit()
+            for user in users:
+                session.add(user)
+            session.commit()
+            for usershare in usershares:
+                session.add(usershare)
+        # Get leaderboard with top user as current
+        userID = 1
+        leaderboard, curruser_lb_info = self.gdb.getleaderboard(userID)
+        # Assert the current user was returned correctly
+        assert curruser_lb_info['userID'] == userID
+        # Assert that leaderboard is ordered and ranked correctly
+        assert leaderboard[0]['userID'] == 1
+        assert leaderboard[0]['ranking'] == 1
+        assert leaderboard[1]['userID'] == 3
+        assert leaderboard[1]['ranking'] == 2
+        assert leaderboard[2]['userID'] == 2
+        assert leaderboard[2]['ranking'] == 3
+        # Assert that total values were calculated correctly
+        # TODO: Remove magic numbers
+        assert leaderboard[0]['totalvalue'] == 10000 + 100 * 20
+        assert leaderboard[1]['totalvalue'] == 5000
+        assert leaderboard[2]['totalvalue'] == 2000 + 100 * 20
+
+    def test_gettopgainers(self):
+        # TODO: Create unit test
+        pass
+
+    def test_gettipofday(self):
+        # Create new tip
+        tipID = 1
+        data = "A test a day keeps the bugs away!"
+        tip = Tips(tipID=tipID, data=data)
+        # Add tip directly to database
+        with self.gdb.sessionmanager() as session:
+            session.add(tip)
+        # Get tip of the day
+        tip = self.gdb.gettipofday()
+        # Assert that tip was retreived
+        assert tip == data
 
     def generatetestuser(self, userID=None, firstname=None, lastname=None,
                          email=None, dob=None, gender=None, username=None,
