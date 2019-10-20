@@ -188,6 +188,6 @@ class Leaderboard(Base):
 # Allow creation of tables by running API directly
 if __name__ == "__main__":
     # Define database API
-    gdb = GoogleDatabaseAPI(Config)
+    gdb = DatabaseAPI(Config)
     # Create tables
     Base.metadata.create_all(gdb.engine)

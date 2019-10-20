@@ -5,7 +5,7 @@ from wtforms import (StringField, PasswordField, SubmitField,
 from wtforms.fields.html5 import EmailField, DateField
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import ValidationError
-from gdb_api import GoogleDatabaseAPI
+from db_api import DatabaseAPI
 from datetime import datetime, timedelta
 from app import gdb
 

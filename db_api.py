@@ -17,7 +17,7 @@ import operator
 import random
 
 
-class GoogleDatabaseAPI:
+class DatabaseAPI:
     """
     API class for handling calls to google cloud SQL database.
 
@@ -1101,7 +1101,7 @@ class GoogleDatabaseAPI:
         Update leaderboard table with current totalvalues and rankings
         """
         # TODO Remove magic number
-        leaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+        leaderboard, user = DatabaseAPI.getleaderboard(self, 1)
         with self.sessionmanager() as session:
 
             recordtime = datetime.utcnow()
@@ -1140,7 +1140,7 @@ class GoogleDatabaseAPI:
 
         """
         # TODO Remove magic number
-        currentleaderboard, user = GoogleDatabaseAPI.getleaderboard(self, 1)
+        currentleaderboard, user = DatabaseAPI.getleaderboard(self, 1)
 
         with self.sessionmanager() as session:
 

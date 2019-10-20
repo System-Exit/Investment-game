@@ -2,7 +2,7 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user, login_user, logout_user
-from gdb_api import GoogleDatabaseAPI
+from db_api import DatabaseAPI
 from config import Config
 
 
@@ -10,7 +10,7 @@ from config import Config
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 # Initialise Database Interface
-gdb = GoogleDatabaseAPI(Config)
+gdb = DatabaseAPI(Config)
 
 
 def create_app(config_class=Config):

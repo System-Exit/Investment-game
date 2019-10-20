@@ -1,4 +1,4 @@
-from gdb_api import GoogleDatabaseAPI
+from db_api import DatabaseAPI
 from config import Config
 from models import Base, User, Share, Admin, Transaction, Usershare
 from argon2 import PasswordHasher
@@ -33,11 +33,11 @@ class TestConfig(Config):
     DB_QUERY = os.getenv('TEST_DB_QUERY') or ''
 
 
-class TestGoogleDatabaseAPI(unittest.TestCase):
+class TestDatabaseAPI(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         # Initialise database interface
-        self.gdb = GoogleDatabaseAPI(config_class=TestConfig)
+        self.gdb = DatabaseAPI(config_class=TestConfig)
         # Create all tables
         Base.metadata.create_all(self.gdb.engine)
         Base.metadata.reflect(bind=self.gdb.engine)
