@@ -2,11 +2,19 @@ Budding Investors
 =================
 Welcome to Budding Investors! This application has been designed as a way of providing users a way to learn about and practice share market trading in safe sandbox environment that requires no real monetary investment. Once you sign up, you start off with $1,000,000 that you can use to buy and sell whatever shares you like. You can simply invest to your hearts content and potentially see where your investments take you or you can compete against others in the leaderboard to become the best invester there is!
 
+Note: The application is mostly finished, but should still be considered under construction. 
+
 Links
 -----
 Budding Investors Website: https://budding-investors-248807.appspot.com/
 
 Github repository: https://github.com/s3606685-declan/Investment-game
+
+Credentials
+-----------
+You can register in order to use the application. Once registered, you can login and use the application as a standard user immediately. Alternatively, you may use the existing test account with the username and password of 'test' and 'test' respectively.
+
+Since there is no existsing functionality to create admins, in order to login as an admin you must login using the username and password of 'admin' and 'admin' respectively.
 
 
 Deploy your own version
@@ -64,3 +72,26 @@ In order to run the application locally for testing, you will need to do the exe
 If you want to run the application on a server using a service such as gunicorn, you should do so using the command: `gunicorn -b :80 main:app`, which will run the application at localhost on port 80.
 
 If you want to have shares updated by a cron job locally, you will need to manually set one up that calls the address appended with '/tasks/updateshares'. The cURL tool should suffice for this purpose. You can also create a python script that calls the `updateshares` method from an initialised instance of the `DatabaseAPI` class from `db_api.py`.
+
+
+Development and Testing
+-----------------------
+For development, it is best that you follow the steps to set up the appilication locally, then proceed.
+
+The application uses Python/Flask for the backend and template building of the application, with some JavaScript for the interactive frontend components. Each component of the application is separated as a module ("main" and "admin" for now). If you wish to add new major functionality or separate existing functionality, create a new folder for that module, define it's blueprints and register those blueprints in the `create_app` method. Each module, at minimum, should contain `__init__.py` and `routes.py` files.
+
+The application avoids the use of flask-sqalchemy by separating database interface code from the rest of the code and using sqalchemy directly. This means the database interface code can be reused for future application development, web-based or otherwise.
+
+For local testing, you will need to satisfy some prerequisites:
+1. Ensure toy have install general and local prerequisites to get tests working correctly.
+2. Install pytest by executing the following command: `pip install pytest`.
+
+In order to run all unit tests, execute the following command in the project directory: `pytest tests.py`.
+In order to run a specific test, execute the command: `pytest tests.py::<TEST CLASS>::<TEST METHOD>`.
+
+
+Miscellaneous Notes
+-------------------
+As there is no functionality to create an admin account, you must manually add an admin user into the admin table in the application database with the desired username and desired password hashed by using the Argon2 algorithm in python.
+
+While there is currently no way to add new shares via the web UI, you can add them using the `addshare` method from the `DatabaseAPI` class and including the ASX issuer code for the company of the share.
