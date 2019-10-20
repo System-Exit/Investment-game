@@ -62,3 +62,5 @@ For local or server deployment, you will need to satisfy a couple more prerequis
 In order to run the application locally for testing, you will need to do the execute the following command in the project directory: `flask run`. This will run the application at localhost on port 5000.
 
 If you want to run the application on a server using a service such as gunicorn, you should do so using the command: `gunicorn -b :80 main:app`, which will run the application at localhost on port 80.
+
+If you want to have shares updated by a cron job locally, you will need to manually set one up that calls the address appended with '/tasks/updateshares'. The cURL tool should suffice for this purpose. You can also create a python script that calls the `updateshares` method from an initialised instance of the `GoogleDatabaseAPI` class from `gdb_api.py`.
