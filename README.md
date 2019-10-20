@@ -17,8 +17,8 @@ You can register in order to use the application. Once registered, you can login
 Since there is no existsing functionality to create admins, in order to login as an admin you must login using the username and password of 'admin' and 'admin' respectively.
 
 
-Deploy your own version
-=======================
+Deploy It Yourself
+==================
 If you want to develop and use this application elsewhere, we have included a simple guide below:
 
 
