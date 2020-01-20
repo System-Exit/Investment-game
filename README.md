@@ -1,20 +1,13 @@
+Context/Foreword
+================
+This is a web application that was built during my time at RMIT and is the capstone project for my group. Including myself, there were 6 group members that worked on this project, though some worked more on the code than others.
+
+
 Budding Investors
 =================
 Welcome to Budding Investors! This application has been designed as a way of providing users a way to learn about and practice share market trading in safe sandbox environment that requires no real monetary investment. Once you sign up, you start off with $1,000,000 that you can use to buy and sell whatever shares you like. You can simply invest to your hearts content and potentially see where your investments take you or you can compete against others in the leaderboard to become the best invester there is!
 
 Note: The application is mostly finished, but should still be considered under construction. 
-
-Links
------
-Budding Investors Website: https://budding-investors-248807.appspot.com/
-
-Github repository: https://github.com/s3606685-declan/Investment-game
-
-Credentials
------------
-You can register in order to use the application. Once registered, you can login and use the application as a standard user immediately. Alternatively, you may use the existing test account with the username and password of 'test' and 'test' respectively.
-
-Since there is no existsing functionality to create admins, in order to login as an admin you must login using the username and password of 'admin' and 'admin' respectively.
 
 
 Deploy It Yourself
